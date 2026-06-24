@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { skillApi, type CreateSkillData, type UpdateSkillData } from '../api/api'
+import { skillApi, type CreateSkillData, type UpdateSkillData } from '../../api/api.ts'
+import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import './SkillEditor.css'
 
 export function SkillEditor() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEditing = !!id
+  const editorRef = useRef<MDXEditorMethods>(null)
   
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
@@ -156,15 +158,10 @@ export function SkillEditor() {
 
           <div className="form-group">
             <label htmlFor="content">Content (Markdown) *</label>
-            <textarea
-              id="content"
-              className="content-editor"
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="# Skill Content
-
-Write your skill documentation in Markdown..."
-              rows={20}
+            <MdxEditorWrapper
+              ref={editorRef}
+              markdown={formData.content}
+              onChange={(markdown) => setFormData(prev => ({ ...prev, content: markdown }))}
             />
             <small>Markdown supported. Use @skill-name to reference other skills.</small>
           </div>

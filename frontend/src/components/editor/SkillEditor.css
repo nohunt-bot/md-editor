@@ -89,6 +89,16 @@
   min-height: 400px;
 }
 
+/* MDXEditor container override */
+.form-group .mdx-editor-container {
+  min-height: 500px;
+  border: 1px solid #2a2a4a;
+}
+
+.form-group .mdx-editor-container:focus-within {
+  border-color: #00d4ff;
+}
+
 .form-group small {
   color: #666;
   font-size: 0.75rem;

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { skillApi, folderApi, tagApi, type CreateSkillData } from '../api/api'
-import { SkillEditor } from '../components/editor/SkillEditor'
+import { skillApi, folderApi, tagApi } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
 import './SkillsPage.css'
 

@@ -1,7 +1,18 @@
 import axios from 'axios'
-import { getToken, refreshToken } from './auth/keycloak'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
+
+// Simple token storage (Keycloak integration TODO)
+let token: string | null = null
+
+export function getToken(): string | null {
+  return token
+}
+
+export async function refreshToken(): Promise<void> {
+  // TODO: Implement Keycloak token refresh
+  console.warn('Token refresh not implemented')
+}
 
 export const api = axios.create({
   baseURL: API_BASE,
