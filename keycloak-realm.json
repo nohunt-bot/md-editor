@@ -1,0 +1,116 @@
+{
+  "id": "skill-md",
+  "realm": "skill-md",
+  "displayName": "Skill.md Service",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "skill-md",
+      "name": "Skill.md Frontend",
+      "description": "React frontend client",
+      "publicClient": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "http://localhost:3000"
+      ],
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "skill-md-backend",
+      "name": "Skill.md Backend",
+      "description": "Spring Boot backend resource server",
+      "publicClient": false,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "skill-admin",
+        "description": "Full admin access"
+      },
+      {
+        "name": "skill-editor",
+        "description": "Can create and edit skills"
+      },
+      {
+        "name": "skill-viewer",
+        "description": "Read-only access"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@example.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "skill-admin"
+      ]
+    },
+    {
+      "username": "editor",
+      "email": "editor@example.com",
+      "firstName": "Editor",
+      "lastName": "User",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "editor",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "skill-editor"
+      ]
+    },
+    {
+      "username": "viewer",
+      "email": "viewer@example.com",
+      "firstName": "Viewer",
+      "lastName": "User",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "skill-viewer"
+      ]
+    }
+  ]
+}

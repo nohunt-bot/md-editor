@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.gradle/
+build/
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+
+# Test
+coverage/
+.nyc_output/
+
+# Misc
+dist/
+*.tmp
+
+# Maven Wrapper binary (can be downloaded)
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Compiled classes
+**/*.class
