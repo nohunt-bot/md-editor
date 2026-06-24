@@ -73,7 +73,7 @@
 - [x] Skills list page with filtering (folder, tag, search)
 - [x] List/Grid view toggle
 - [x] SkillCard component
-- [x] SkillEditor (Create/Edit form with Markdown textarea)
+- [x] SkillEditor (Create/Edit form with MDXEditor WYSIWYG)
 - [x] SkillDetail page (placeholder)
 
 **Components:**
@@ -81,6 +81,12 @@
 - [x] Tag input with autocomplete-style UX
 - [x] Sidebar navigation
 - [x] Responsive layout
+
+**Editor:**
+- [x] MDXEditor WYSIWYG integration
+- [x] Toolbar (headings, bold/italic/underline, lists, links, code blocks, tables)
+- [x] Dark theme styling
+- [x] Syntax highlighting support (JavaScript, TypeScript, Python)
 
 ### DevOps
 
@@ -103,7 +109,7 @@
 - [x] SkillEditor form (Create/Edit)
 - [x] FolderTree component
 - [x] Tag input
-- [ ] MDXEditor WYSIWYG integration (replace textarea)
+- [x] MDXEditor WYSIWYG integration
 - [ ] ReferencePicker with @ autocomplete
 - [ ] Real-time conflict detection
 
