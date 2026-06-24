@@ -1,0 +1,99 @@
+.folder-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.folder-tree-empty {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.folder-tree-empty p {
+  margin: 0 0 0.75rem 0;
+}
+
+.folder-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #e0e0e0;
+  font-size: 0.875rem;
+  user-select: none;
+}
+
+.folder-item:hover {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.folder-item.selected {
+  background: rgba(0, 212, 255, 0.15);
+  color: #00d4ff;
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.625rem;
+  transition: transform 0.2s;
+  padding: 0;
+}
+
+.expand-btn.expanded {
+  transform: rotate(90deg);
+}
+
+.expand-btn:hover {
+  color: #00d4ff;
+}
+
+.folder-icon {
+  font-size: 1rem;
+}
+
+.folder-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-children {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.btn-small {
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-small:hover {
+  background: rgba(0, 212, 255, 0.25);
+  border-color: #00d4ff;
+}

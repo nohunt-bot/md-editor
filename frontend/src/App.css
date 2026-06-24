@@ -1,23 +1,56 @@
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: #e0e0e0;
+  background-color: #0f0f1a;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
 .app {
   min-height: 100vh;
   background: #0f0f1a;
-  color: #e0e0e0;
 }
 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.875rem 2rem;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border-bottom: 1px solid #2a2a4a;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #00d4ff;
   text-decoration: none;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .nav-links {
@@ -27,8 +60,9 @@
 }
 
 .nav-links a {
-  color: #e0e0e0;
+  color: #888;
   text-decoration: none;
+  font-size: 0.875rem;
   transition: color 0.2s;
 }
 
@@ -38,12 +72,15 @@
 
 .btn-primary {
   background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  color: #000;
+  color: #000 !important;
   padding: 0.5rem 1.25rem;
   border-radius: 6px;
   font-weight: 600;
   text-decoration: none;
+  font-size: 0.875rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -51,57 +88,54 @@
   box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
 }
 
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .main-content {
-  padding: 2rem;
-  max-width: 1400px;
+  min-height: calc(100vh - 60px);
+}
+
+.skill-detail {
+  max-width: 900px;
   margin: 0 auto;
+  padding: 3rem 2rem;
 }
 
-.home {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.home h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.home p {
-  font-size: 1.25rem;
-  color: #888;
-  margin-bottom: 2rem;
-}
-
-.skills-page h1 {
+.skill-detail h1 {
   font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-.skills-list {
-  background: #1a1a2e;
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid #2a2a4a;
-}
-
-.skill-detail,
-.skill-editor,
-.new-skill {
-  background: #1a1a2e;
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid #2a2a4a;
-}
-
-h1, h2, h3 {
+  margin-bottom: 1rem;
   color: #fff;
 }
 
-a {
-  color: #00d4ff;
+.skill-detail p {
+  color: #888;
+  line-height: 1.6;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a4a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a5a;
+}
+
+/* Selection */
+::selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: #fff;
 }

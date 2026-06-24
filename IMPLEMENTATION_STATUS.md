@@ -1,6 +1,6 @@
 # Skill.md Service - Implementation Status
 
-## ✅ Completed (Phase 0 + Phase 1)
+## ✅ Completed (Phase 0 + Phase 1 + Phase 2 Partial)
 
 ### Backend (Spring Boot)
 
@@ -53,7 +53,7 @@
 **Core Infrastructure:**
 - [x] Vite + React 18 + TypeScript setup
 - [x] React Router configuration
-- [x] Basic styling (dark theme)
+- [x] Dark theme styling with Inter + JetBrains Mono fonts
 - [x] Environment configuration
 
 **Authentication:**
@@ -69,11 +69,18 @@
 - [x] Tag API client
 
 **UI Pages:**
-- [x] Home page
-- [x] Skills list page (placeholder)
-- [x] Skill detail page (placeholder)
-- [x] Skill editor page (placeholder)
-- [x] New skill page (placeholder)
+- [x] Home page (redirects to /skills)
+- [x] Skills list page with filtering (folder, tag, search)
+- [x] List/Grid view toggle
+- [x] SkillCard component
+- [x] SkillEditor (Create/Edit form with Markdown textarea)
+- [x] SkillDetail page (placeholder)
+
+**Components:**
+- [x] FolderTree (collapsible tree structure)
+- [x] Tag input with autocomplete-style UX
+- [x] Sidebar navigation
+- [x] Responsive layout
 
 ### DevOps
 
@@ -87,28 +94,40 @@
 
 ---
 
-## 🚧 Next Steps (Phase 2 - Editor Experience)
+## 🚧 Next Steps
 
-### Backend
-- [ ] Integrate MDXEditor content validation
-- [ ] Implement full-text search with MongoDB text index
-- [ ] Add audit logging (AOP)
-- [ ] Implement reference resolution in SkillResponse
+### Phase 2 Complete - Editor Experience
 
-### Frontend
-- [ ] Install MDXEditor dependencies
-- [ ] Create SkillEditor component with MDXEditor
-- [ ] Implement ReferencePicker (@ autocomplete)
-- [ ] Create FolderTree component
-- [ ] Build SkillsList with filtering/sorting
-- [ ] Create SkillDetail view with version sidebar
-- [ ] Implement NewSkill/EditSkill forms
-- [ ] Add TagInput component
+- [x] Skills list with filtering (folder, tag, search)
+- [x] List/Grid view toggle
+- [x] SkillEditor form (Create/Edit)
+- [x] FolderTree component
+- [x] Tag input
+- [ ] MDXEditor WYSIWYG integration (replace textarea)
+- [ ] ReferencePicker with @ autocomplete
+- [ ] Real-time conflict detection
 
-### Testing
-- [ ] Backend unit tests (JUnit)
-- [ ] Backend integration tests (Testcontainers)
-- [ ] Frontend component tests (Vitest)
+### Phase 3 - Version & Permissions
+
+- [ ] Version history sidebar on SkillDetail
+- [ ] Version diff viewer (react-diff-viewer)
+- [ ] Restore to previous version
+- [ ] Keycloak role-based UI (show/hide based on permissions)
+- [ ] Audit log viewer (admin only)
+
+### Phase 4 - LLM Discovery
+
+- [ ] `/api/discovery/match` endpoint
+- [ ] Service account client setup
+- [ ] Vector embedding evaluation (Atlas Vector Search)
+
+### Phase 5 - Polish
+
+- [ ] Markdown bundle export
+- [ ] Empty states
+- [ ] Loading states
+- [ ] Error handling
+- [ ] Mobile responsive improvements
 
 ---
 

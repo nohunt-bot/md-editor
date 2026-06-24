@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { SkillsPage } from './pages/SkillsPage'
+import { SkillEditor } from './components/editor/SkillEditor'
 import './App.css'
 
 function App() {
@@ -9,16 +11,19 @@ function App() {
           <Link to="/" className="logo">Skill.md</Link>
           <div className="nav-links">
             <Link to="/skills">Skills</Link>
-            <Link to="/skills/new" className="btn-primary">New Skill</Link>
+            <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noreferrer">
+              API Docs
+            </a>
+            <Link to="/skills/new" className="btn-primary">+ New Skill</Link>
           </div>
         </nav>
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Navigate to="/skills" replace />} />
             <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/skills/:id" element={<SkillDetailPage />} />
-            <Route path="/skills/:id/edit" element={<SkillEditorPage />} />
-            <Route path="/skills/new" element={<NewSkillPage />} />
+            <Route path="/skills/new" element={<SkillEditor />} />
+            <Route path="/skills/:id" element={<SkillDetail />} />
+            <Route path="/skills/:id/edit" element={<SkillEditor />} />
           </Routes>
         </main>
       </div>
@@ -26,50 +31,12 @@ function App() {
   )
 }
 
-function HomePage() {
-  return (
-    <div className="home">
-      <h1>Welcome to Skill.md</h1>
-      <p>Team-shared skill knowledge base</p>
-      <Link to="/skills" className="btn-primary">Browse Skills</Link>
-    </div>
-  )
-}
-
-function SkillsPage() {
-  return (
-    <div className="skills-page">
-      <h1>Skills</h1>
-      <div className="skills-list">
-        <p>Loading skills...</p>
-      </div>
-    </div>
-  )
-}
-
-function SkillDetailPage() {
+function SkillDetail() {
+  // TODO: Implement skill detail page with version history
   return (
     <div className="skill-detail">
       <h1>Skill Detail</h1>
-      <p>Skill content will be displayed here</p>
-    </div>
-  )
-}
-
-function SkillEditorPage() {
-  return (
-    <div className="skill-editor">
-      <h1>Edit Skill</h1>
-      <p>Editor will be loaded here</p>
-    </div>
-  )
-}
-
-function NewSkillPage() {
-  return (
-    <div className="new-skill">
-      <h1>Create New Skill</h1>
-      <p>New skill form will be here</p>
+      <p>Coming soon - will show skill content, references, and version history</p>
     </div>
   )
 }
