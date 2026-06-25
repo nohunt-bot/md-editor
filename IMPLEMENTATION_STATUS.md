@@ -98,6 +98,17 @@
 - [x] Seed data script (seed-data.sh)
 - [x] .gitignore
 
+### Testing
+
+- [x] Backend unit tests (JUnit 5 + Mockito)
+  - SkillServiceTest: 4 tests for optimistic locking logic
+  - OptimisticLockingConflictExceptionTest: 1 test for exception
+  - GlobalExceptionHandlerTest: 1 test for 409 response
+- [x] Backend integration tests (Testcontainers MongoDB)
+  - SkillControllerIntegrationTest: 4 HTTP flow tests (requires Docker)
+- [x] Frontend unit tests (Vitest + Testing Library)
+  - ConflictDialog.test.tsx: 5 tests for conflict dialog
+
 ---
 
 ## 🚧 Next Steps
