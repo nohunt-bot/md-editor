@@ -41,6 +41,19 @@ public class SkillService {
         Skill skill = skillRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Skill not found: " + id));
         
+        // Optimistic locking check
+        if (request.expectedVersion() != null) {
+            if (!skill.getCurrentVersion().equals(request.expectedVersion())) {
+                throw new OptimisticLockingConflictException(
+                    skill.getId(),
+                    skill.getCurrentVersion(),
+                    skill.getUpdatedAt(),
+                    skill.getContent(),
+                    skill.getLastEditorId()
+                );
+            }
+        }
+        
         if (request.name() != null) skill.setName(request.name());
         if (request.displayName() != null) skill.setDisplayName(request.displayName());
         if (request.description() != null) skill.setDescription(request.description());
