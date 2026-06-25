@@ -110,13 +110,14 @@
 - [x] FolderTree component
 - [x] Tag input
 - [x] MDXEditor WYSIWYG integration
+- [x] Optimistic locking (conflict detection + diff viewer)
 - [ ] ReferencePicker with @ autocomplete
-- [ ] Real-time conflict detection
+- [ ] Real-time conflict detection (WebSocket)
 
 ### Phase 3 - Version & Permissions
 
 - [ ] Version history sidebar on SkillDetail
-- [ ] Version diff viewer (react-diff-viewer)
+- [ ] Version diff viewer (standalone, not just conflict)
 - [ ] Restore to previous version
 - [ ] Keycloak role-based UI (show/hide based on permissions)
 - [ ] Audit log viewer (admin only)
