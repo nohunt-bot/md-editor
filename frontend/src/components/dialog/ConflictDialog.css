@@ -1,0 +1,105 @@
+.conflict-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.conflict-dialog {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 1200px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.conflict-header h2 {
+  margin: 0 0 1rem 0;
+  color: #ff6b6b;
+}
+
+.conflict-message {
+  color: #a0a0b0;
+  margin: 0 0 1.5rem 0;
+}
+
+.conflict-info {
+  background: #161626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.conflict-info p {
+  margin: 0.5rem 0;
+  color: #e0e0e0;
+}
+
+.conflict-diff {
+  margin: 1.5rem 0;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.conflict-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.conflict-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a2a4a;
+  background: #161626;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.conflict-actions button:hover {
+  border-color: #00d4ff;
+  color: #00d4ff;
+}
+
+.btn-override {
+  background: #ff6b6b !important;
+  border-color: #ff6b6b !important;
+  color: white !important;
+}
+
+.btn-override:hover {
+  background: #ff5252 !important;
+}
+
+.btn-merge {
+  background: #4ecdc4 !important;
+  border-color: #4ecdc4 !important;
+  color: white !important;
+}
+
+.btn-merge:hover {
+  background: #45b7af !important;
+}
+
+.btn-abandon {
+  background: #666 !important;
+  border-color: #666 !important;
+  color: white !important;
+}
+
+.btn-abandon:hover {
+  background: #555 !important;
+}
