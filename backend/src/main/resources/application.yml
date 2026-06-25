@@ -5,21 +5,13 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/skillmd
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://keycloak.example.com/realms/skill-md
 
 app:
   audit:
     retention-days: 90
   version:
     retention-count: 50
-  cors:
-    allowed-origins: http://localhost:5173
 
 logging:
   level:
     com.company.skillmd: DEBUG
-    org.springframework.security: DEBUG

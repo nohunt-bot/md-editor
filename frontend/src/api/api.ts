@@ -1,17 +1,20 @@
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
+const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false'
 
-// Simple token storage (Keycloak integration TODO)
 let token: string | null = null
 
 export function getToken(): string | null {
   return token
 }
 
+export function setToken(t: string | null): void {
+  token = t
+}
+
 export async function refreshToken(): Promise<void> {
-  // TODO: Implement Keycloak token refresh
-  console.warn('Token refresh not implemented')
+  // Keycloak token refresh handled via initKeycloak
 }
 
 export const api = axios.create({
@@ -21,29 +24,28 @@ export const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   async (config) => {
-    let token = getToken()
-    if (!token) {
-      await refreshToken()
-      token = getToken()
+    if (AUTH_ENABLED) {
+      let t = getToken()
+      if (!t) {
+        await refreshToken()
+        t = getToken()
+      }
+      if (t) {
+        config.headers.Authorization = `Bearer ${t}`
+      }
     }
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    // Add user ID header for MVP (will be replaced with proper JWT claims)
-    config.headers['X-User-Id'] = 'user-123' // TODO: Get from JWT
+    config.headers['X-User-Id'] = AUTH_ENABLED ? (getToken() ? 'from-jwt' : 'anonymous') : 'user-123'
     return config
   },
   (error) => Promise.reject(error)
 )
 
-// Response interceptor for token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    if (AUTH_ENABLED && error.response?.status === 401) {
       try {
         await refreshToken()
         error.config.headers.Authorization = `Bearer ${getToken()}`

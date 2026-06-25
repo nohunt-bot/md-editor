@@ -44,6 +44,8 @@ public class SkillController {
         try {
             SkillResponse response = skillService.updateSkill(id, request, userId);
             return ResponseEntity.ok(response);
+        } catch (OptimisticLockingConflictException e) {
+            throw e;
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
