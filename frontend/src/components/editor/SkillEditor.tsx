@@ -4,6 +4,13 @@ import { skillApi, type CreateSkillData, type UpdateSkillData } from '../../api/
 import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import './SkillEditor.css'
 
+interface Conflict {
+  currentVersion: number
+  currentContent: string
+  currentEditorId: string
+  message: string
+}
+
 export function SkillEditor() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -12,6 +19,7 @@ export function SkillEditor() {
   
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
+  const [conflict, setConflict] = useState<Conflict | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -82,9 +90,20 @@ export function SkillEditor() {
       }
       navigate('/skills')
     } catch (error: any) {
+      if (error.response?.status === 409) {
+        // Optimistic lock conflict
+        const data = error.response.data
+        setConflict({
+          currentVersion: data.currentVersion,
+          currentContent: data.currentContent,
+          currentEditorId: data.currentEditorId,
+          message: data.message
+        })
+        setSaving(false)
+        return  // Don't navigate away
+      }
       console.error('Failed to save skill:', error)
       alert('Failed to save: ' + (error.response?.data?.message || error.message))
-    } finally {
       setSaving(false)
     }
   }
@@ -228,6 +247,9 @@ export function SkillEditor() {
           </div>
         </aside>
       </div>
+      
+      {/* Conflict dialog will be rendered here in Task 9 */}
+      {conflict && <div className="conflict-placeholder" />}
     </div>
   )
 }
