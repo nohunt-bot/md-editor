@@ -126,4 +126,5 @@ export type UpdateSkillData = {
   prerequisites?: { skillId: string; note: string }[]
   commitMessage?: string
   expectedVersion?: number
+  forceUpdate?: boolean
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { skillApi, type CreateSkillData, type UpdateSkillData } from '../../api/api.ts'
 import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
+import { ConflictDialog } from '../dialog/ConflictDialog'
 import './SkillEditor.css'
 
 interface Conflict {
@@ -106,6 +107,37 @@ export function SkillEditor() {
       alert('Failed to save: ' + (error.response?.data?.message || error.message))
       setSaving(false)
     }
+  }
+
+  async function handleOverride() {
+    if (!id) return
+    setConflict(null)
+    setSaving(true)
+    try {
+      const updateData: UpdateSkillData = {
+        ...formData,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
+        expectedVersion: formData.currentVersion,
+        forceUpdate: true
+      }
+      await skillApi.update(id, updateData)
+      navigate('/skills')
+    } catch (error: any) {
+      console.error('Failed to force save:', error)
+      alert('Failed to save: ' + (error.response?.data?.message || error.message))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleMerge(mergedContent: string) {
+    setFormData(prev => ({ ...prev, content: mergedContent }))
+    setConflict(null)
+  }
+
+  function handleAbandon() {
+    setConflict(null)
+    navigate('/skills')
   }
 
   function handleTagInput(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -247,9 +279,19 @@ export function SkillEditor() {
           </div>
         </aside>
       </div>
-      
-      {/* Conflict dialog will be rendered here in Task 9 */}
-      {conflict && <div className="conflict-placeholder" />}
+
+      {conflict && (
+        <ConflictDialog
+          newContent={formData.content}
+          currentContent={conflict.currentContent}
+          currentVersion={conflict.currentVersion}
+          currentEditorId={conflict.currentEditorId}
+          message={conflict.message}
+          onOverride={handleOverride}
+          onMerge={handleMerge}
+          onAbandon={handleAbandon}
+        />
+      )}
     </div>
   )
 }
