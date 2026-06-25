@@ -60,7 +60,7 @@ class SkillServiceTest {
         // Arrange
         String skillId = "skill-1";
         Integer currentVersion = 5;
-        Integer expectedVersion = 3; // Stale version
+        Integer expectedVersion = 3;
         String userId = "user-123";
 
         Skill skill = createSkill(skillId, currentVersion);
@@ -87,7 +87,7 @@ class SkillServiceTest {
         // Arrange
         String skillId = "skill-1";
         Integer currentVersion = 5;
-        Integer expectedVersion = 3; // Stale version
+        Integer expectedVersion = 3;
         String userId = "user-123";
 
         Skill skill = createSkill(skillId, currentVersion);
