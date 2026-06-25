@@ -42,7 +42,7 @@ public class SkillService {
             .orElseThrow(() -> new RuntimeException("Skill not found: " + id));
         
         // Optimistic locking check
-        if (request.expectedVersion() != null) {
+        if (request.expectedVersion() != null && !Boolean.TRUE.equals(request.forceUpdate())) {
             if (!skill.getCurrentVersion().equals(request.expectedVersion())) {
                 throw new OptimisticLockingConflictException(
                     skill.getId(),

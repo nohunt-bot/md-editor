@@ -13,7 +13,8 @@ public record UpdateSkillRequest(
     List<ReferenceDTO> references,
     List<PrerequisiteDTO> prerequisites,
     String commitMessage,
-    Integer expectedVersion
+    Integer expectedVersion,
+    Boolean forceUpdate
 ) {
     public record ReferenceDTO(String skillId, String relation) {}
     public record PrerequisiteDTO(String skillId, String note) {}
