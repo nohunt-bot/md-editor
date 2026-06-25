@@ -12,7 +12,8 @@ public record UpdateSkillRequest(
     List<String> tags,
     List<ReferenceDTO> references,
     List<PrerequisiteDTO> prerequisites,
-    String commitMessage
+    String commitMessage,
+    Integer expectedVersion
 ) {
     public record ReferenceDTO(String skillId, String relation) {}
     public record PrerequisiteDTO(String skillId, String note) {}
