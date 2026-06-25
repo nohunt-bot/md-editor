@@ -125,4 +125,5 @@ export type UpdateSkillData = {
   references?: { skillId: string; relation: string }[]
   prerequisites?: { skillId: string; note: string }[]
   commitMessage?: string
+  expectedVersion?: number
 }

@@ -19,7 +19,9 @@ export function SkillEditor() {
     content: '',
     folderId: '',
     tags: [] as string[],
-    commitMessage: ''
+    commitMessage: '',
+    currentVersion: 0,
+    updatedAt: null as string | null
   })
 
   useEffect(() => {
@@ -40,7 +42,9 @@ export function SkillEditor() {
         content: skill.content,
         folderId: skill.folderId || '',
         tags: skill.tags || [],
-        commitMessage: ''
+        commitMessage: '',
+        currentVersion: skill.currentVersion,
+        updatedAt: skill.updatedAt
       })
     } catch (error) {
       console.error('Failed to load skill:', error)
@@ -61,7 +65,8 @@ export function SkillEditor() {
       if (isEditing && id) {
         const updateData: UpdateSkillData = {
           ...formData,
-          tags: formData.tags.length > 0 ? formData.tags : undefined
+          tags: formData.tags.length > 0 ? formData.tags : undefined,
+          expectedVersion: formData.currentVersion
         }
         await skillApi.update(id, updateData)
       } else {
