@@ -1,7 +1,10 @@
 package com.company.skillmd.folder;
 
-import org.springframework.data.annotation.*;
-import org.springframework.data.mongodb.core.mapping.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.Instant;
 
 @Document(collection = "folders")
@@ -9,11 +12,8 @@ public class Folder {
 
     @Id
     private String id;
-
     private String name;
     private String parentId;
-    private String path;
-    private String ownerId;
 
     @CreatedDate
     private Instant createdAt;
@@ -21,7 +21,6 @@ public class Folder {
     @LastModifiedDate
     private Instant updatedAt;
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -30,12 +29,6 @@ public class Folder {
 
     public String getParentId() { return parentId; }
     public void setParentId(String parentId) { this.parentId = parentId; }
-
-    public String getPath() { return path; }
-    public void setPath(String path) { this.path = path; }
-
-    public String getOwnerId() { return ownerId; }
-    public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

@@ -1,87 +1,128 @@
 package com.company.skillmd.folder;
 
+import com.company.skillmd.skill.SkillRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Instant;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
 public class FolderService {
 
     private final FolderRepository folderRepository;
+    private final SkillRepository skillRepository;
 
-    public FolderService(FolderRepository folderRepository) {
+    public FolderService(FolderRepository folderRepository, SkillRepository skillRepository) {
         this.folderRepository = folderRepository;
+        this.skillRepository = skillRepository;
     }
 
-    public Folder createFolder(String name, String parentId, String ownerId) {
+    public FolderResponse createFolder(String name, String parentId) {
+        name = validateName(name);
+        if (isDuplicateName(name, parentId)) {
+            throw new IllegalArgumentException("A folder named '" + name + "' already exists here");
+        }
+        if (parentId != null) {
+            folderRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent folder not found: " + parentId));
+        }
         Folder folder = new Folder();
         folder.setName(name);
         folder.setParentId(parentId);
-        folder.setOwnerId(ownerId);
-        
-        // Build path
-        if (parentId == null) {
-            folder.setPath("/" + name);
-        } else {
-            Folder parent = folderRepository.findById(parentId)
-                .orElseThrow(() -> new RuntimeException("Parent folder not found: " + parentId));
-            folder.setPath(parent.getPath() + "/" + name);
+        return toResponse(folderRepository.save(folder));
+    }
+
+    public FolderResponse renameFolder(String id, String newName) {
+        newName = validateName(newName);
+        Folder folder = findById(id);
+        if (!folder.getName().equals(newName) && isDuplicateName(newName, folder.getParentId())) {
+            throw new IllegalArgumentException("A folder named '" + newName + "' already exists here");
         }
-        
-        return folderRepository.save(folder);
+        folder.setName(newName);
+        return toResponse(folderRepository.save(folder));
     }
 
-    public List<Folder> getRootFolders() {
-        return folderRepository.findByParentIdNull();
-    }
-
-    public List<Folder> getSubfolders(String parentId) {
-        return folderRepository.findByParentId(parentId);
-    }
-
-    public Folder moveFolder(String folderId, String newParentId) {
-        Folder folder = folderRepository.findById(folderId)
-            .orElseThrow(() -> new RuntimeException("Folder not found: " + folderId));
-        
+    public FolderResponse moveFolder(String id, String newParentId) {
+        Folder folder = findById(id);
+        if (id.equals(newParentId)) {
+            throw new IllegalArgumentException("Cannot move a folder into itself");
+        }
+        if (newParentId != null) {
+            folderRepository.findById(newParentId)
+                .orElseThrow(() -> new RuntimeException("Target folder not found: " + newParentId));
+            if (isDescendant(newParentId, id)) {
+                throw new IllegalArgumentException("Cannot move a folder into its own descendant");
+            }
+        }
         folder.setParentId(newParentId);
-        
-        // Update path
-        if (newParentId == null) {
-            folder.setPath("/" + folder.getName());
-        } else {
-            Folder parent = folderRepository.findById(newParentId)
-                .orElseThrow(() -> new RuntimeException("Parent folder not found: " + newParentId));
-            folder.setPath(parent.getPath() + "/" + folder.getName());
+        return toResponse(folderRepository.save(folder));
+    }
+
+    public void deleteFolder(String id) {
+        findById(id);
+        if (!folderRepository.findByParentId(id).isEmpty()) {
+            throw new IllegalStateException("Cannot delete a folder that contains subfolders");
         }
-        
-        return folderRepository.save(folder);
+        if (!skillRepository.findByFolderId(id).isEmpty()) {
+            throw new IllegalStateException("Cannot delete a folder that contains skills");
+        }
+        folderRepository.deleteById(id);
     }
 
-    public void deleteFolder(String folderId) {
-        // TODO: Check if folder contains skills
-        folderRepository.deleteById(folderId);
-    }
-
-    public List<FolderNode> getFolderTree() {
-        List<Folder> allFolders = folderRepository.findAll();
-        return buildTree(allFolders, null);
-    }
-
-    private List<FolderNode> buildTree(List<Folder> allFolders, String parentId) {
-        return allFolders.stream()
-            .filter(f -> (parentId == null && f.getParentId() == null) || 
-                         (parentId != null && parentId.equals(f.getParentId())))
-            .map(f -> new FolderNode(
-                f.getId(),
-                f.getName(),
-                f.getPath(),
-                buildTree(allFolders, f.getId())
-            ))
+    public List<FolderResponse> listFolders() {
+        return folderRepository.findAll().stream()
+            .map(this::toResponse)
             .toList();
     }
 
-    public record FolderNode(String id, String name, String path, List<FolderNode> children) {}
+    public List<FolderNode> getFolderTree() {
+        List<Folder> all = folderRepository.findAll();
+        return buildTree(all, null);
+    }
+
+    private List<FolderNode> buildTree(List<Folder> all, String parentId) {
+        return all.stream()
+            .filter(f -> parentId == null ? f.getParentId() == null : parentId.equals(f.getParentId()))
+            .map(f -> new FolderNode(f.getId(), f.getName(), f.getParentId(), buildTree(all, f.getId())))
+            .toList();
+    }
+
+    private boolean isDuplicateName(String name, String parentId) {
+        return parentId == null
+            ? folderRepository.existsByNameAndParentIdIsNull(name)
+            : folderRepository.existsByNameAndParentId(name, parentId);
+    }
+
+    // Returns true if targetId is a descendant of ancestorId
+    private boolean isDescendant(String targetId, String ancestorId) {
+        Folder current = folderRepository.findById(targetId).orElse(null);
+        while (current != null && current.getParentId() != null) {
+            if (current.getParentId().equals(ancestorId)) return true;
+            current = folderRepository.findById(current.getParentId()).orElse(null);
+        }
+        return false;
+    }
+
+    private Folder findById(String id) {
+        return folderRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Folder not found: " + id));
+    }
+
+    private String validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Folder name cannot be empty");
+        }
+        return name.trim();
+    }
+
+    private FolderResponse toResponse(Folder folder) {
+        return new FolderResponse(folder.getId(), folder.getName(), folder.getParentId(),
+            folder.getCreatedAt(), folder.getUpdatedAt());
+    }
+
+    public record FolderResponse(String id, String name, String parentId,
+                                 java.time.Instant createdAt, java.time.Instant updatedAt) {}
+
+    public record FolderNode(String id, String name, String parentId, List<FolderNode> children) {}
 }

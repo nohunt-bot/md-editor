@@ -23,7 +23,8 @@ docker-compose logs -f
 - Frontend: http://localhost:5173
 - Backend: http://localhost:8080 (Swagger: http://localhost:8080/swagger-ui.html)
 - MongoDB: localhost:27017
-- Keycloak: http://localhost:8081 (admin/admin)
+
+> **Auth note:** Keycloak is currently disabled (deferred). All requests are permitted without authentication. See `docs/decisions/20260703-defer-keycloak-stub-identity.md`.
 
 ### 單獨運行後端
 
@@ -69,7 +70,7 @@ npm run dev
 | State | Zustand |
 | Backend | Spring Boot 3.x (Java 17) |
 | Database | MongoDB 7.x |
-| Auth | Keycloak |
+| Auth | Dev stub (Keycloak deferred — see docs/decisions/) |
 
 ## 專案結構
 
@@ -96,7 +97,7 @@ md-editor/
 │       ├── api/      # OpenAPI generated client
 │       ├── hooks/
 │       ├── stores/   # Zustand stores
-│       └── auth/     # Keycloak integration
+│       └── auth/     # Auth (Keycloak deferred — stub only)
 └── docker-compose.yml
 ```
 

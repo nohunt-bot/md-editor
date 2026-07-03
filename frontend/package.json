@@ -16,7 +16,6 @@
     "@codemirror/lang-python": "^6.1.4",
     "@mdxeditor/editor": "^3.1.0",
     "axios": "^1.6.7",
-    "keycloak-js": "^25.0.0",
     "react": "^18.2.0",
     "react-diff-viewer-continued": "^4.0.1",
     "react-dom": "^18.2.0",
