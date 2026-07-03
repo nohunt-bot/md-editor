@@ -7,7 +7,7 @@
 ### 本地開發（需要 Docker）
 
 ```bash
-cd ~/Documents/md-editor
+cd ~/md-editor
 
 # 複製前端環境變數
 cp frontend/.env.example frontend/.env
@@ -85,19 +85,19 @@ md-editor/
 │       ├── tag/      # Tag management
 │       ├── search/   # Full-text search
 │       ├── discovery/# LLM discovery API
-│       └── audit/    # Audit logging
+│       ├── audit/    # Audit logging
+│       ├── auth/     # Auth interfaces (deferred)
+│       └── common/   # Shared utilities
 ├── frontend/         # React app
 │   └── src/
-│       ├── pages/    # Route components
+│       ├── pages/    # SkillsPage (list/grid/filter view)
 │       ├── components/
-│       │   ├── editor/
-│       │   ├── tree/
-│       │   ├── version/
-│       │   └── common/
-│       ├── api/      # OpenAPI generated client
+│       │   ├── editor/     # SkillEditor, MdxEditorWrapper
+│       │   ├── tree/       # FolderTree
+│       │   └── dialog/     # ConflictDialog
+│       ├── api/      # API client
 │       ├── hooks/
-│       ├── stores/   # Zustand stores
-│       └── auth/     # Auth (Keycloak deferred — stub only)
+│       └── stores/   # Zustand stores
 └── docker-compose.yml
 ```
 
@@ -123,4 +123,6 @@ md-editor/
 
 ## 參考文檔
 
-完整設計文檔：`~/Documents/obsidian/Projects/mk-editor/plan.md`
+- 實作規格：`docs/design/PRD.md`
+- 任務追蹤：`docs/tasks/20260703-skill-marketplace.md`
+- Auth 決策：`docs/decisions/20260703-defer-keycloak-stub-identity.md`

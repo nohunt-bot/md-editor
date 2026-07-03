@@ -8,14 +8,14 @@
 - [x] Spring Boot 3.x project skeleton (Maven)
 - [x] Maven build configuration (pom.xml)
 - [x] Maven wrapper (mvnw)
-- [x] Docker Compose setup (MongoDB + Keycloak + Backend + Frontend)
+- [x] Docker Compose setup (MongoDB + Backend + Frontend; Keycloak deferred)
 - [x] OpenAPI/Swagger documentation
 
 **Security:**
-- [x] OAuth2 Resource Server configuration
-- [x] Keycloak JWT authentication
-- [x] Role-based access control (admin/editor/viewer)
-- [x] CORS configuration
+- [x] ~~OAuth2 Resource Server configuration~~ (deferred with Keycloak, 2026-07-03)
+- [x] ~~Keycloak JWT authentication~~ (deferred, 2026-07-03)
+- [x] ~~Role-based access control (admin/editor/viewer)~~ (deferred, 2026-07-03)
+- [x] CORS configuration (permissive for dev)
 
 **Domain - Skills:**
 - [x] Skill entity with full schema
@@ -57,9 +57,9 @@
 - [x] Environment configuration
 
 **Authentication:**
-- [x] Keycloak JS integration
-- [x] Token management (refresh, expiry)
-- [x] Role checking utilities
+- [x] ~~Keycloak JS integration~~ (removed 2026-07-03, deferred per docs/decisions/)
+- [x] ~~Token management (refresh, expiry)~~ (removed 2026-07-03)
+- [x] ~~Role checking utilities~~ (removed 2026-07-03)
 
 **API Layer:**
 - [x] Axios instance with interceptors
@@ -69,17 +69,17 @@
 - [x] Tag API client
 
 **UI Pages:**
-- [x] Home page (redirects to /skills)
-- [x] Skills list page with filtering (folder, tag, search)
+- [x] Home page (redirects to /skills in App.tsx)
+- [x] Skills list page with filtering (folder, tag, search) — SkillsPage.tsx
 - [x] List/Grid view toggle
-- [x] SkillCard component
-- [x] SkillEditor (Create/Edit form with MDXEditor WYSIWYG)
-- [x] SkillDetail page (placeholder)
+- [x] SkillCard component (inline in SkillsPage.tsx)
+- [x] SkillEditor (Create/Edit form with MDXEditor WYSIWYG) — SkillEditor.tsx
+- [x] SkillDetail page (placeholder in App.tsx)
 
 **Components:**
-- [x] FolderTree (collapsible tree structure)
-- [x] Tag input with autocomplete-style UX
-- [x] Sidebar navigation
+- [x] FolderTree (collapsible tree structure) — FolderTree.tsx
+- [x] Tag sidebar (clickable tag list in SkillsPage.tsx)
+- [x] Sidebar navigation (folder/tag sections in SkillsPage.tsx)
 - [x] Responsive layout
 
 **Editor:**
@@ -90,10 +90,10 @@
 
 ### DevOps
 
-- [x] Docker Compose (4 services)
+- [x] Docker Compose (3 services: MongoDB, Backend, Frontend)
 - [x] Backend Dockerfile (multi-stage)
 - [x] Frontend Dockerfile (multi-stage with nginx)
-- [x] Keycloak realm JSON (with test users)
+- [x] ~~Keycloak realm JSON~~ (retained for future use; Keycloak deferred 2026-07-03)
 - [x] Setup script (setup.sh)
 - [x] Seed data script (seed-data.sh)
 - [x] .gitignore
@@ -182,6 +182,16 @@ md-editor/
 │   │   │   ├── TagRepository.java ✅
 │   │   │   ├── TagService.java ✅
 │   │   │   └── TagController.java ✅
+│   │   ├── search/
+│   │   │   └── (Full-text search service) ✅
+│   │   ├── discovery/
+│   │   │   └── (LLM discovery API) ✅
+│   │   ├── audit/
+│   │   │   └── (Audit logging) ✅
+│   │   ├── auth/
+│   │   │   └── (Auth interfaces — deferred) 
+│   │   ├── common/
+│   │   │   └── (Shared utilities) ✅
 │   │   ├── SkillMdApplication.java ✅
 │   │   └── HealthController.java ✅
 │   ├── src/main/resources/
@@ -193,23 +203,32 @@ md-editor/
 │   └── Dockerfile ✅
 ├── frontend/
 │   ├── src/
-│   │   ├── auth/
-│   │   │   └── keycloak.ts ✅
+│   │   ├── pages/
+│   │   │   └── SkillsPage.tsx ✅
+│   │   ├── components/
+│   │   │   ├── editor/
+│   │   │   │   ├── SkillEditor.tsx ✅
+│   │   │   │   └── MdxEditorWrapper.tsx ✅
+│   │   │   ├── tree/
+│   │   │   │   └── FolderTree.tsx ✅
+│   │   │   └── dialog/
+│   │   │       └── ConflictDialog.tsx ✅
 │   │   ├── api/
 │   │   │   └── api.ts ✅
+│   │   ├── test/
+│   │   │   ├── setup.ts ✅
+│   │   │   └── ConflictDialog.test.tsx ✅
 │   │   ├── App.tsx ✅
-│   │   ├── App.css ✅
 │   │   ├── main.tsx ✅
-│   │   └── index.css ✅
-│   ├── public/
-│   │   └── silent-check-sso.html ✅
+│   │   └── vite-env.d.ts ✅
+│   ├── public/ ✅
 │   ├── package.json ✅
 │   ├── vite.config.ts ✅
 │   ├── tsconfig.json ✅
 │   ├── .env.example ✅
 │   └── Dockerfile ✅
 ├── docker-compose.yml ✅
-├── keycloak-realm.json ✅
+├── keycloak-realm.json (retained for future use) ⚠️
 ├── setup.sh ✅
 ├── seed-data.sh ✅
 ├── README.md ✅
@@ -221,7 +240,7 @@ md-editor/
 ## 🚀 Quick Start
 
 ```bash
-cd ~/Documents/md-editor
+cd ~/md-editor
 
 # Setup and start all services
 ./setup.sh
@@ -233,7 +252,6 @@ cd ~/Documents/md-editor
 # Frontend: http://localhost:5173
 # Backend:  http://localhost:8080
 # Swagger:  http://localhost:8080/swagger-ui.html
-# Keycloak: http://localhost:8081 (admin/admin)
 ```
 
 ---
