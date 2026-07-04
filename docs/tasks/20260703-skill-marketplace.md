@@ -98,9 +98,9 @@ Status: active (2026-07-03)
       發布/下架按鈕（依權限顯示）、open skill 顯示「複製到我的團隊」；
       版本還原若串接則順修 VersionController 仍讀 X-User-Id 的殘留
       → 驗證：Vitest + Playwright 流程測試
-- [ ] 2.5 編輯器精簡（STANDARD）：MDXEditor plugins 收斂為
-      headings/bold/italic/lists/link/codeblock；移除 image/table/underline；
-      顯示 draft/published 徽章
+- [x] 2.5 編輯器精簡（spend-limit 環境→commander inline）：MDXEditor toolbar
+      收斂為 headings/bold/italic/lists/link/codeblock；移除 image/table/
+      underline 按鈕；顯示 draft/published 徽章
       → 驗證：toolbar 快照測試；貼上含 table 的 markdown 內容不損毀（原文保留）
 
 ### Phase 3 — 開放空間體驗
@@ -248,6 +248,14 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   build/tsc/vitest(19 tests) 全 exit 0。詳情頁：左 rendered markdown、右
   metadata+權限閘控動作（編輯/發布/下架/複製）+版本歷史。版本還原未串接、
   VersionController X-User-Id 殘留留 TODO（前端未用到）。實機視覺需後端→4.3
+- 2026-07-04 | 2.5 | done，commit bba4123（commander inline，避免再撞上限）。
+  toolbar：BoldItalicUnderlineToggles options=['Bold','Italic']（本版無
+  BoldItalicToggles，用 options 隱藏 underline 才是正解）、移除 InsertTable/
+  InsertThematicBreak 按鈕；渲染 plugin 全保留→貼上表格/圖片不損毀。
+  SkillEditor header 加 Badge（編輯時顯示 draft/published）。閘門：tsc/build/
+  vitest(19) exit 0。★ Phase 2 前端全數完成（tokens→雙區 shell→卡片→詳情頁
+  →編輯器）。⚠️ MDXEditor jsdom 難測，toolbar 快照 + 貼上不損毀 →併入 4.3 E2E
+  互動驗證。
 
 ## Decisions
 
