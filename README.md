@@ -96,8 +96,8 @@ md-editor/
 │       │   ├── tree/       # FolderTree
 │       │   └── dialog/     # ConflictDialog
 │       ├── api/      # API client
-│       ├── hooks/
-│       └── stores/   # Zustand stores
+│       ├── hooks/    # (空目錄 — 規劃中)
+│       └── stores/   # (空目錄 — Zustand 規劃中)
 └── docker-compose.yml
 ```
 
@@ -115,8 +115,8 @@ md-editor/
 ## 開發階段
 
 - [x] Phase 0: Foundation (專案骨架)
-- [ ] Phase 1: MVP CRUD
-- [ ] Phase 2: 編輯體驗 (MDXEditor)
+- [x] Phase 1: MVP CRUD
+- [ ] Phase 2: 編輯體驗 (MDXEditor) — partial（進行中）
 - [ ] Phase 3: 版本與權限
 - [ ] Phase 4: LLM Discovery
 - [ ] Phase 5: Polish

@@ -182,16 +182,11 @@ md-editor/
 │   │   │   ├── TagRepository.java ✅
 │   │   │   ├── TagService.java ✅
 │   │   │   └── TagController.java ✅
-│   │   ├── search/
-│   │   │   └── (Full-text search service) ✅
-│   │   ├── discovery/
-│   │   │   └── (LLM discovery API) ✅
-│   │   ├── audit/
-│   │   │   └── (Audit logging) ✅
-│   │   ├── auth/
-│   │   │   └── (Auth interfaces — deferred) 
-│   │   ├── common/
-│   │   │   └── (Shared utilities) ✅
+│   │   ├── search/     (空目錄 — 未實作)
+│   │   ├── discovery/  (空目錄 — 未實作，LLM discovery deferred)
+│   │   ├── audit/      (空目錄 — 未實作)
+│   │   ├── auth/       (空目錄 — auth deferred)
+│   │   ├── common/     (僅空子目錄 exception/、validation/ — 未實作)
 │   │   ├── SkillMdApplication.java ✅
 │   │   └── HealthController.java ✅
 │   ├── src/main/resources/

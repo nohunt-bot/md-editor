@@ -37,14 +37,14 @@ Status: active (2026-07-03)
 
 ### Phase 0 — 收斂現狀（先做，其他 phase 依賴乾淨基線）
 
-- [~] 0.1 完成 Keycloak 移除並收斂 working tree（STANDARD）：現有未 commit
+- [x] 0.1 完成 Keycloak 移除並收斂 working tree（STANDARD）：現有未 commit
       變更（刪 `frontend/src/auth/keycloak.ts`、`DevSecurityConfig.java`）方向
       與決策一致，收尾而非 revert——後端 DevSecurityConfig 定稿（permit-all +
       stub 身分注入點）、前端移除 keycloak-js 相依與殘留引用、docker-compose
       移除 keycloak 服務、`keycloak-realm.json` 保留但 README 註明未啟用
       → 驗證：`git status --short` 乾淨；`./mvnw test` 與 `npm run build` 皆過；
       `docker-compose config` 無 keycloak 服務
-- [ ] 0.2 文件對齊程式碼（CHEAP 產出 + STANDARD 覆核）：IMPLEMENTATION_STATUS.md
+- [x] 0.2 文件對齊程式碼（CHEAP 產出 + STANDARD 覆核）：IMPLEMENTATION_STATUS.md
       移除不存在的宣稱（SkillCard/SkillDetail/Sidebar/Home）；README 補上
       backend 實有的 search/discovery/audit/auth 套件、更新技術棧表
       （Auth 欄改為 dev stub / Keycloak deferred）
@@ -59,7 +59,8 @@ Status: active (2026-07-03)
       → 驗證：backend 單元測試綠 + migration 在 seed 資料上跑過
 - [ ] 1.2 身分抽象與團隊授權（orchestrator）：`CurrentUserProvider` 介面
       （userId / teamIds / roles），MVP 提供 dev stub 實作（設定檔或 request
-      header 指定身分）；授權規則——團隊成員可寫本團隊 skill；`open`+`published`
+      header 指定身分）；注意：現有 api.ts 已硬編 `X-User-Id: user-123`，與
+      PRD 的 `X-Dev-User` 命名不一致——1.2 時統一（建議照 PRD）；授權規則——團隊成員可寫本團隊 skill；`open`+`published`
       全員可讀；publish 需該團隊 editor 以上。`teamId` 語意 = 未來 Keycloak
       group id（公司 IdP 已確認有 groups），接回時只換 Provider 實作
       → 驗證：授權矩陣整合測試（Testcontainers，stub 身分）全綠
@@ -142,6 +143,20 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   前端視覺架構、操作手順 F1-F6）。fresh-context TOP 覆核判 FIX-FIRST：
   1 blocker（F4 restore endpoint 未定義）+ 2 should-fix（admin 授權矩陣與
   API 註記矛盾）+ 3 nit——6 項全數修正後升 v1.1。實作 phase 以 PRD 為 spec
+- 2026-07-03 | 0.1 | done，commit 0ac3359。keycloak-js/攔截器/SSO頁移除、
+  SecurityConfig 本已 permitAll（DevSecurityConfig 冗餘、unstage）、compose
+  本已無 keycloak。單元測試 6/6（exit 0）；⚠️ Docker 不可用，Testcontainers
+  整合測試跳過（`-Dtest='!*IntegrationTest'`），4.3 前必補跑。npm build
+  exit 0。commander 抽查：status 乾淨、grep keycloak 無殘留
+- 2026-07-03 | 0.2 | CHEAP 產出 done，commit 033d373（README/
+  IMPLEMENTATION_STATUS 對齊 code；Documents 路徑歸零，commander 抽查過）。
+  STANDARD fresh-context 覆核進行中。⚠️ 教訓：0.2 agent 清 tree 時洗掉了
+  任務檔未 commit 的進度標記——之後進度更新要即時 commit 或明示 stash
+- 2026-07-03 | 0.2 | STANDARD 覆核判 FIX-FIRST（retry: 1）：抓到
+  search/discovery/audit/common 為**空目錄**卻標 ✅（連最初 planning 掃描
+  也誤判「backend 有這些套件」——實為空殼，特此更正）；hooks/stores 空目錄、
+  README phase 清單不一致。6 項發現由 commander inline 修正（兩檔六處、
+  行號明確，派工不划算）。覆核其餘 criteria 全 PASS，0.2 標 [x]
 
 ## Decisions
 
