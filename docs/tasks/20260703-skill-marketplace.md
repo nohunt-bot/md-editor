@@ -57,7 +57,7 @@ Status: active (2026-07-03)
       `folders` 加 `teamId`；沿用 v0.2 effective-scope 概念；既有資料 migration；
       同步更新 docs/schema.md
       → 驗證：backend 單元測試綠 + migration 在 seed 資料上跑過
-- [~] 1.2 身分抽象與團隊授權（implementer in worktree + commander 閘門）：`CurrentUserProvider` 介面
+- [!] 1.2 身分抽象與團隊授權（implementer in worktree + commander 閘門）(retry: 1)：`CurrentUserProvider` 介面
       （userId / teamIds / roles），MVP 提供 dev stub 實作（設定檔或 request
       header 指定身分）；注意：現有 api.ts 已硬編 `X-User-Id: user-123`，與
       PRD 的 `X-Dev-User` 命名不一致——1.2 時統一（建議照 PRD）；授權規則——團隊成員可寫本團隊 skill；`open`+`published`
@@ -165,6 +165,13 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   ⚠️ TRIPWIRE：orchestrator 在 implementer 完成後停住未跑閘門/合併，
   commander 手動收尾。1.2 起改「implementer in worktree + commander 閘門」
   等效管線（教訓待 4.4 retro 落 LESSONS.md）
+- 2026-07-04 | 1.2 | [!] (retry: 1) PARK：implementer 於 87 次工具呼叫後撞
+  **月度用量上限**中斷（"monthly spend limit"），worktree 無 commit、無未提交
+  變更——無可搶救成果，worktree 已清除。非任務定義問題，是帳務資源阻斷：
+  重派 subagent 會撞同一上限。解法只有使用者能做：raise limit
+  （claude.ai/settings/usage）後，從本步驟重派（dispatch prompt 可沿用
+  progress log 上一條所述 1.2 規格：CurrentUserProvider + dev stub +
+  /api/me + 授權矩陣 + X-Dev-User 統一）。1.3-1.5 依賴 1.2，一併暫停
 
 ## Decisions
 
