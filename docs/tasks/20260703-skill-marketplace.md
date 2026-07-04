@@ -1,6 +1,6 @@
 # Task: 把 md-editor（Skill.md Service）發展成公司內部 skill marketplace——團隊空間 + 開放空間、發布/瀏覽/搜尋、淺色極簡前端
 
-Status: done (2026-07-05)
+Status: active (2026-07-05 reopened — 使用者回饋迭代：對接/UX 補完後推 GitHub)
 
 > 執行協議：`~/.claude/harness/rules/long-tasks.md`。接手的 subagent 先讀本檔，
 > 信任 Progress log 而非記憶，從第一個未打勾的步驟繼續。每個 phase 以
@@ -138,6 +138,24 @@ Status: done (2026-07-05)
       2 則 harness 教訓入 LESSONS.md、本檔 Status: done
       → 驗證：⚠️ 覆核為 commander 自跑（非 fresh context）——spend-limit 阻斷
         subagent，如實記為 done-check 缺口（見結案報告）
+
+### Phase 5 — 對接與 UX 補完（2026-07-05 使用者回饋迭代；驗證一律 commander）
+
+- [ ] 5.1 核心流程順暢度（implementer in worktree，pin base）：
+      (a) 建立後導向新 skill 詳情頁、更新後導回 `/skills/:id`（修 F1 斷鏈：
+      目前存檔一律丟回 /team，發布入口斷）；(b) 錯誤處理去 alert() 化——
+      inline 中文錯誤提示（editor 頂部 error banner，token 樣式）；(c) 無
+      activeTeam 時「+ 新增 Skill」disabled + title 提示，editor 內同步防呆；
+      (d) 編輯器文案統一中文（Edit Skill/Save/Name...→中文）
+      → 驗證：commander 跑 build/tsc/vitest + live Playwright 走 F1
+- [ ] 5.2 搜尋補完（併入 5.1 或獨立）：「查看全部結果」列（→ /open?q=）+
+      ⌘K focus 搜尋
+      → 驗證：Playwright 搜尋流程
+- [ ] 5.3 fresh-context reviewer findings 修復（等 aa4118e 回報後排定）
+      → 驗證：commander 逐項復核
+- [ ] 5.4 最終驗證 + push GitHub：live 全流程（F1 建立→發布、F2 複製、F3 搜尋、
+      F5 下架）Playwright 走查 + 全測試綠 → push origin main
+      → 驗證：git push 成功、遠端 HEAD=本地 HEAD
 
 ### 明確不做（本任務範圍外）
 
