@@ -93,7 +93,7 @@ Status: active (2026-07-03)
 - [x] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）(retry: 1)：清單/卡片、tag/folder 篩選、空狀態，
       全面套新 tokens
       → 驗證：Vitest 元件測試 + screenshot
-- [~] 2.4 SkillDetail 頁——新建（implementer in worktree + commander 閘門）：
+- [x] 2.4 SkillDetail 頁——新建（spend-limit 中斷→commander inline 收尾）：
       rendered markdown、metadata（team/scope/status/版本）、版本歷史入口、
       發布/下架按鈕（依權限顯示）、open skill 顯示「複製到我的團隊」；
       版本還原若串接則順修 VersionController 仍讀 X-User-Id 的殘留
@@ -239,6 +239,15 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   commander 閘門：build/tsc/vitest（15 tests）全 exit 0。⚠️ 卡片實機視覺需
   後端資料，離線只驗空狀態＋元件測試→實機卡片併入 4.3 E2E。
   ★ 對策奏效：pin base SHA + 首要 acceptance 從此為所有 worktree dispatch 標配
+- 2026-07-04 | 2.4 | done，commit a75ab50。agent 又撞月度用量上限（255 tokens
+  即死），但 base 正確（ea3b2cb）且留下未提交成果：SkillDetailPage.tsx（377
+  行）、自製 Markdown 渲染器（無新依賴）、api.ts 加 publish/unpublish/copyToTeam。
+  ★ subagent 反覆死於帳務上限＝資源阻斷，circuit-breaker 換路：commander
+  主線 inline 收尾（補 SkillDetailPage.css、接 App.tsx 換掉 placeholder、
+  刪未用 isMember、加 4 情境 Vitest：editor/viewer/open-copy/404）。閘門：
+  build/tsc/vitest(19 tests) 全 exit 0。詳情頁：左 rendered markdown、右
+  metadata+權限閘控動作（編輯/發布/下架/複製）+版本歷史。版本還原未串接、
+  VersionController X-User-Id 殘留留 TODO（前端未用到）。實機視覺需後端→4.3
 
 ## Decisions
 
