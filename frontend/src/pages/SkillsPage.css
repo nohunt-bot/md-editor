@@ -1,3 +1,5 @@
+/* NOTE(2.3): deep restyle deferred to Phase 2.3. Here: minimal token
+   substitutions so the page is readable on the light-minimal flip. */
 .skills-page {
   display: flex;
   min-height: calc(100vh - 60px);
@@ -5,8 +7,8 @@
 
 .sidebar {
   width: 250px;
-  background: #1a1a2e;
-  border-right: 1px solid #2a2a4a;
+  background: var(--bg-subtle);
+  border-right: 1px solid var(--border);
   padding: 1.5rem;
   flex-shrink: 0;
 }
@@ -18,7 +20,7 @@
 .sidebar-section h3 {
   font-size: 0.875rem;
   text-transform: uppercase;
-  color: #888;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
   letter-spacing: 0.05em;
 }
@@ -33,7 +35,7 @@
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
-  color: #e0e0e0;
+  color: var(--text);
   padding: 0.5rem 0.75rem;
   text-align: left;
   cursor: pointer;
@@ -42,13 +44,13 @@
 }
 
 .tag-item:hover {
-  background: rgba(0, 212, 255, 0.1);
+  background: var(--bg-hover);
 }
 
 .tag-item.active {
-  background: rgba(0, 212, 255, 0.15);
-  border-left-color: #00d4ff;
-  color: #00d4ff;
+  background: var(--bg-hover);
+  border-left-color: var(--accent);
+  color: var(--accent);
 }
 
 .skills-main {
@@ -76,23 +78,23 @@
 }
 
 .search-input {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 1rem;
-  color: #e0e0e0;
+  color: var(--text);
   width: 250px;
   font-size: 0.875rem;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #00d4ff;
+  border-color: var(--accent);
 }
 
 .view-toggle {
   display: flex;
-  background: #1a1a2e;
+  background: var(--bg-subtle);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -100,7 +102,7 @@
 .view-toggle button {
   background: transparent;
   border: none;
-  color: #888;
+  color: var(--text-secondary);
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   font-size: 1rem;
@@ -109,8 +111,8 @@
 
 .view-toggle button.active,
 .view-toggle button:hover {
-  background: #2a2a4a;
-  color: #00d4ff;
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 
 .skills-list {
@@ -127,17 +129,15 @@
 }
 
 .skill-card {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.2s;
 }
 
 .skill-card:hover {
-  border-color: #00d4ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15);
+  border-color: var(--accent);
 }
 
 .skill-card-header {
@@ -149,7 +149,7 @@
 
 .skill-card-header h3 {
   margin: 0;
-  color: #fff;
+  color: var(--text);
   font-size: 1.125rem;
 }
 
@@ -160,8 +160,8 @@
 }
 
 .tag {
-  background: rgba(0, 212, 255, 0.15);
-  color: #00d4ff;
+  background: var(--bg-hover);
+  color: var(--accent);
   padding: 0.25rem 0.625rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -169,7 +169,7 @@
 }
 
 .skill-description {
-  color: #888;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.6;
   margin-bottom: 1rem;
@@ -180,16 +180,16 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 1rem;
-  border-top: 1px solid #2a2a4a;
+  border-top: 1px solid var(--border);
 }
 
 .skill-meta {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.75rem;
 }
 
 .btn-link {
-  color: #00d4ff;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.875rem;
@@ -197,14 +197,14 @@
 }
 
 .btn-link:hover {
-  color: #00ff88;
+  opacity: 0.8;
 }
 
 .loading,
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 .empty-state button {
