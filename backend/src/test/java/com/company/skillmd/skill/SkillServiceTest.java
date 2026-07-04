@@ -1,6 +1,12 @@
 package com.company.skillmd.skill;
 
+import com.company.skillmd.skill.dto.CreateSkillRequest;
+import com.company.skillmd.skill.dto.SkillResponse;
 import com.company.skillmd.skill.dto.UpdateSkillRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -126,6 +134,49 @@ class SkillServiceTest {
 
         // Assert
         verify(skillRepository).save(any(Skill.class));
+    }
+
+    @Test
+    @DisplayName("Create skill defaults scope=team, status=draft, publishedAt=null, sourceSkillId=null")
+    void createSkill_setsDefaults() {
+        // Arrange
+        String userId = "user-123";
+        CreateSkillRequest request = new CreateSkillRequest(
+            "new-skill", "New Skill", "desc", "# content", "team-a",
+            null, List.of("tag1"), null, null
+        );
+        when(skillRepository.save(any(Skill.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        SkillResponse response = skillService.createSkill(request, userId);
+
+        // Assert
+        assertEquals("team-a", response.teamId());
+        assertEquals("team", response.scope());
+        assertEquals("draft", response.status());
+        assertNull(response.publishedAt());
+        assertNull(response.sourceSkillId());
+    }
+
+    @Test
+    @DisplayName("teamId is required on create (bean validation fails when missing)")
+    void createSkill_missingTeamId_failsValidation() {
+        // Arrange
+        CreateSkillRequest request = new CreateSkillRequest(
+            "new-skill", "New Skill", "desc", "# content", null,
+            null, List.of("tag1"), null, null
+        );
+
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = factory.getValidator();
+
+            // Act
+            Set<ConstraintViolation<CreateSkillRequest>> violations = validator.validate(request);
+
+            // Assert
+            assertFalse(violations.isEmpty());
+            assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("teamId")));
+        }
     }
 
     private Skill createSkill(String id, Integer version) {

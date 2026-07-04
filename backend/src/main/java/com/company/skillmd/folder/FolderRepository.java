@@ -12,7 +12,7 @@ public interface FolderRepository extends MongoRepository<Folder, String> {
 
     List<Folder> findByParentIdIsNull();
 
-    boolean existsByNameAndParentId(String name, String parentId);
+    boolean existsByTeamIdAndNameAndParentId(String teamId, String name, String parentId);
 
-    boolean existsByNameAndParentIdIsNull(String name);
+    boolean existsByTeamIdAndNameAndParentIdIsNull(String teamId, String name);
 }

@@ -3,16 +3,22 @@ package com.company.skillmd.folder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
 @Document(collection = "folders")
+@CompoundIndexes({
+    @CompoundIndex(name = "teamId_parentId_name_unique", def = "{'teamId': 1, 'parentId': 1, 'name': 1}", unique = true)
+})
 public class Folder {
 
     @Id
     private String id;
     private String name;
+    private String teamId;
     private String parentId;
 
     @CreatedDate
@@ -26,6 +32,9 @@ public class Folder {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getTeamId() { return teamId; }
+    public void setTeamId(String teamId) { this.teamId = teamId; }
 
     public String getParentId() { return parentId; }
     public void setParentId(String parentId) { this.parentId = parentId; }
