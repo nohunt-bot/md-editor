@@ -119,11 +119,11 @@ Status: active (2026-07-03)
 
 - [ ] 4.1 全站 loading/empty/error states（CHEAP，模式定型後批次套用）
       → 驗證：空資料/斷網情境 screenshot 清單
-- [ ] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋三主流程；
+- [~] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋三主流程；
       修/汰換舊 SkillControllerIntegrationTest（仍用 X-User-Id，1.2 auth 下會 401，
       1.3 交接）；Docker 回來後補跑所有 @*IntegrationTest（1.1/1.2/1.3 累積）
       → 驗證：`./mvnw test` + `npm test` 全綠，覆蓋對照 acceptance criteria
-- [ ] 4.3 E2E 冒煙（STANDARD）：docker-compose 全起，兩個 dev 身分跨團隊情境
+- [~] 4.3 E2E 冒煙（STANDARD）：docker-compose 全起，兩個 dev 身分跨團隊情境
       腳本走完
       → 驗證：腳本 exit 0 + 截圖存檔
 - [ ] 4.4 文件同步 + /retro：README/IMPLEMENTATION_STATUS/schema.md 更新；
@@ -265,6 +265,12 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   navigate 新 skill）。無需重複派工。單一團隊複製直接執行為刻意 UX 決策。
   ★ Phase 3 開放空間體驗完成。實機跨團隊互動驗證（team-b 找到 team-a 發布、
   完整發布/複製流程）統一併入 4.3 E2E（需 Docker）。
+- 2026-07-04 | 4.2 | ★ Docker 恢復可用！跑完整後端套件（含 Testcontainers）：
+  exit 0。累積的整合測試首次真跑且全綠——SearchVisibilityIntegrationTest(2)、
+  SkillControllerIntegrationTest(4)、SkillPublishIntegrationTest(11)，0 失敗
+  0 跳過（Mongo 真的起了，單一類別耗 8.6s）。關掉全任務拖最久的風險：跨團隊
+  授權/發布/複製/可見性搜尋皆端到端驗證。舊 SkillControllerIntegrationTest
+  已於 2.2 改用 X-Dev-User（grep X-User-Id=0），4.2 的汰換項自動達成。
 
 ## Decisions
 
