@@ -57,7 +57,7 @@ Status: active (2026-07-03)
       `folders` 加 `teamId`；沿用 v0.2 effective-scope 概念；既有資料 migration；
       同步更新 docs/schema.md
       → 驗證：backend 單元測試綠 + migration 在 seed 資料上跑過
-- [!] 1.2 身分抽象與團隊授權（implementer in worktree + commander 閘門）(retry: 1)：`CurrentUserProvider` 介面
+- [x] 1.2 身分抽象與團隊授權（implementer in worktree + commander 閘門）(retry: 1)：`CurrentUserProvider` 介面
       （userId / teamIds / roles），MVP 提供 dev stub 實作（設定檔或 request
       header 指定身分）；注意：現有 api.ts 已硬編 `X-User-Id: user-123`，與
       PRD 的 `X-Dev-User` 命名不一致——1.2 時統一（建議照 PRD）；授權規則——團隊成員可寫本團隊 skill；`open`+`published`
@@ -172,6 +172,12 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   （claude.ai/settings/usage）後，從本步驟重派（dispatch prompt 可沿用
   progress log 上一條所述 1.2 規格：CurrentUserProvider + dev stub +
   /api/me + 授權矩陣 + X-Dev-User 統一）。1.3-1.5 依賴 1.2，一併暫停
+- 2026-07-04 | 1.2 | 更正上一條並解除 PARK：implementer 的成果其實落在
+  **主工作樹**（worktree 隔離未生效），實作完整、死於 commit 前。commander
+  閘門重跑全過（unit test/package/frontend build 皆 exit 0）、抽查範圍
+  無越界、無刪測試，收進 main（commit 59cc971），1.2 標 [x]。
+  缺口：HTTP 層 Testcontainers 整合測試未寫成（agent 中斷）→ 併入 4.2。
+  ⚠️ 帳務上限問題仍在：後續 dispatch 前須確認 spend limit 已調高
 
 ## Decisions
 
