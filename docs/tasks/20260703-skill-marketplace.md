@@ -90,7 +90,7 @@ Status: active (2026-07-03)
       .getUserId() 取得，前端只送 `X-Dev-User`
       → 驗證：Playwright——進入 app 零點擊同時看到兩個入口；建立 skill 只送
       單一 header 仍正確記 author
-- [~] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）：清單/卡片、tag/folder 篩選、空狀態，
+- [!] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）(retry: 1)：清單/卡片、tag/folder 篩選、空狀態，
       全面套新 tokens
       → 驗證：Vitest 元件測試 + screenshot
 - [ ] 2.4 SkillDetail 頁——新建（orchestrator）：rendered markdown、metadata
@@ -222,6 +222,15 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   截圖確認零點擊雙區可見、離線 graceful（顯示「尚無團隊」空狀態）。
   ⚠️ 交接：VersionController restore 仍讀 X-User-Id（本步刻意未動）→ 待
   版本還原前端串接（尚未排；PRD F4）時一併修，記入 open issues
+- 2026-07-04 | 2.3 | [!] (retry: 1) TRIPWIRE：worktree 從舊 base f184d82
+  （phase 1）分出，agent 看不到 2.1/2.2 成果、把 SkillsPage 退回舊 local-state
+  版本；合併 diff 顯示會刪掉整個 2.2 shell（Sidebar/GlobalSearch/
+  TeamFilterContext/useIdentity，-522 行）。判定不可合併，整條棄掉（Badge
+  新檔亦引用 main 上不存在的 --fs-xs/--ok-soft，piecemeal 搶救不划算）。
+  ★ 根因＝worktree base 過期反覆發生（1.2/2.2 靠 agent 自行 reset 才成、
+  2.3 沒 reset 就翻車）。對策：重派時第一步強制
+  `git reset --hard 69b897c`（本輪 main SHA），並列為首要 acceptance
+  criterion。待 4.4 retro 落 LESSONS.md：worktree 隔離不可信任其 base
 
 ## Decisions
 
