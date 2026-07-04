@@ -1,61 +1,10 @@
-/* NOTE(2.3): deep restyle deferred to Phase 2.3. Here: minimal token
-   substitutions so the page is readable on the light-minimal flip. */
-.skills-page {
-  display: flex;
-  min-height: calc(100vh - 60px);
-}
-
-.sidebar {
-  width: 250px;
-  background: var(--bg-subtle);
-  border-right: 1px solid var(--border);
-  padding: 1.5rem;
-  flex-shrink: 0;
-}
-
-.sidebar-section {
-  margin-bottom: 2rem;
-}
-
-.sidebar-section h3 {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-  letter-spacing: 0.05em;
-}
-
-.tag-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tag-item {
-  background: transparent;
-  border: none;
-  border-left: 3px solid transparent;
-  color: var(--text);
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 0 4px 4px 0;
-  transition: all 0.2s;
-}
-
-.tag-item:hover {
-  background: var(--bg-hover);
-}
-
-.tag-item.active {
-  background: var(--bg-hover);
-  border-left-color: var(--accent);
-  color: var(--accent);
-}
+/* Team skill list (§6.4) — light-minimal cards (§6.1): white bg, 1px border,
+   single radius, hover tint. Separation via border + whitespace, no heavy
+   shadow. Colours from tokens only. */
 
 .skills-main {
   flex: 1;
-  padding: 2rem;
+  padding: var(--sp-8);
   overflow-y: auto;
 }
 
@@ -63,28 +12,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--sp-6);
+  gap: var(--sp-4);
 }
 
 .skills-header h1 {
-  font-size: 2rem;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
   margin: 0;
 }
 
 .skills-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--sp-3);
   align-items: center;
 }
 
 .search-input {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  padding: var(--sp-2) var(--sp-3);
   color: var(--text);
-  width: 250px;
-  font-size: 0.875rem;
+  width: 240px;
+  font-size: var(--fs-sm);
+  font-family: var(--font-ui);
 }
 
 .search-input:focus {
@@ -94,30 +46,44 @@
 
 .view-toggle {
   display: flex;
-  background: var(--bg-subtle);
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
 .view-toggle button {
-  background: transparent;
+  background: var(--bg);
   border: none;
   color: var(--text-secondary);
-  padding: 0.5rem 0.75rem;
+  padding: var(--sp-2) var(--sp-3);
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s;
+  font-size: var(--fs-base);
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
 }
 
-.view-toggle button.active,
+.view-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+
 .view-toggle button:hover {
+  background: var(--bg-hover);
+}
+
+.view-toggle button.active {
   background: var(--bg-hover);
   color: var(--accent);
 }
 
+.skills-count {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-4);
+}
+
 .skills-list {
   display: grid;
-  gap: 1rem;
+  gap: var(--sp-3);
 }
 
 .skills-list.list {
@@ -125,88 +91,127 @@
 }
 
 .skills-list.grid {
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
 .skill-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s;
+  border-radius: var(--radius);
+  padding: var(--sp-4);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .skill-card:hover {
-  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.skill-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .skill-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  gap: var(--sp-2);
 }
 
 .skill-card-header h3 {
   margin: 0;
   color: var(--text);
-  font-size: 1.125rem;
-}
-
-.skill-tags {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.tag {
-  background: var(--bg-hover);
-  color: var(--accent);
-  padding: 0.25rem 0.625rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: var(--fs-md);
+  font-weight: 600;
 }
 
 .skill-description {
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+  font-size: var(--fs-sm);
+  line-height: var(--lh);
+  /* 2-line truncation (§6.4) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(var(--fs-sm) * var(--lh) * 2);
 }
 
 .skill-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  gap: var(--sp-2);
+  margin-top: auto;
+}
+
+.skill-tags {
+  display: flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+
+.skill-card:hover .tag {
+  background: var(--bg-subtle);
 }
 
 .skill-meta {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
 }
 
-.btn-link {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: color 0.2s;
-}
-
-.btn-link:hover {
-  opacity: 0.8;
-}
-
+/* Empty + loading states (§6.4) — centered, muted, minimal. */
 .loading,
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: var(--sp-8) var(--sp-6);
   color: var(--text-secondary);
+  gap: var(--sp-2);
 }
 
-.empty-state button {
-  margin-top: 1rem;
+.empty-state-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.empty-state-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.btn-primary {
+  display: inline-block;
+  margin-top: var(--sp-3);
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
 }
