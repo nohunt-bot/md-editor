@@ -67,12 +67,12 @@ Status: active (2026-07-03)
 - [x] 1.3 發布與複製 API（implementer in worktree + commander 閘門）：`POST /api/skills/{id}/publish`、
       `DELETE /api/skills/{id}/publish`、`POST /api/skills/{id}/copy-to-team`
       → 驗證：整合測試——draft 對外不可見 / published 可見 / 複製後獨立演化且記 sourceSkillId
-- [~] 1.4 搜尋接可見性 + view=open 清單（implementer in worktree + commander 閘門）：
+- [x] 1.4 搜尋接可見性 + view=open 清單（implementer in worktree + commander 閘門）：
       $text index（照原設計 MVP），結果按呼叫者可見範圍過濾；含 GET /api/skills
       ?view=open 清單（1.2 刻意留給 1.4）；順帶修 updateSkill 吞 RuntimeException
       把 403 遮成 404 的既有 bug（1.3 交接）
       → 驗證：整合測試——他團隊 draft 不出現在結果
-- [ ] 1.5 Dev 身分與 seed 更新（STANDARD）：定義 demo 團隊（team-a/team-b）
+- [~] 1.5 Dev 身分與 seed 更新（implementer in worktree + commander 閘門）：定義 demo 團隊（team-a/team-b）
       與 dev 使用者（stub，含 editor/viewer 角色）；seed-data.sh 產生兩團隊
       各自 skills + 數個已發布 open skills
       → 驗證：docker-compose up 後以兩個 dev 身分檢查可見性符合預期
@@ -189,6 +189,13 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   無越界。使用者切 opus 續作，本步無撞上限。2 個 1.3 交接的既有問題已
   分派：updateSkill 遮 403→1.4 順修；舊 SkillControllerIntegrationTest
   用 X-User-Id 會 401→4.2 汰換
+- 2026-07-04 | 1.4 | done，commit 0cf9e39（opus）。GET /api/skills?view=open
+  （批次解析 teamDisplayName）、GET /api/search（$text，回 {team,open} 分組去重、
+  metadata-only）、順修 updateSkill 遮 403→404 bug。worktree 隔離這次讓 commit
+  快轉直上 main（無 merge commit），commander 在 main 重跑閘門：unit exit 0
+  （SearchServiceTest 4 + SkillServiceTest 21）、package exit 0；diff 僅
+  search/skill/team 套件+測試、零 frontend/docs 越界。教訓累積：worktree
+  隔離時好時壞，一律以「commander 在 main 重跑閘門」為準（不信任 agent 自報）
 
 ## Decisions
 
