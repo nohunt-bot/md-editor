@@ -52,12 +52,12 @@ Status: active (2026-07-03)
 
 ### Phase 1 — 資料模型與 API（marketplace 核心）
 
-- [~] 1.1 Schema 擴充（orchestrator）：`skills` 加 `teamId`、`scope: "team"|"open"`、
+- [x] 1.1 Schema 擴充（orchestrator）：`skills` 加 `teamId`、`scope: "team"|"open"`、
       `status: "draft"|"published"`、`publishedAt`、`sourceSkillId`（複製來源）；
       `folders` 加 `teamId`；沿用 v0.2 effective-scope 概念；既有資料 migration；
       同步更新 docs/schema.md
       → 驗證：backend 單元測試綠 + migration 在 seed 資料上跑過
-- [ ] 1.2 身分抽象與團隊授權（orchestrator）：`CurrentUserProvider` 介面
+- [~] 1.2 身分抽象與團隊授權（implementer in worktree + commander 閘門）：`CurrentUserProvider` 介面
       （userId / teamIds / roles），MVP 提供 dev stub 實作（設定檔或 request
       header 指定身分）；注意：現有 api.ts 已硬編 `X-User-Id: user-123`，與
       PRD 的 `X-Dev-User` 命名不一致——1.2 時統一（建議照 PRD）；授權規則——團隊成員可寫本團隊 skill；`open`+`published`
@@ -157,6 +157,14 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   也誤判「backend 有這些套件」——實為空殼，特此更正）；hooks/stores 空目錄、
   README phase 清單不一致。6 項發現由 commander inline 修正（兩檔六處、
   行號明確，派工不划算）。覆核其餘 criteria 全 PASS，0.2 標 [x]
+- 2026-07-04 | 1.1 | done，merge 22fd2b5（impl commit eb52965）。Skill/Folder
+  新欄位+索引、team/ 套件+GET /api/teams、冪等 migration script、schema.md
+  同步。implementer 自驗過；commander fresh-context 閘門重跑：單元測試
+  exit 0、migration node --check OK。implementer 合理延伸：補 @Valid +
+  MethodArgumentNotValidException handler（原碼未啟用 bean validation）。
+  ⚠️ TRIPWIRE：orchestrator 在 implementer 完成後停住未跑閘門/合併，
+  commander 手動收尾。1.2 起改「implementer in worktree + commander 閘門」
+  等效管線（教訓待 4.4 retro 落 LESSONS.md）
 
 ## Decisions
 
