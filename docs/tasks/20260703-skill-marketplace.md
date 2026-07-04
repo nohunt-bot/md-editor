@@ -72,7 +72,7 @@ Status: active (2026-07-03)
       ?view=open 清單（1.2 刻意留給 1.4）；順帶修 updateSkill 吞 RuntimeException
       把 403 遮成 404 的既有 bug（1.3 交接）
       → 驗證：整合測試——他團隊 draft 不出現在結果
-- [~] 1.5 Dev 身分與 seed 更新（implementer in worktree + commander 閘門）：定義 demo 團隊（team-a/team-b）
+- [x] 1.5 Dev 身分與 seed 更新（implementer in worktree + commander 閘門）：定義 demo 團隊（team-a/team-b）
       與 dev 使用者（stub，含 editor/viewer 角色）；seed-data.sh 產生兩團隊
       各自 skills + 數個已發布 open skills
       → 驗證：docker-compose up 後以兩個 dev 身分檢查可見性符合預期
@@ -84,8 +84,12 @@ Status: active (2026-07-03)
       → 驗證：screenshot 對照設計檢查清單；使用者過目
 - [ ] 2.2 App shell 與導覽（orchestrator）：左側欄固定兩區——「我的團隊」
       （團隊切換 + folder tree）與「開放空間」；頂部全域搜尋；dev 身分/團隊
-      切換器（stub 階段的替代登入，dev 環境顯示）
-      → 驗證：Playwright——進入 app 零點擊同時看到兩個入口
+      切換器（stub 階段的替代登入，dev 環境顯示）；**順修後端 author 契約**：
+      createSkill/updateSkill 仍讀 `X-User-Id` 當 author，授權卻走 `X-Dev-User`
+      （1.5 seed 靠同時送兩個 header 繞過）——改為 author 由 CurrentUserProvider
+      .getUserId() 取得，前端只送 `X-Dev-User`
+      → 驗證：Playwright——進入 app 零點擊同時看到兩個入口；建立 skill 只送
+      單一 header 仍正確記 author
 - [ ] 2.3 SkillsPage 重構（orchestrator）：清單/卡片、tag/folder 篩選、空狀態，
       全面套新 tokens
       → 驗證：Vitest 元件測試 + screenshot
@@ -196,6 +200,13 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   （SearchServiceTest 4 + SkillServiceTest 21）、package exit 0；diff 僅
   search/skill/team 套件+測試、零 frontend/docs 越界。教訓累積：worktree
   隔離時好時壞，一律以「commander 在 main 重跑閘門」為準（不信任 agent 自報）
+- 2026-07-04 | 1.5 | done，commit 2bf80ab（opus）。seed-data.sh 重寫為 REST
+  驅動的跨團隊 seeder（alice/carol 建 skill、發布子集、各留 draft、--reset
+  冪等）、README 加雙身分 demo。app.dev-users 本已符 PRD 無需改。commander
+  閘門：bash -n exit 0、endpoint 靜態交叉核對全中。
+  ★ Phase 1 後端 marketplace 核心完成（schema→授權→發布/複製→搜尋→seed）。
+  發現殘留不一致：createSkill/updateSkill 用 X-User-Id 當 author、授權走
+  X-Dev-User → 折進 2.2 順修（seed 暫送雙 header 繞過）
 
 ## Decisions
 
