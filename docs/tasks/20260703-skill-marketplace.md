@@ -82,7 +82,7 @@ Status: active (2026-07-03)
 - [x] 2.1 Design tokens（STANDARD，配合 frontend-design skill）：index.css 收斂為
       CSS variables（色彩/間距/字級/圓角），淺色底、清楚層級
       → 驗證：screenshot 對照設計檢查清單；使用者過目
-- [ ] 2.2 App shell 與導覽（orchestrator）：左側欄固定兩區——「我的團隊」
+- [~] 2.2 App shell 與導覽（implementer in worktree + commander 閘門）：左側欄固定兩區——「我的團隊」
       （團隊切換 + folder tree）與「開放空間」；頂部全域搜尋；dev 身分/團隊
       切換器（stub 階段的替代登入，dev 環境顯示）；**順修後端 author 契約**：
       createSkill/updateSkill 仍讀 `X-User-Id` 當 author，授權卻走 `X-Dev-User`
