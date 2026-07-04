@@ -52,7 +52,7 @@ Status: active (2026-07-03)
 
 ### Phase 1 — 資料模型與 API（marketplace 核心）
 
-- [ ] 1.1 Schema 擴充（orchestrator）：`skills` 加 `teamId`、`scope: "team"|"open"`、
+- [~] 1.1 Schema 擴充（orchestrator）：`skills` 加 `teamId`、`scope: "team"|"open"`、
       `status: "draft"|"published"`、`publishedAt`、`sourceSkillId`（複製來源）；
       `folders` 加 `teamId`；沿用 v0.2 effective-scope 概念；既有資料 migration；
       同步更新 docs/schema.md
