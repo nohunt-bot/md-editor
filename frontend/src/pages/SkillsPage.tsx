@@ -1,43 +1,49 @@
 import { useState, useEffect } from 'react'
-import { skillApi, folderApi, tagApi } from '../api/api'
-import { FolderTree } from '../components/tree/FolderTree'
+import { Link } from 'react-router-dom'
+import { skillApi } from '../api/api'
+import { useTeamFilter } from '../app/TeamFilterContext'
+import type { Identity } from '../app/useIdentity'
 import './SkillsPage.css'
 
-export function SkillsPage() {
+// The team skill list (§6.4). Folder/tag filters live in the shell sidebar and
+// are shared via TeamFilterContext. Card restyle is Phase 2.3 — TODO(2.3).
+export function SkillsPage({ identity }: { identity: Identity }) {
+  const { selectedFolder, selectedTag } = useTeamFilter()
   const [skills, setSkills] = useState<any[]>([])
-  const [folders, setFolders] = useState<any[]>([])
-  const [tags, setTags] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
-  const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+
+  const teamId = identity.activeTeamId
 
   useEffect(() => {
-    loadData()
-  }, [])
-
-  async function loadData() {
-    try {
-      const [skillsRes, foldersRes, tagsRes] = await Promise.all([
-        skillApi.list(),
-        folderApi.getTree(),
-        tagApi.list()
-      ])
-      setSkills(skillsRes.data.content || [])
-      setFolders(foldersRes.data)
-      setTags(tagsRes.data)
-    } catch (error) {
-      console.error('Failed to load data:', error)
-    } finally {
+    if (!teamId) {
+      setSkills([])
       setLoading(false)
+      return
     }
-  }
+    let cancelled = false
+    setLoading(true)
+    skillApi
+      .list(teamId)
+      .then((res) => {
+        if (!cancelled) setSkills(res.data.content || [])
+      })
+      .catch(() => {
+        if (!cancelled) setSkills([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [teamId])
 
-  const filteredSkills = skills.filter(skill => {
+  const filteredSkills = skills.filter((skill) => {
     const matchFolder = !selectedFolder || skill.folderId === selectedFolder
     const matchTag = !selectedTag || skill.tags?.includes(selectedTag)
-    const matchSearch = !searchQuery || 
+    const matchSearch =
+      !searchQuery ||
       skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       skill.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       skill.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,84 +51,40 @@ export function SkillsPage() {
   })
 
   return (
-    <div className="skills-page">
-      <aside className="sidebar">
-        <div className="sidebar-section">
-          <h3>Folders</h3>
-          <FolderTree 
-            folders={folders}
-            selectedFolder={selectedFolder}
-            onSelectFolder={setSelectedFolder}
+    <div className="skills-main">
+      <div className="skills-header">
+        <h1>{identity.activeTeam?.displayName || '團隊'} Skills</h1>
+        <div className="skills-actions">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="篩選 skill…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="sidebar-section">
-          <h3>Tags</h3>
-          <div className="tag-list">
-            <button
-              className={`tag-item ${!selectedTag ? 'active' : ''}`}
-              onClick={() => setSelectedTag(null)}
-            >
-              All Tags
-            </button>
-            {tags.map(tag => (
-              <button
-                key={tag.id}
-                className={`tag-item ${selectedTag === tag.name ? 'active' : ''}`}
-                onClick={() => setSelectedTag(tag.name)}
-                style={{ borderLeftColor: tag.color }}
-              >
-                {tag.name} ({tag.usageCount})
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
+      </div>
 
-      <main className="skills-main">
-        <div className="skills-header">
-          <h1>Skills</h1>
-          <div className="skills-actions">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search skills..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <div className="view-toggle">
-              <button
-                className={viewMode === 'list' ? 'active' : ''}
-                onClick={() => setViewMode('list')}
-              >
-                ☰
-              </button>
-              <button
-                className={viewMode === 'grid' ? 'active' : ''}
-                onClick={() => setViewMode('grid')}
-              >
-                ⊞
-              </button>
-            </div>
-          </div>
+      {!teamId ? (
+        <div className="empty-state">
+          <p>選擇一個團隊以檢視 skill</p>
         </div>
-
-        {loading ? (
-          <div className="loading">Loading skills...</div>
-        ) : filteredSkills.length === 0 ? (
-          <div className="empty-state">
-            <p>No skills found</p>
-            <button className="btn-primary" onClick={() => window.location.href = '/skills/new'}>
-              Create First Skill
-            </button>
-          </div>
-        ) : (
-          <div className={`skills-list ${viewMode}`}>
-            {filteredSkills.map(skill => (
-              <SkillCard key={skill.id} skill={skill} />
-            ))}
-          </div>
-        )}
-      </main>
+      ) : loading ? (
+        <div className="loading">載入中…</div>
+      ) : filteredSkills.length === 0 ? (
+        <div className="empty-state">
+          <p>還沒有 skill</p>
+          <Link to="/skills/new" className="btn-primary">
+            建立第一個 Skill
+          </Link>
+        </div>
+      ) : (
+        <div className="skills-list list">
+          {filteredSkills.map((skill) => (
+            <SkillCard key={skill.id} skill={skill} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -134,15 +96,19 @@ function SkillCard({ skill }: { skill: any }) {
         <h3>{skill.displayName || skill.name}</h3>
         <div className="skill-tags">
           {skill.tags?.slice(0, 3).map((tag: string) => (
-            <span key={tag} className="tag">{tag}</span>
+            <span key={tag} className="tag">
+              {tag}
+            </span>
           ))}
         </div>
       </div>
       <p className="skill-description">{skill.description}</p>
       <div className="skill-card-footer">
         <span className="skill-meta">v{skill.currentVersion}</span>
-        <span className="skill-meta">Updated {new Date(skill.updatedAt).toLocaleDateString()}</span>
-        <a href={`/skills/${skill.id}`} className="btn-link">View →</a>
+        {skill.status && <span className={`badge badge-${skill.status}`}>{skill.status}</span>}
+        <Link to={`/skills/${skill.id}`} className="btn-link">
+          檢視 →
+        </Link>
       </div>
     </div>
   )

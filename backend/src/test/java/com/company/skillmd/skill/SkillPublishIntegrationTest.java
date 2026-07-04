@@ -191,9 +191,9 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
     // --- Phase 1.4: updateSkill 403-vs-404 fix (PRD §5.5) ---
 
     private HttpHeaders updateHeadersFor(String devUser) {
-        HttpHeaders headers = headersFor(devUser);
-        headers.set("X-User-Id", devUser);
-        return headers;
+        // Author/editor identity now comes from X-Dev-User (headersFor);
+        // X-User-Id is no longer read by the controller.
+        return headersFor(devUser);
     }
 
     @Test

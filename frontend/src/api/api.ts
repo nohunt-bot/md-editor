@@ -2,18 +2,100 @@ import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
 
+// --- Dev identity (§2.1) -------------------------------------------------
+// The active dev user is stored in localStorage and sent as X-Dev-User on
+// every request. The backend derives author/lastEditor from this header via
+// CurrentUserProvider, so the client no longer sends X-User-Id.
+export const DEV_USER_KEY = 'devUser'
+export const DEV_USERS = ['alice', 'bob', 'carol', 'admin'] as const
+export type DevUser = (typeof DEV_USERS)[number]
+
+export function getDevUser(): string {
+  return localStorage.getItem(DEV_USER_KEY) || 'alice'
+}
+
+export function setDevUser(user: string): void {
+  localStorage.setItem(DEV_USER_KEY, user)
+}
+
+// --- Active team --------------------------------------------------------
+// The team currently selected in the sidebar switcher. Team-scoped calls
+// (list, create) use it. Persisted so a reload keeps the same context.
+export const ACTIVE_TEAM_KEY = 'activeTeamId'
+
+export function getActiveTeamId(): string | null {
+  return localStorage.getItem(ACTIVE_TEAM_KEY)
+}
+
+export function setActiveTeamId(teamId: string): void {
+  localStorage.setItem(ACTIVE_TEAM_KEY, teamId)
+}
+
 export const api = axios.create({
   baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
-    'X-Dev-User': 'alice',
   },
 })
 
+api.interceptors.request.use((config) => {
+  config.headers['X-Dev-User'] = getDevUser()
+  return config
+})
+
+// --- Identity / teams ---------------------------------------------------
+export type TeamMembership = {
+  id: string
+  displayName: string
+  role: string
+}
+
+export type MeResponse = {
+  userId: string
+  displayName: string
+  teams: TeamMembership[]
+  admin: boolean
+}
+
+export function getMe() {
+  return api.get<MeResponse>('/api/me')
+}
+
+export function getTeams() {
+  return api.get('/api/teams')
+}
+
+// --- Search (§6.5) ------------------------------------------------------
+export type SearchResult = {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  teamId: string
+  teamDisplayName: string
+  scope: string
+  status: string
+  tags: string[]
+  publishedAt: string | null
+  updatedAt: string | null
+}
+
+export type SearchResponse = {
+  team: SearchResult[]
+  open: SearchResult[]
+}
+
+export function search(q: string, scope: string = 'all') {
+  return api.get<SearchResponse>('/api/search', { params: { q, scope } })
+}
+
 // Skill API
 export const skillApi = {
-  list: (page = 0, size = 20) =>
-    api.get('/api/skills', { params: { page, size } }),
+  list: (teamId: string, page = 0, size = 20) =>
+    api.get('/api/skills', { params: { teamId, page, size } }),
+
+  listOpen: (params: { tag?: string; q?: string; page?: number; size?: number } = {}) =>
+    api.get('/api/skills', { params: { view: 'open', ...params } }),
 
   get: (id: string) =>
     api.get(`/api/skills/${id}`),
@@ -39,8 +121,8 @@ export const skillApi = {
 
 // Folder API
 export const folderApi = {
-  getTree: () =>
-    api.get('/api/folders/tree'),
+  getTree: (teamId?: string) =>
+    api.get('/api/folders/tree', { params: teamId ? { teamId } : {} }),
 
   list: () =>
     api.get('/api/folders'),
@@ -69,6 +151,7 @@ export type CreateSkillData = {
   displayName?: string
   description?: string
   content: string
+  teamId?: string
   folderId?: string
   tags?: string[]
   references?: { skillId: string; relation: string }[]
