@@ -117,6 +117,17 @@ export const skillApi = {
 
   restoreVersion: (skillId: string, version: number) =>
     api.post(`/api/skills/${skillId}/versions/${version}/restore`),
+
+  // §5.4 F4: publish to / unpublish from the open space.
+  publish: (id: string) =>
+    api.post(`/api/skills/${id}/publish`),
+
+  unpublish: (id: string) =>
+    api.delete(`/api/skills/${id}/publish`),
+
+  // §5.4 F2: copy an open+published skill into a team the caller can edit.
+  copyToTeam: (id: string, targetTeamId: string) =>
+    api.post(`/api/skills/${id}/copy-to-team`, { targetTeamId }),
 }
 
 // Folder API

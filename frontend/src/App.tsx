@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { SkillsPage } from './pages/SkillsPage'
 import { OpenSpacePage } from './pages/OpenSpacePage'
 import { SkillEditor } from './components/editor/SkillEditor'
+import { SkillDetailPage } from './pages/SkillDetailPage'
 import { Sidebar } from './app/Sidebar'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
@@ -31,7 +32,7 @@ function App() {
                 <Route path="/team" element={<SkillsPage identity={identity} />} />
                 <Route path="/open" element={<OpenSpacePage />} />
                 <Route path="/skills/new" element={<SkillEditor />} />
-                <Route path="/skills/:id" element={<SkillDetail />} />
+                <Route path="/skills/:id" element={<SkillDetailPage />} />
                 <Route path="/skills/:id/edit" element={<SkillEditor />} />
                 {/* Legacy alias */}
                 <Route path="/skills" element={<Navigate to="/team" replace />} />
@@ -41,17 +42,6 @@ function App() {
         </div>
       </TeamFilterProvider>
     </BrowserRouter>
-  )
-}
-
-function SkillDetail() {
-  // TODO(2.4): full read view — rendered markdown + metadata sidebar +
-  // actions (edit/publish/copy) + version history.
-  return (
-    <div className="page">
-      <h1>Skill 詳情</h1>
-      <p className="text-muted">即將推出——內容、metadata 與版本歷史。</p>
-    </div>
   )
 }
 

@@ -1,0 +1,270 @@
+/* Phase 2.4 SkillDetail — two-column read page, light-minimal (PRD §6.4/§6.1).
+   Consumes 2.1 tokens; separation via 1px border + whitespace, no heavy shadow. */
+
+.skill-detail {
+  display: flex;
+  gap: var(--sp-8);
+  align-items: flex-start;
+  padding: var(--sp-6);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Left: reading column */
+.detail-reading {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 720px;
+}
+
+.detail-title {
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 var(--sp-2);
+  line-height: var(--lh);
+}
+
+.detail-desc {
+  font-size: var(--fs-md);
+  color: var(--text-secondary);
+  margin: 0 0 var(--sp-6);
+  line-height: var(--lh);
+}
+
+/* Right: metadata + actions + versions */
+.detail-sidebar {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  position: sticky;
+  top: var(--sp-6);
+}
+
+.detail-meta,
+.detail-actions,
+.detail-versions {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-4);
+  background: var(--bg);
+}
+
+.detail-section-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0 0 var(--sp-3);
+}
+
+.detail-meta dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-2) var(--sp-3);
+  margin: 0;
+}
+
+.detail-meta dt {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.detail-meta dd {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  margin: 0;
+  text-align: right;
+  word-break: break-word;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  justify-content: flex-end;
+}
+
+.detail-tags .tag {
+  display: inline-flex;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+}
+
+/* Actions block */
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.detail-action {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* Version history */
+.version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.version-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+
+.version-row:first-child {
+  border-top: none;
+}
+
+.version-num {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.version-editor {
+  color: var(--text);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.version-time {
+  color: var(--text-muted);
+  flex: 0 0 auto;
+  font-size: var(--fs-xs);
+}
+
+.detail-empty {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Loading / not-found states */
+.detail-loading,
+.detail-notfound {
+  padding: var(--sp-8);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.detail-notfound-title {
+  font-size: var(--fs-lg);
+  color: var(--text);
+  margin: 0 0 var(--sp-2);
+}
+
+.detail-notfound-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--sp-4);
+}
+
+/* Secondary button (primary lives in App.css; secondary defined here) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Confirm / copy dialog */
+.detail-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 29, 33, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.detail-dialog {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  width: 380px;
+  max-width: calc(100vw - var(--sp-8));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.detail-dialog h3 {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.detail-dialog p {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--lh);
+}
+
+.detail-dialog select {
+  padding: var(--sp-2);
+  font-size: var(--fs-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.detail-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+/* Responsive: stack columns on narrow viewports */
+@media (max-width: 860px) {
+  .skill-detail {
+    flex-direction: column;
+  }
+  .detail-sidebar {
+    flex-basis: auto;
+    width: 100%;
+    position: static;
+  }
+}
