@@ -1,5 +1,8 @@
 package com.company.skillmd.skill;
 
+import com.company.skillmd.auth.AuthorizationService;
+import com.company.skillmd.auth.CurrentUser;
+import com.company.skillmd.auth.CurrentUserProvider;
 import com.company.skillmd.skill.dto.CreateSkillRequest;
 import com.company.skillmd.skill.dto.SkillResponse;
 import com.company.skillmd.skill.dto.UpdateSkillRequest;
@@ -16,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,7 +40,9 @@ class SkillServiceTest {
 
     @BeforeEach
     void setUp() {
-        skillService = new SkillService(skillRepository, referenceResolver);
+        CurrentUserProvider adminProvider = () -> new CurrentUser("admin", "Admin", Map.of(), true);
+        AuthorizationService authorizationService = new AuthorizationService(adminProvider);
+        skillService = new SkillService(skillRepository, referenceResolver, authorizationService);
     }
 
     @Test

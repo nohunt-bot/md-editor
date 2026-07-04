@@ -26,8 +26,10 @@ public class SkillController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<SkillResponse>> listSkills(Pageable pageable) {
-        return ResponseEntity.ok(skillService.listSkills(pageable));
+    public ResponseEntity<Page<SkillResponse>> listSkills(
+            @RequestParam String teamId,
+            Pageable pageable) {
+        return ResponseEntity.ok(skillService.listSkills(teamId, pageable));
     }
 
     @GetMapping("/{id}")

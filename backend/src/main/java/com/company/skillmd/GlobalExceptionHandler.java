@@ -1,5 +1,8 @@
 package com.company.skillmd;
 
+import com.company.skillmd.auth.ForbiddenException;
+import com.company.skillmd.auth.ResourceNotFoundException;
+import com.company.skillmd.auth.UnauthorizedException;
 import com.company.skillmd.skill.OptimisticLockingConflictException;
 import com.company.skillmd.skill.dto.ConflictResponse;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(ex.getMessage()));
+    }
 
     @ExceptionHandler(OptimisticLockingConflictException.class)
     public ResponseEntity<ConflictResponse> handleOptimisticLockingConflict(

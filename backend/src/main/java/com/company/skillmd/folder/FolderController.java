@@ -18,13 +18,13 @@ public class FolderController {
     }
 
     @GetMapping("/tree")
-    public ResponseEntity<List<FolderNode>> getTree() {
-        return ResponseEntity.ok(folderService.getFolderTree());
+    public ResponseEntity<List<FolderNode>> getTree(@RequestParam String teamId) {
+        return ResponseEntity.ok(folderService.getFolderTree(teamId));
     }
 
     @GetMapping
-    public ResponseEntity<List<FolderResponse>> list() {
-        return ResponseEntity.ok(folderService.listFolders());
+    public ResponseEntity<List<FolderResponse>> list(@RequestParam String teamId) {
+        return ResponseEntity.ok(folderService.listFolders(teamId));
     }
 
     @PostMapping

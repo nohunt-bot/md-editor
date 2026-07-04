@@ -17,6 +17,8 @@ public interface SkillRepository extends MongoRepository<Skill, String> {
     List<Skill> findByTagsContaining(String tag);
     
     Page<Skill> findByDeletedAtNull(Pageable pageable);
-    
+
     List<Skill> findByDeletedAtNull();
+
+    Page<Skill> findByTeamIdAndDeletedAtNull(String teamId, Pageable pageable);
 }

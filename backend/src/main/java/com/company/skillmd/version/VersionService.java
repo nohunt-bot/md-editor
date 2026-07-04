@@ -1,5 +1,7 @@
 package com.company.skillmd.version;
 
+import com.company.skillmd.auth.AuthorizationService;
+import com.company.skillmd.auth.ResourceNotFoundException;
 import com.company.skillmd.skill.Skill;
 import com.company.skillmd.skill.SkillRepository;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,13 @@ public class VersionService {
 
     private final SkillVersionRepository versionRepository;
     private final SkillRepository skillRepository;
+    private final AuthorizationService authorizationService;
 
-    public VersionService(SkillVersionRepository versionRepository, SkillRepository skillRepository) {
+    public VersionService(SkillVersionRepository versionRepository, SkillRepository skillRepository,
+                           AuthorizationService authorizationService) {
         this.versionRepository = versionRepository;
         this.skillRepository = skillRepository;
+        this.authorizationService = authorizationService;
     }
 
     /**
@@ -44,10 +49,14 @@ public class VersionService {
     }
 
     public List<SkillVersion> getVersions(String skillId) {
+        Skill skill = requireSkill(skillId);
+        authorizationService.requireResourceReadable(skill.getTeamId(), isOpenAndPublished(skill));
         return versionRepository.findBySkillIdOrderByVersionDesc(skillId);
     }
 
     public Optional<SkillVersion> getVersion(String skillId, Integer version) {
+        Skill skill = requireSkill(skillId);
+        authorizationService.requireResourceReadable(skill.getTeamId(), isOpenAndPublished(skill));
         return versionRepository.findBySkillIdAndVersion(skillId, version);
     }
 
@@ -55,12 +64,12 @@ public class VersionService {
      * Restore skill to a specific version (creates a new version with old content)
      */
     public Skill restoreToVersion(String skillId, Integer versionNumber, String userId) {
+        Skill skill = requireSkill(skillId);
+        authorizationService.requireResourceEditable(skill.getTeamId());
+
         SkillVersion oldVersion = versionRepository.findBySkillIdAndVersion(skillId, versionNumber)
-            .orElseThrow(() -> new RuntimeException("Version not found: " + versionNumber));
-        
-        Skill skill = skillRepository.findById(skillId)
-            .orElseThrow(() -> new RuntimeException("Skill not found: " + skillId));
-        
+            .orElseThrow(() -> new ResourceNotFoundException("Version not found: " + versionNumber));
+
         // Update skill with old version content
         skill.setName(oldVersion.getSnapshot().getName());
         skill.setDisplayName(oldVersion.getSnapshot().getDisplayName());
@@ -77,5 +86,14 @@ public class VersionService {
         createVersion(saved, "Restored to version " + versionNumber, userId);
         
         return saved;
+    }
+
+    private Skill requireSkill(String skillId) {
+        return skillRepository.findById(skillId)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + skillId));
+    }
+
+    private boolean isOpenAndPublished(Skill skill) {
+        return "open".equals(skill.getScope()) && "published".equals(skill.getStatus());
     }
 }

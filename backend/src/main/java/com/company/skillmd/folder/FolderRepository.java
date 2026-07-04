@@ -12,6 +12,8 @@ public interface FolderRepository extends MongoRepository<Folder, String> {
 
     List<Folder> findByParentIdIsNull();
 
+    List<Folder> findByTeamId(String teamId);
+
     boolean existsByTeamIdAndNameAndParentId(String teamId, String name, String parentId);
 
     boolean existsByTeamIdAndNameAndParentIdIsNull(String teamId, String name);

@@ -1,5 +1,7 @@
 package com.company.skillmd.skill;
 
+import com.company.skillmd.auth.AuthorizationService;
+import com.company.skillmd.auth.ResourceNotFoundException;
 import com.company.skillmd.skill.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +17,17 @@ public class SkillService {
 
     private final SkillRepository skillRepository;
     private final ReferenceResolver referenceResolver;
+    private final AuthorizationService authorizationService;
 
-    public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver) {
+    public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver,
+                         AuthorizationService authorizationService) {
         this.skillRepository = skillRepository;
         this.referenceResolver = referenceResolver;
+        this.authorizationService = authorizationService;
     }
 
     public SkillResponse createSkill(CreateSkillRequest request, String userId) {
+        authorizationService.requireCanEdit(request.teamId());
         Skill skill = new Skill();
         skill.setName(request.name());
         skill.setDisplayName(request.displayName());
@@ -44,8 +50,9 @@ public class SkillService {
 
     public SkillResponse updateSkill(String id, UpdateSkillRequest request, String userId) {
         Skill skill = skillRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Skill not found: " + id));
-        
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        authorizationService.requireResourceEditable(skill.getTeamId());
+
         // Optimistic locking check
         if (request.expectedVersion() != null && !Boolean.TRUE.equals(request.forceUpdate())) {
             if (!skill.getCurrentVersion().equals(request.expectedVersion())) {
@@ -74,16 +81,24 @@ public class SkillService {
     }
 
     public Optional<SkillResponse> getSkill(String id) {
-        return skillRepository.findById(id).map(this::toResponse);
+        return skillRepository.findById(id)
+            .filter(skill -> skill.getDeletedAt() == null)
+            .map(skill -> {
+                boolean openAndPublished = "open".equals(skill.getScope()) && "published".equals(skill.getStatus());
+                authorizationService.requireResourceReadable(skill.getTeamId(), openAndPublished);
+                return toResponse(skill);
+            });
     }
 
-    public Page<SkillResponse> listSkills(Pageable pageable) {
-        return skillRepository.findByDeletedAtNull(pageable).map(this::toResponse);
+    public Page<SkillResponse> listSkills(String teamId, Pageable pageable) {
+        authorizationService.requireTeamMember(teamId);
+        return skillRepository.findByTeamIdAndDeletedAtNull(teamId, pageable).map(this::toResponse);
     }
 
     public void deleteSkill(String id) {
         Skill skill = skillRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Skill not found: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        authorizationService.requireResourceEditable(skill.getTeamId());
         skill.setDeletedAt(Instant.now());
         skillRepository.save(skill);
     }

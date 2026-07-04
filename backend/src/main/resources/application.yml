@@ -11,6 +11,26 @@ app:
     retention-days: 90
   version:
     retention-count: 50
+  dev-users:
+    alice:
+      display-name: Alice
+      admin: false
+      teams:
+        team-a: EDITOR
+    bob:
+      display-name: Bob
+      admin: false
+      teams:
+        team-a: VIEWER
+    carol:
+      display-name: Carol
+      admin: false
+      teams:
+        team-b: EDITOR
+    admin:
+      display-name: Admin
+      admin: true
+      teams: {}
 
 logging:
   level:

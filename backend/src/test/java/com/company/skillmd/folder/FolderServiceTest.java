@@ -1,5 +1,8 @@
 package com.company.skillmd.folder;
 
+import com.company.skillmd.auth.AuthorizationService;
+import com.company.skillmd.auth.CurrentUser;
+import com.company.skillmd.auth.CurrentUserProvider;
 import com.company.skillmd.folder.FolderService.FolderResponse;
 import com.company.skillmd.skill.SkillRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +31,9 @@ class FolderServiceTest {
 
     @BeforeEach
     void setUp() {
-        folderService = new FolderService(folderRepository, skillRepository);
+        CurrentUserProvider adminProvider = () -> new CurrentUser("admin", "Admin", Map.of(), true);
+        AuthorizationService authorizationService = new AuthorizationService(adminProvider);
+        folderService = new FolderService(folderRepository, skillRepository, authorizationService);
     }
 
     @Test

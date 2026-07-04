@@ -1,5 +1,7 @@
 package com.company.skillmd.folder;
 
+import com.company.skillmd.auth.AuthorizationService;
+import com.company.skillmd.auth.ResourceNotFoundException;
 import com.company.skillmd.skill.SkillRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +14,13 @@ public class FolderService {
 
     private final FolderRepository folderRepository;
     private final SkillRepository skillRepository;
+    private final AuthorizationService authorizationService;
 
-    public FolderService(FolderRepository folderRepository, SkillRepository skillRepository) {
+    public FolderService(FolderRepository folderRepository, SkillRepository skillRepository,
+                          AuthorizationService authorizationService) {
         this.folderRepository = folderRepository;
         this.skillRepository = skillRepository;
+        this.authorizationService = authorizationService;
     }
 
     public FolderResponse createFolder(String name, String teamId, String parentId) {
@@ -23,6 +28,7 @@ public class FolderService {
         if (teamId == null || teamId.isBlank()) {
             throw new IllegalArgumentException("teamId is required");
         }
+        authorizationService.requireCanEdit(teamId);
         if (isDuplicateName(teamId, name, parentId)) {
             throw new IllegalArgumentException("A folder named '" + name + "' already exists here");
         }
@@ -40,6 +46,7 @@ public class FolderService {
     public FolderResponse renameFolder(String id, String newName) {
         newName = validateName(newName);
         Folder folder = findById(id);
+        authorizationService.requireResourceEditable(folder.getTeamId());
         if (!folder.getName().equals(newName) && isDuplicateName(folder.getTeamId(), newName, folder.getParentId())) {
             throw new IllegalArgumentException("A folder named '" + newName + "' already exists here");
         }
@@ -49,6 +56,7 @@ public class FolderService {
 
     public FolderResponse moveFolder(String id, String newParentId) {
         Folder folder = findById(id);
+        authorizationService.requireResourceEditable(folder.getTeamId());
         if (id.equals(newParentId)) {
             throw new IllegalArgumentException("Cannot move a folder into itself");
         }
@@ -64,7 +72,8 @@ public class FolderService {
     }
 
     public void deleteFolder(String id) {
-        findById(id);
+        Folder folder = findById(id);
+        authorizationService.requireResourceEditable(folder.getTeamId());
         if (!folderRepository.findByParentId(id).isEmpty()) {
             throw new IllegalStateException("Cannot delete a folder that contains subfolders");
         }
@@ -74,14 +83,16 @@ public class FolderService {
         folderRepository.deleteById(id);
     }
 
-    public List<FolderResponse> listFolders() {
-        return folderRepository.findAll().stream()
+    public List<FolderResponse> listFolders(String teamId) {
+        authorizationService.requireTeamMember(teamId);
+        return folderRepository.findByTeamId(teamId).stream()
             .map(this::toResponse)
             .toList();
     }
 
-    public List<FolderNode> getFolderTree() {
-        List<Folder> all = folderRepository.findAll();
+    public List<FolderNode> getFolderTree(String teamId) {
+        authorizationService.requireTeamMember(teamId);
+        List<Folder> all = folderRepository.findByTeamId(teamId);
         return buildTree(all, null);
     }
 
@@ -110,7 +121,7 @@ public class FolderService {
 
     private Folder findById(String id) {
         return folderRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Folder not found: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Folder not found: " + id));
     }
 
     private String validateName(String name) {
