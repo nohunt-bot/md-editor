@@ -64,7 +64,7 @@ Status: active (2026-07-03)
       全員可讀；publish 需該團隊 editor 以上。`teamId` 語意 = 未來 Keycloak
       group id（公司 IdP 已確認有 groups），接回時只換 Provider 實作
       → 驗證：授權矩陣整合測試（Testcontainers，stub 身分）全綠
-- [ ] 1.3 發布與複製 API（orchestrator）：`POST /api/skills/{id}/publish`、
+- [~] 1.3 發布與複製 API（implementer in worktree + commander 閘門）：`POST /api/skills/{id}/publish`、
       `DELETE /api/skills/{id}/publish`、`POST /api/skills/{id}/copy-to-team`
       → 驗證：整合測試——draft 對外不可見 / published 可見 / 複製後獨立演化且記 sourceSkillId
 - [ ] 1.4 搜尋接可見性（orchestrator）：$text index（照原設計 MVP），
