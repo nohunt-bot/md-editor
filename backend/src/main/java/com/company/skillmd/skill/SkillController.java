@@ -36,6 +36,14 @@ public class SkillController {
         return ResponseEntity.ok(skillService.listSkills(teamId, pageable));
     }
 
+    @GetMapping(params = "view=open")
+    public ResponseEntity<Page<OpenSkillResponse>> listOpenSkills(
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String q,
+            Pageable pageable) {
+        return ResponseEntity.ok(skillService.listOpenSkills(tag, q, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<SkillResponse> getSkill(@PathVariable String id) {
         return skillService.getSkill(id)
@@ -48,14 +56,13 @@ public class SkillController {
             @PathVariable String id,
             @RequestBody UpdateSkillRequest request,
             @RequestHeader("X-User-Id") String userId) {
-        try {
-            SkillResponse response = skillService.updateSkill(id, request, userId);
-            return ResponseEntity.ok(response);
-        } catch (OptimisticLockingConflictException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        // Let typed exceptions propagate to GlobalExceptionHandler so the caller
+        // gets the correct status: ForbiddenException -> 403 (member-but-viewer),
+        // ResourceNotFoundException -> 404 (non-member / missing),
+        // OptimisticLockingConflictException -> 409. The previous broad
+        // RuntimeException -> 404 catch masked a legitimate 403 as 404 (PRD §5.5).
+        SkillResponse response = skillService.updateSkill(id, request, userId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

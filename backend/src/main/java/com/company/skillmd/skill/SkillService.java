@@ -3,13 +3,22 @@ package com.company.skillmd.skill;
 import com.company.skillmd.auth.AuthorizationService;
 import com.company.skillmd.auth.ResourceNotFoundException;
 import com.company.skillmd.skill.dto.*;
+import com.company.skillmd.team.TeamService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,12 +27,17 @@ public class SkillService {
     private final SkillRepository skillRepository;
     private final ReferenceResolver referenceResolver;
     private final AuthorizationService authorizationService;
+    private final TeamService teamService;
+    private final MongoTemplate mongoTemplate;
 
     public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver,
-                         AuthorizationService authorizationService) {
+                         AuthorizationService authorizationService, TeamService teamService,
+                         MongoTemplate mongoTemplate) {
         this.skillRepository = skillRepository;
         this.referenceResolver = referenceResolver;
         this.authorizationService = authorizationService;
+        this.teamService = teamService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public SkillResponse createSkill(CreateSkillRequest request, String userId) {
@@ -93,6 +107,41 @@ public class SkillService {
     public Page<SkillResponse> listSkills(String teamId, Pageable pageable) {
         authorizationService.requireTeamMember(teamId);
         return skillRepository.findByTeamIdAndDeletedAtNull(teamId, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Open-space listing (PRD §5.2, {@code view=open}): only
+     * {@code scope=open ∧ status=published ∧ deletedAt=null}, visible to any
+     * authenticated user (no team membership required — the caller's identity
+     * is already resolved by the security layer). Optional {@code tag} / {@code q}
+     * ($text) filters; sorted by {@code publishedAt} desc. Each row carries the
+     * owning team's displayName, batch-resolved to avoid N+1.
+     */
+    public Page<OpenSkillResponse> listOpenSkills(String tag, String q, Pageable pageable) {
+        Criteria criteria = Criteria.where("scope").is("open")
+            .and("status").is("published")
+            .and("deletedAt").isNull();
+        if (tag != null && !tag.isBlank()) {
+            criteria = criteria.and("tags").is(tag);
+        }
+
+        Query query = new Query(criteria);
+        if (q != null && !q.isBlank()) {
+            query.addCriteria(TextCriteria.forDefaultLanguage().matching(q));
+        }
+        query.with(Sort.by(Sort.Direction.DESC, "publishedAt"));
+
+        long total = mongoTemplate.count(Query.of(query).limit(0).skip(0), Skill.class);
+        query.with(pageable);
+        List<Skill> skills = mongoTemplate.find(query, Skill.class);
+
+        Set<String> teamIds = skills.stream().map(Skill::getTeamId).collect(Collectors.toSet());
+        var displayNames = teamService.resolveDisplayNames(teamIds);
+
+        List<OpenSkillResponse> rows = skills.stream()
+            .map(s -> toOpenResponse(s, displayNames.get(s.getTeamId())))
+            .toList();
+        return new PageImpl<>(rows, pageable, total);
     }
 
     public void deleteSkill(String id) {
@@ -180,6 +229,27 @@ public class SkillService {
             suffix++;
         } while (skillRepository.existsByTeamIdAndName(teamId, candidate));
         return candidate;
+    }
+
+    private OpenSkillResponse toOpenResponse(Skill skill, String teamDisplayName) {
+        return new OpenSkillResponse(
+            skill.getId(),
+            skill.getName(),
+            skill.getDisplayName(),
+            skill.getDescription(),
+            skill.getTeamId(),
+            teamDisplayName,
+            skill.getScope(),
+            skill.getStatus(),
+            skill.getPublishedAt(),
+            skill.getSourceSkillId(),
+            skill.getTags(),
+            skill.getCurrentVersion(),
+            skill.getAuthorId(),
+            skill.getLastEditorId(),
+            skill.getCreatedAt(),
+            skill.getUpdatedAt()
+        );
     }
 
     private SkillResponse toResponse(Skill skill) {

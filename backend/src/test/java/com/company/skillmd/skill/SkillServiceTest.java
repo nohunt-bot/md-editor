@@ -28,6 +28,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,13 +40,19 @@ class SkillServiceTest {
     @Mock
     private ReferenceResolver referenceResolver;
 
+    @Mock
+    private com.company.skillmd.team.TeamService teamService;
+
+    @Mock
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+
     private SkillService skillService;
 
     @BeforeEach
     void setUp() {
         CurrentUserProvider adminProvider = () -> new CurrentUser("admin", "Admin", Map.of(), true);
         AuthorizationService authorizationService = new AuthorizationService(adminProvider);
-        skillService = new SkillService(skillRepository, referenceResolver, authorizationService);
+        skillService = new SkillService(skillRepository, referenceResolver, authorizationService, teamService, mongoTemplate);
     }
 
     @Test
@@ -192,7 +199,8 @@ class SkillServiceTest {
 
     private SkillService serviceForUser(CurrentUser user) {
         CurrentUserProvider provider = () -> user;
-        return new SkillService(skillRepository, referenceResolver, new AuthorizationService(provider));
+        return new SkillService(skillRepository, referenceResolver, new AuthorizationService(provider),
+            teamService, mongoTemplate);
     }
 
     private Skill teamSkill(String id, String teamId) {
@@ -381,6 +389,59 @@ class SkillServiceTest {
         skillService.deleteSkill("skill-1");
 
         verify(skillRepository).save(any(Skill.class));
+    }
+
+    // --- Phase 1.4: update authz (403 vs 404, PRD §5.5) ---
+
+    @Test
+    @DisplayName("Update by team viewer throws Forbidden (403), not masked as NotFound")
+    void updateSkill_viewer_forbidden() {
+        SkillService service = serviceForUser(new CurrentUser("bob", "Bob", Map.of("team-a", Role.VIEWER), false));
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        UpdateSkillRequest request = new UpdateSkillRequest(
+            null, null, null, "new", null, null, null, null, "c", null, false);
+
+        assertThrows(ForbiddenException.class, () -> service.updateSkill("skill-1", request, "bob"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Update by non-member throws ResourceNotFound (404)")
+    void updateSkill_nonMember_notFound() {
+        SkillService service = serviceForUser(new CurrentUser("carol", "Carol", Map.of("team-b", Role.EDITOR), false));
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        UpdateSkillRequest request = new UpdateSkillRequest(
+            null, null, null, "new", null, null, null, null, "c", null, false);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.updateSkill("skill-1", request, "carol"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    // --- Phase 1.4: open-space listing ---
+
+    @Test
+    @DisplayName("listOpenSkills resolves teamDisplayName and returns metadata-only rows")
+    void listOpenSkills_resolvesTeamDisplayName() {
+        Skill open = teamSkill("open-1", "team-a");
+        open.setScope("open");
+        open.setStatus("published");
+        open.setPublishedAt(Instant.now());
+        when(mongoTemplate.count(any(org.springframework.data.mongodb.core.query.Query.class), eq(Skill.class)))
+            .thenReturn(1L);
+        when(mongoTemplate.find(any(org.springframework.data.mongodb.core.query.Query.class), eq(Skill.class)))
+            .thenReturn(List.of(open));
+        when(teamService.resolveDisplayNames(Set.of("team-a"))).thenReturn(Map.of("team-a", "Team Alpha"));
+
+        var page = skillService.listOpenSkills(null, null, org.springframework.data.domain.PageRequest.of(0, 20));
+
+        assertEquals(1, page.getTotalElements());
+        var row = page.getContent().get(0);
+        assertEquals("open-1", row.id());
+        assertEquals("Team Alpha", row.teamDisplayName());
+        assertEquals("published", row.status());
+        assertEquals("open", row.scope());
     }
 
     private Skill createSkill(String id, Integer version) {

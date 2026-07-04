@@ -2,6 +2,7 @@ package com.company.skillmd.skill;
 
 import com.company.skillmd.AbstractIntegrationTest;
 import com.company.skillmd.skill.dto.CopyToTeamRequest;
+import com.company.skillmd.skill.dto.UpdateSkillRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -185,5 +186,41 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
             new HttpEntity<>(headersFor("alice")), String.class);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
+
+    // --- Phase 1.4: updateSkill 403-vs-404 fix (PRD §5.5) ---
+
+    private HttpHeaders updateHeadersFor(String devUser) {
+        HttpHeaders headers = headersFor(devUser);
+        headers.set("X-User-Id", devUser);
+        return headers;
+    }
+
+    @Test
+    @DisplayName("PUT /{id} by team viewer returns 403 (not masked as 404)")
+    void update_viewer_forbidden() {
+        Skill skill = persistSkill("upd-viewer", "team-a", "team", "draft");
+        UpdateSkillRequest body = new UpdateSkillRequest(
+            null, null, null, "new content", null, null, null, null, "edit", null, false);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            baseUrl + "/" + skill.getId(), HttpMethod.PUT,
+            new HttpEntity<>(body, updateHeadersFor("bob")), String.class);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("PUT /{id} by non-member returns 404")
+    void update_nonMember_notFound() {
+        Skill skill = persistSkill("upd-nonmember", "team-a", "team", "draft");
+        UpdateSkillRequest body = new UpdateSkillRequest(
+            null, null, null, "new content", null, null, null, null, "edit", null, false);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            baseUrl + "/" + skill.getId(), HttpMethod.PUT,
+            new HttpEntity<>(body, updateHeadersFor("carol")), String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }
