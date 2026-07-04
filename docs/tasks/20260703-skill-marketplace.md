@@ -90,7 +90,7 @@ Status: active (2026-07-03)
       .getUserId() 取得，前端只送 `X-Dev-User`
       → 驗證：Playwright——進入 app 零點擊同時看到兩個入口；建立 skill 只送
       單一 header 仍正確記 author
-- [ ] 2.3 SkillsPage 重構（orchestrator）：清單/卡片、tag/folder 篩選、空狀態，
+- [~] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）：清單/卡片、tag/folder 篩選、空狀態，
       全面套新 tokens
       → 驗證：Vitest 元件測試 + screenshot
 - [ ] 2.4 SkillDetail 頁——新建（orchestrator）：rendered markdown、metadata
