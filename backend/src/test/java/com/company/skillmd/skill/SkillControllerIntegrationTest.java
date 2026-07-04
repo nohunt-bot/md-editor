@@ -36,7 +36,7 @@ class SkillControllerIntegrationTest extends AbstractIntegrationTest {
 
         headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-User-Id", "test-user");
+        headers.set("X-Dev-User", "alice");
     }
 
     @Test

@@ -23,8 +23,8 @@ public class SkillController {
 
     @PostMapping
     public ResponseEntity<SkillResponse> createSkill(
-            @Valid @RequestBody CreateSkillRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @Valid @RequestBody CreateSkillRequest request) {
+        String userId = authorizationService.currentUser().getUserId();
         SkillResponse response = skillService.createSkill(request, userId);
         return ResponseEntity.ok(response);
     }
@@ -54,13 +54,15 @@ public class SkillController {
     @PutMapping("/{id}")
     public ResponseEntity<SkillResponse> updateSkill(
             @PathVariable String id,
-            @RequestBody UpdateSkillRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestBody UpdateSkillRequest request) {
+        // Author/editor identity is derived from the CurrentUserProvider
+        // abstraction (via X-Dev-User), not a separate X-User-Id header.
         // Let typed exceptions propagate to GlobalExceptionHandler so the caller
         // gets the correct status: ForbiddenException -> 403 (member-but-viewer),
         // ResourceNotFoundException -> 404 (non-member / missing),
         // OptimisticLockingConflictException -> 409. The previous broad
         // RuntimeException -> 404 catch masked a legitimate 403 as 404 (PRD §5.5).
+        String userId = authorizationService.currentUser().getUserId();
         SkillResponse response = skillService.updateSkill(id, request, userId);
         return ResponseEntity.ok(response);
     }

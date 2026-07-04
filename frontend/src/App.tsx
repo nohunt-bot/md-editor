@@ -1,42 +1,56 @@
 import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { SkillsPage } from './pages/SkillsPage'
+import { OpenSpacePage } from './pages/OpenSpacePage'
 import { SkillEditor } from './components/editor/SkillEditor'
+import { Sidebar } from './app/Sidebar'
+import { GlobalSearch } from './app/GlobalSearch'
+import { TeamFilterProvider } from './app/TeamFilterContext'
+import { useIdentity } from './app/useIdentity'
 import './App.css'
 
 function App() {
+  // Identity loads once for the whole shell. Even if /api/me fails (no
+  // backend), useIdentity falls back to an empty identity so both zones render.
+  const identity = useIdentity()
+
   return (
     <BrowserRouter>
-      <div className="app">
-        <nav className="navbar">
-          <Link to="/" className="logo">Skill.md</Link>
-          <div className="nav-links">
-            <Link to="/skills">Skills</Link>
-            <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noreferrer">
-              API Docs
-            </a>
-            <Link to="/skills/new" className="btn-primary">+ New Skill</Link>
+      <TeamFilterProvider>
+        <div className="app-shell">
+          <Sidebar identity={identity} />
+          <div className="app-body">
+            <header className="app-topbar">
+              <GlobalSearch />
+              <Link to="/skills/new" className="btn-primary">
+                ＋ 新增 Skill
+              </Link>
+            </header>
+            <main className="app-main">
+              <Routes>
+                <Route path="/" element={<Navigate to="/team" replace />} />
+                <Route path="/team" element={<SkillsPage identity={identity} />} />
+                <Route path="/open" element={<OpenSpacePage />} />
+                <Route path="/skills/new" element={<SkillEditor />} />
+                <Route path="/skills/:id" element={<SkillDetail />} />
+                <Route path="/skills/:id/edit" element={<SkillEditor />} />
+                {/* Legacy alias */}
+                <Route path="/skills" element={<Navigate to="/team" replace />} />
+              </Routes>
+            </main>
           </div>
-        </nav>
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Navigate to="/skills" replace />} />
-            <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/skills/new" element={<SkillEditor />} />
-            <Route path="/skills/:id" element={<SkillDetail />} />
-            <Route path="/skills/:id/edit" element={<SkillEditor />} />
-          </Routes>
-        </main>
-      </div>
+        </div>
+      </TeamFilterProvider>
     </BrowserRouter>
   )
 }
 
 function SkillDetail() {
-  // TODO: Implement skill detail page with version history
+  // TODO(2.4): full read view — rendered markdown + metadata sidebar +
+  // actions (edit/publish/copy) + version history.
   return (
-    <div className="skill-detail">
-      <h1>Skill Detail</h1>
-      <p>Coming soon - will show skill content, references, and version history</p>
+    <div className="page">
+      <h1>Skill 詳情</h1>
+      <p className="text-muted">即將推出——內容、metadata 與版本歷史。</p>
     </div>
   )
 }

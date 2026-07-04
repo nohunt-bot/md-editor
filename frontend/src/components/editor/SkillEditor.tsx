@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { skillApi, type CreateSkillData, type UpdateSkillData } from '../../api/api.ts'
+import { skillApi, getActiveTeamId, type CreateSkillData, type UpdateSkillData } from '../../api/api.ts'
 import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import { ConflictDialog } from '../dialog/ConflictDialog'
 import './SkillEditor.css'
@@ -84,12 +84,14 @@ export function SkillEditor() {
           displayName: formData.displayName || undefined,
           description: formData.description || undefined,
           content: formData.content,
+          // New skills are owned by the sidebar's active team (§F1).
+          teamId: getActiveTeamId() || undefined,
           folderId: formData.folderId || undefined,
           tags: formData.tags.length > 0 ? formData.tags : undefined
         }
         await skillApi.create(createData)
       }
-      navigate('/skills')
+      navigate('/team')
     } catch (error: any) {
       if (error.response?.status === 409) {
         // Optimistic lock conflict
@@ -121,7 +123,7 @@ export function SkillEditor() {
         forceUpdate: true
       }
       await skillApi.update(id, updateData)
-      navigate('/skills')
+      navigate('/team')
     } catch (error: any) {
       console.error('Failed to force save:', error)
       alert('Failed to save: ' + (error.response?.data?.message || error.message))
@@ -137,7 +139,7 @@ export function SkillEditor() {
 
   function handleAbandon() {
     setConflict(null)
-    navigate('/skills')
+    navigate('/team')
   }
 
   function handleTagInput(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -165,7 +167,7 @@ export function SkillEditor() {
   return (
     <div className="skill-editor">
       <div className="editor-header">
-        <button className="btn-back" onClick={() => navigate('/skills')}>← Back</button>
+        <button className="btn-back" onClick={() => navigate('/team')}>← Back</button>
         <h1>{isEditing ? 'Edit Skill' : 'Create New Skill'}</h1>
         <button 
           className="btn-primary" 
