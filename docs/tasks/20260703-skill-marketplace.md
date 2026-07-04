@@ -82,7 +82,7 @@ Status: active (2026-07-03)
 - [x] 2.1 Design tokens（STANDARD，配合 frontend-design skill）：index.css 收斂為
       CSS variables（色彩/間距/字級/圓角），淺色底、清楚層級
       → 驗證：screenshot 對照設計檢查清單；使用者過目
-- [~] 2.2 App shell 與導覽（implementer in worktree + commander 閘門）：左側欄固定兩區——「我的團隊」
+- [x] 2.2 App shell 與導覽（implementer in worktree + commander 閘門）：左側欄固定兩區——「我的團隊」
       （團隊切換 + folder tree）與「開放空間」；頂部全域搜尋；dev 身分/團隊
       切換器（stub 階段的替代登入，dev 環境顯示）；**順修後端 author 契約**：
       createSkill/updateSkill 仍讀 `X-User-Id` 當 author，授權卻走 `X-Dev-User`
@@ -213,6 +213,15 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   Playwright 起 dev server（5174，後端未起故 API 報錯屬預期）截圖確認淺色外殼
   正確渲染——白底、單一 accent #2563eb、灰階層級、1px 邊線。⚠️ 版面仍是舊
   單側欄（雙區 IA 是 2.2）；MDXEditor 深主題殘留留 TODO(2.5)。使用者過目待覆
+- 2026-07-04 | 2.2 | done，merge 83c6d96（impl caf30fe，opus，14 檔 +993）。
+  雙區側欄（我的團隊：團隊切換+FolderTree+tags／開放空間：瀏覽全部）、頂部
+  全域搜尋（兩群下拉）、dev 身分切換器（localStorage，alice/bob/carol/admin）、
+  /open 頁、後端 author 契約修正（createSkill/updateSkill 改用
+  CurrentUserProvider，前端只送 X-Dev-User，舊整合測試 header 一併更新）。
+  commander 閘門：後端 54 tests exit 0、npm build+tsc exit 0；Playwright
+  截圖確認零點擊雙區可見、離線 graceful（顯示「尚無團隊」空狀態）。
+  ⚠️ 交接：VersionController restore 仍讀 X-User-Id（本步刻意未動）→ 待
+  版本還原前端串接（尚未排；PRD F4）時一併修，記入 open issues
 
 ## Decisions
 
