@@ -17,8 +17,6 @@ import {
   BlockTypeSelect,
   CodeToggle,
   InsertCodeBlock,
-  InsertTable,
-  InsertThematicBreak,
   ListsToggle,
   CreateLink
 } from '@mdxeditor/editor'
@@ -54,18 +52,21 @@ export const MdxEditorWrapper = forwardRef<MDXEditorMethods, MdxEditorWrapperPro
             imagePlugin(),
             codeBlockPlugin({ defaultCodeBlockLanguage: '' }),
             frontmatterPlugin(),
+            // Phase 2.5 (ADR editor-feature-reduction): toolbar limited to
+            // headings, bold/italic (no underline), lists, links, code block.
+            // Image/table/thematic-break authoring removed. Rendering plugins
+            // above are kept so pasted markdown with those constructs survives
+            // as content and is not corrupted.
             toolbarPlugin({
               toolbarContents: () => (
                 <>
                   <UndoRedo />
                   <BlockTypeSelect />
-                  <BoldItalicUnderlineToggles />
+                  <BoldItalicUnderlineToggles options={['Bold', 'Italic']} />
                   <CodeToggle />
                   <ListsToggle />
                   <CreateLink />
                   <InsertCodeBlock />
-                  <InsertTable />
-                  <InsertThematicBreak />
                 </>
               )
             })

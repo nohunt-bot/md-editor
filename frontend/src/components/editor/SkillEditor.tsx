@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { skillApi, getActiveTeamId, type CreateSkillData, type UpdateSkillData } from '../../api/api.ts'
 import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import { ConflictDialog } from '../dialog/ConflictDialog'
+import { Badge } from '../common/Badge'
 import './SkillEditor.css'
 
 interface Conflict {
@@ -21,6 +22,7 @@ export function SkillEditor() {
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [conflict, setConflict] = useState<Conflict | null>(null)
+  const [status, setStatus] = useState<string | undefined>(undefined)
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -44,6 +46,7 @@ export function SkillEditor() {
     try {
       const res = await skillApi.get(id)
       const skill = res.data
+      setStatus(skill.status)
       setFormData({
         name: skill.name,
         displayName: skill.displayName || '',
@@ -168,7 +171,10 @@ export function SkillEditor() {
     <div className="skill-editor">
       <div className="editor-header">
         <button className="btn-back" onClick={() => navigate('/team')}>← Back</button>
-        <h1>{isEditing ? 'Edit Skill' : 'Create New Skill'}</h1>
+        <h1>
+          {isEditing ? 'Edit Skill' : 'Create New Skill'}
+          {isEditing && <Badge status={status} />}
+        </h1>
         <button 
           className="btn-primary" 
           onClick={handleSave}
