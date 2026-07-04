@@ -1,0 +1,20 @@
+/* Status badge — pill, small (§6.1). Colours from tokens only. */
+.badge {
+  display: inline-block;
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: capitalize;
+}
+
+.badge-published {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge-draft {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}

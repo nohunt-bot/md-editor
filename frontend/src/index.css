@@ -24,6 +24,7 @@
 
   /* Semantic */
   --ok: #16a34a;      /* published */
+  --ok-soft: #dcfce7; /* published badge background */
   --warn: #d97706;
   --danger: #dc2626;
 
@@ -32,6 +33,7 @@
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Type scale (line-height 1.5) */
+  --fs-xs: 12px;
   --fs-sm: 13px;
   --fs-base: 14px;   /* body */
   --fs-md: 16px;
