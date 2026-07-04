@@ -1,20 +1,46 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { skillApi } from '../api/api'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { skillApi, tagApi } from '../api/api'
+import './OpenSpacePage.css'
 
-// Minimal open-space browse (§6.4). The richer version (latest-published
-// sort, tag chips, source-team meta) is Phase 3.1 — TODO(3.1).
+// Phase 3.1: open-space browse. Latest-published cards (backend sorts by
+// publishedAt desc), tag-chip filter, and honours ?q / ?tag from the URL so
+// the global search and tag links land here. All rows are open+published, so
+// provenance (source team + published date) is what the card foregrounds.
+
+type OpenSkill = {
+  id: string
+  name: string
+  displayName?: string
+  description?: string
+  teamId: string
+  teamDisplayName?: string
+  publishedAt?: string
+  tags?: string[]
+}
+
 export function OpenSpacePage() {
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
+  const navigate = useNavigate()
   const q = params.get('q') || undefined
-  const [skills, setSkills] = useState<any[]>([])
+  const tag = params.get('tag') || undefined
+
+  const [skills, setSkills] = useState<OpenSkill[]>([])
+  const [tags, setTags] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    tagApi
+      .list()
+      .then((res) => setTags((res.data || []).map((t: any) => t.name ?? t)))
+      .catch(() => setTags([]))
+  }, [])
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     skillApi
-      .listOpen({ q })
+      .listOpen({ q, tag })
       .then((res) => {
         if (!cancelled) setSkills(res.data.content || [])
       })
@@ -27,35 +53,85 @@ export function OpenSpacePage() {
     return () => {
       cancelled = true
     }
-  }, [q])
+  }, [q, tag])
+
+  function selectTag(next?: string) {
+    const p = new URLSearchParams(params)
+    if (!next || next === tag) p.delete('tag')
+    else p.set('tag', next)
+    setParams(p, { replace: true })
+  }
+
+  const filtering = Boolean(q || tag)
 
   return (
-    <div className="page">
+    <div className="page open-space">
       <div className="page-header">
         <h1>開放空間</h1>
+        {q && <span className="open-space-q">搜尋：「{q}」</span>}
       </div>
 
+      {tags.length > 0 && (
+        <div className="open-space-tags">
+          <button
+            className={`tag-chip ${!tag ? 'active' : ''}`}
+            onClick={() => selectTag(undefined)}
+          >
+            全部
+          </button>
+          {tags.map((t) => (
+            <button
+              key={t}
+              className={`tag-chip ${tag === t ? 'active' : ''}`}
+              onClick={() => selectTag(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
-        <div className="loading">載入中…</div>
+        <div className="empty-state">載入中…</div>
       ) : skills.length === 0 ? (
         <div className="empty-state">
-          <p>還沒有團隊發布 skill</p>
+          <p>{filtering ? '沒有符合的 skill，試試放寬篩選' : '還沒有團隊發布 skill'}</p>
         </div>
       ) : (
-        <ul className="open-list">
+        <div className="open-grid">
           {skills.map((skill) => (
-            <li key={skill.id} className="open-row">
-              <Link to={`/skills/${skill.id}`} className="open-row-title">
-                {skill.displayName || skill.name}
-              </Link>
-              {skill.description && <p className="open-row-desc">{skill.description}</p>}
-              <div className="open-row-meta">
-                {skill.teamDisplayName || skill.teamId}
-                {skill.publishedAt && ` · ${new Date(skill.publishedAt).toLocaleDateString()}`}
+            <article
+              key={skill.id}
+              className="open-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(`/skills/${skill.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') navigate(`/skills/${skill.id}`)
+              }}
+            >
+              <h2 className="open-card-title">{skill.displayName || skill.name}</h2>
+              {skill.description && <p className="open-card-desc">{skill.description}</p>}
+              {skill.tags && skill.tags.length > 0 && (
+                <div className="open-card-tags">
+                  {skill.tags.map((t) => (
+                    <span key={t} className="tag">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="open-card-meta">
+                <span className="open-card-team">{skill.teamDisplayName || skill.teamId}</span>
+                {skill.publishedAt && (
+                  <span className="open-card-date">
+                    {new Date(skill.publishedAt).toLocaleDateString()}
+                  </span>
+                )}
               </div>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )
