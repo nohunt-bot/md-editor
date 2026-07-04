@@ -79,7 +79,7 @@ Status: active (2026-07-03)
 
 ### Phase 2 — 前端基礎重構（淺色極簡 + 資訊架構）
 
-- [ ] 2.1 Design tokens（STANDARD，配合 frontend-design skill）：index.css 收斂為
+- [x] 2.1 Design tokens（STANDARD，配合 frontend-design skill）：index.css 收斂為
       CSS variables（色彩/間距/字級/圓角），淺色底、清楚層級
       → 驗證：screenshot 對照設計檢查清單；使用者過目
 - [ ] 2.2 App shell 與導覽（orchestrator）：左側欄固定兩區——「我的團隊」
@@ -207,6 +207,12 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   ★ Phase 1 後端 marketplace 核心完成（schema→授權→發布/複製→搜尋→seed）。
   發現殘留不一致：createSkill/updateSkill 用 X-User-Id 當 author、授權走
   X-Dev-User → 折進 2.2 順修（seed 暫送雙 header 繞過）
+- 2026-07-04 | 2.1 | done，merge 2cae7bd（impl d395f06，opus）。26 個 CSS
+  tokens（PRD §6.2 全套）於 index.css :root，App.css + 5 個元件 CSS 汰換硬編
+  色值為 token；深→淺翻轉。commander 閘門：npm build exit 0、tsc exit 0；
+  Playwright 起 dev server（5174，後端未起故 API 報錯屬預期）截圖確認淺色外殼
+  正確渲染——白底、單一 accent #2563eb、灰階層級、1px 邊線。⚠️ 版面仍是舊
+  單側欄（雙區 IA 是 2.2）；MDXEditor 深主題殘留留 TODO(2.5)。使用者過目待覆
 
 ## Decisions
 
