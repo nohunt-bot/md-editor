@@ -90,12 +90,13 @@ Status: active (2026-07-03)
       .getUserId() 取得，前端只送 `X-Dev-User`
       → 驗證：Playwright——進入 app 零點擊同時看到兩個入口；建立 skill 只送
       單一 header 仍正確記 author
-- [!] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）(retry: 1)：清單/卡片、tag/folder 篩選、空狀態，
+- [x] 2.3 SkillsPage 重構（implementer in worktree + commander 閘門）(retry: 1)：清單/卡片、tag/folder 篩選、空狀態，
       全面套新 tokens
       → 驗證：Vitest 元件測試 + screenshot
-- [ ] 2.4 SkillDetail 頁——新建（orchestrator）：rendered markdown、metadata
-      （team/scope/status/版本）、版本歷史入口、發布/下架按鈕（依權限顯示）、
-      open skill 顯示「複製到我的團隊」
+- [~] 2.4 SkillDetail 頁——新建（implementer in worktree + commander 閘門）：
+      rendered markdown、metadata（team/scope/status/版本）、版本歷史入口、
+      發布/下架按鈕（依權限顯示）、open skill 顯示「複製到我的團隊」；
+      版本還原若串接則順修 VersionController 仍讀 X-User-Id 的殘留
       → 驗證：Vitest + Playwright 流程測試
 - [ ] 2.5 編輯器精簡（STANDARD）：MDXEditor plugins 收斂為
       headings/bold/italic/lists/link/codeblock；移除 image/table/underline；
@@ -231,6 +232,13 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   2.3 沒 reset 就翻車）。對策：重派時第一步強制
   `git reset --hard 69b897c`（本輪 main SHA），並列為首要 acceptance
   criterion。待 4.4 retro 落 LESSONS.md：worktree 隔離不可信任其 base
+- 2026-07-04 | 2.3 | done（retry 成功），merge f751976（impl 6ea54b6，opus）。
+  強制 reset 到 5ad835b 後 base 正確：merge-base 核對＝5ad835b、diff 未碰
+  App.tsx/app/（無 2.2 回歸）。Badge 元件（published 綠/draft 灰）、卡片重構、
+  list/grid 切換、三種空狀態；index.css 僅加 --ok-soft/--fs-xs 兩 token。
+  commander 閘門：build/tsc/vitest（15 tests）全 exit 0。⚠️ 卡片實機視覺需
+  後端資料，離線只驗空狀態＋元件測試→實機卡片併入 4.3 E2E。
+  ★ 對策奏效：pin base SHA + 首要 acceptance 從此為所有 worktree dispatch 標配
 
 ## Decisions
 
