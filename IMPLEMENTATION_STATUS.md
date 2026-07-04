@@ -1,6 +1,12 @@
 # Skill.md Service - Implementation Status
 
-## ✅ Completed (Phase 0 + Phase 1 + Phase 2 Partial)
+> **Marketplace 轉型（2026-07-03-05）已完成 Phase 0–4**：公司內部 skill
+> marketplace（團隊空間 + 開放空間、發布/複製/搜尋、淺色極簡前端、dev-stub
+> 身分）。主檔 `docs/tasks/20260703-skill-marketplace.md`；spec `docs/design/PRD.md`。
+> 後端單元+整合測試全綠（含 Testcontainers），前端 24 tests 綠，跨團隊 E2E
+> 已於真 stack 驗證。以下為早期 Phase 0/1 骨架記錄，marketplace 增量見任務檔。
+
+## ✅ Completed (early skeleton — Phase 0 + Phase 1)
 
 ### Backend (Spring Boot)
 
@@ -272,5 +278,5 @@ cd ~/md-editor
 
 ---
 
-**Status:** Phase 1 Complete ✅  
-**Next:** Phase 2 - Editor Experience (MDXEditor, ReferencePicker, Search)
+**Status:** Marketplace Phase 0–4 complete ✅ (see docs/tasks/20260703-skill-marketplace.md)  
+**Next:** LLM discovery 前端串接、Keycloak 接回（皆為原任務明確 deferred 項）

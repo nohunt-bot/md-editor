@@ -1,6 +1,6 @@
 # Task: 把 md-editor（Skill.md Service）發展成公司內部 skill marketplace——團隊空間 + 開放空間、發布/瀏覽/搜尋、淺色極簡前端
 
-Status: active (2026-07-03)
+Status: done (2026-07-05)
 
 > 執行協議：`~/.claude/harness/rules/long-tasks.md`。接手的 subagent 先讀本檔，
 > 信任 Progress log 而非記憶，從第一個未打勾的步驟繼續。每個 phase 以
@@ -133,9 +133,11 @@ Status: active (2026-07-03)
         carol copy-to-team 成功（新 draft、記 sourceSkillId、v1）、bob 發布=403；
         UI 層——Playwright 截 /team（4 卡片 badge 正確）+ /open（3 跨團隊卡片
         含來源團隊）（scratchpad e2e-team.png / e2e-open.png）
-- [~] 4.4 文件同步 + /retro：README/IMPLEMENTATION_STATUS/schema.md 更新；
-      跑 /retro 收尾，本檔改 Status: done
-      → 驗證：fresh-context reviewer 核對文件與實況
+- [x] 4.4 文件同步 + /retro：schema.md（1.1 更新）、README（0.2/1.5）、
+      IMPLEMENTATION_STATUS（4.4 加 marketplace 摘要+改結尾狀態）；/retro 收尾、
+      2 則 harness 教訓入 LESSONS.md、本檔 Status: done
+      → 驗證：⚠️ 覆核為 commander 自跑（非 fresh context）——spend-limit 阻斷
+        subagent，如實記為 done-check 缺口（見結案報告）
 
 ### 明確不做（本任務範圍外）
 
@@ -289,6 +291,12 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
 - 2026-07-04 | 4.1/4.2 | done。4.1 狀態頁隨各頁增量完成（每頁 loading+empty，
   API 錯誤 fallback 空態）；獨立錯誤態列日後 polish。4.2 後端含整合全綠、前端
   24 綠、舊測試汰換自動達成。★ Phase 4 僅剩 4.4 文件同步+retro。
+- 2026-07-05 | 4.4 | done——結案。文件同步（IMPLEMENTATION_STATUS 加 marketplace
+  摘要）、2 則教訓入 ~/.claude/harness/LESSONS.md（worktree base 過期、
+  spend-limit 搶救協議）。★★ 全任務 Phase 0-4 完成，Status: done。
+  ⚠️ 誠實缺口：所有 phase 的驗證由 commander 自跑（閘門重跑+E2E），非
+  fresh-context 覆核——spend-limit 使 subagent 反覆死，circuit-breaker 換
+  inline。judgment §2「作者不自驗」未完全滿足，如實記錄。Follow-ups 見結案報告。
 
 ## Decisions
 
