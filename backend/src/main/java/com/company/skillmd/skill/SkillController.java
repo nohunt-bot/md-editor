@@ -1,9 +1,11 @@
 package com.company.skillmd.skill;
 
+import com.company.skillmd.auth.AuthorizationService;
 import com.company.skillmd.skill.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class SkillController {
 
     private final SkillService skillService;
+    private final AuthorizationService authorizationService;
 
-    public SkillController(SkillService skillService) {
+    public SkillController(SkillService skillService, AuthorizationService authorizationService) {
         this.skillService = skillService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping
@@ -58,5 +62,24 @@ public class SkillController {
     public ResponseEntity<Void> deleteSkill(@PathVariable String id) {
         skillService.deleteSkill(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/publish")
+    public ResponseEntity<SkillResponse> publishSkill(@PathVariable String id) {
+        return ResponseEntity.ok(skillService.publishSkill(id));
+    }
+
+    @DeleteMapping("/{id}/publish")
+    public ResponseEntity<SkillResponse> unpublishSkill(@PathVariable String id) {
+        return ResponseEntity.ok(skillService.unpublishSkill(id));
+    }
+
+    @PostMapping("/{id}/copy-to-team")
+    public ResponseEntity<SkillResponse> copyToTeam(
+            @PathVariable String id,
+            @RequestBody CopyToTeamRequest request) {
+        String userId = authorizationService.currentUser().getUserId();
+        SkillResponse response = skillService.copyToTeam(id, request.targetTeamId(), userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

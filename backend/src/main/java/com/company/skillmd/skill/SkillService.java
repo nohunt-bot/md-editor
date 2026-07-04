@@ -99,8 +99,87 @@ public class SkillService {
         Skill skill = skillRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
         authorizationService.requireResourceEditable(skill.getTeamId());
+        if ("published".equals(skill.getStatus())) {
+            throw new ConflictException("先下架才可刪");
+        }
         skill.setDeletedAt(Instant.now());
         skillRepository.save(skill);
+    }
+
+    /**
+     * Publish a skill: scope=open, status=published, publishedAt=now.
+     * Editor of the skill's team or admin only. Idempotent-safe (re-publishing
+     * an already-published skill just refreshes publishedAt).
+     */
+    public SkillResponse publishSkill(String id) {
+        Skill skill = skillRepository.findById(id)
+            .filter(s -> s.getDeletedAt() == null)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        authorizationService.requireResourceEditable(skill.getTeamId());
+        skill.setScope("open");
+        skill.setStatus("published");
+        skill.setPublishedAt(Instant.now());
+        return toResponse(skillRepository.save(skill));
+    }
+
+    /**
+     * Unpublish a skill: status=draft, scope stays "open" (scope encodes
+     * intent). Editor of the skill's team, or admin (admin may unpublish any
+     * team's open skill).
+     */
+    public SkillResponse unpublishSkill(String id) {
+        Skill skill = skillRepository.findById(id)
+            .filter(s -> s.getDeletedAt() == null)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        authorizationService.requireResourceEditable(skill.getTeamId());
+        skill.setStatus("draft");
+        return toResponse(skillRepository.save(skill));
+    }
+
+    /**
+     * Copy a skill into targetTeamId as a fresh independent draft. Source must
+     * be visible to the caller (team member, open+published, or admin) and the
+     * caller must be an editor of the target team. Name collisions within the
+     * target team are resolved by auto-suffixing (-2, -3, ...).
+     */
+    public SkillResponse copyToTeam(String id, String targetTeamId, String userId) {
+        Skill source = skillRepository.findById(id)
+            .filter(s -> s.getDeletedAt() == null)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        boolean openAndPublished = "open".equals(source.getScope()) && "published".equals(source.getStatus());
+        authorizationService.requireResourceReadable(source.getTeamId(), openAndPublished);
+        authorizationService.requireCanEdit(targetTeamId);
+
+        Skill copy = new Skill();
+        copy.setName(uniqueName(targetTeamId, source.getName()));
+        copy.setDisplayName(source.getDisplayName());
+        copy.setDescription(source.getDescription());
+        copy.setContent(source.getContent());
+        copy.setTeamId(targetTeamId);
+        copy.setScope("team");
+        copy.setStatus("draft");
+        copy.setPublishedAt(null);
+        copy.setSourceSkillId(source.getId());
+        copy.setFolderId(null);
+        copy.setTags(source.getTags() != null ? List.copyOf(source.getTags()) : List.of());
+        copy.setCurrentVersion(1);
+        copy.setAuthorId(userId);
+        copy.setLastEditorId(userId);
+
+        return toResponse(skillRepository.save(copy));
+    }
+
+    private String uniqueName(String teamId, String baseName) {
+        if (!skillRepository.existsByTeamIdAndName(teamId, baseName)) {
+            return baseName;
+        }
+        int suffix = 2;
+        String candidate;
+        do {
+            candidate = baseName + "-" + suffix;
+            suffix++;
+        } while (skillRepository.existsByTeamIdAndName(teamId, candidate));
+        return candidate;
     }
 
     private SkillResponse toResponse(Skill skill) {

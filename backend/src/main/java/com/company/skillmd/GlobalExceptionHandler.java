@@ -3,6 +3,7 @@ package com.company.skillmd;
 import com.company.skillmd.auth.ForbiddenException;
 import com.company.skillmd.auth.ResourceNotFoundException;
 import com.company.skillmd.auth.UnauthorizedException;
+import com.company.skillmd.skill.ConflictException;
 import com.company.skillmd.skill.OptimisticLockingConflictException;
 import com.company.skillmd.skill.dto.ConflictResponse;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler {
             ex.getCurrentEditorId()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

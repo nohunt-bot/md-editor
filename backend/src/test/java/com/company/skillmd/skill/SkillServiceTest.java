@@ -3,6 +3,9 @@ package com.company.skillmd.skill;
 import com.company.skillmd.auth.AuthorizationService;
 import com.company.skillmd.auth.CurrentUser;
 import com.company.skillmd.auth.CurrentUserProvider;
+import com.company.skillmd.auth.ForbiddenException;
+import com.company.skillmd.auth.ResourceNotFoundException;
+import com.company.skillmd.auth.Role;
 import com.company.skillmd.skill.dto.CreateSkillRequest;
 import com.company.skillmd.skill.dto.SkillResponse;
 import com.company.skillmd.skill.dto.UpdateSkillRequest;
@@ -183,6 +186,201 @@ class SkillServiceTest {
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("teamId")));
         }
+    }
+
+    // --- Phase 1.3: publish / unpublish / copy-to-team / delete guard ---
+
+    private SkillService serviceForUser(CurrentUser user) {
+        CurrentUserProvider provider = () -> user;
+        return new SkillService(skillRepository, referenceResolver, new AuthorizationService(provider));
+    }
+
+    private Skill teamSkill(String id, String teamId) {
+        Skill skill = new Skill();
+        skill.setId(id);
+        skill.setName("my-skill");
+        skill.setDisplayName("My Skill");
+        skill.setDescription("desc");
+        skill.setContent("# content");
+        skill.setTeamId(teamId);
+        skill.setScope("team");
+        skill.setStatus("draft");
+        skill.setTags(List.of("tag1"));
+        skill.setCurrentVersion(3);
+        return skill;
+    }
+
+    @Test
+    @DisplayName("Publish sets scope=open, status=published, publishedAt")
+    void publishSkill_setsFields() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = skillService.publishSkill("skill-1");
+
+        assertEquals("open", response.scope());
+        assertEquals("published", response.status());
+        assertNotNull(response.publishedAt());
+    }
+
+    @Test
+    @DisplayName("Re-publishing an already-published skill just refreshes (no error)")
+    void publishSkill_idempotent() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        skill.setPublishedAt(Instant.now().minusSeconds(1000));
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = skillService.publishSkill("skill-1");
+
+        assertEquals("published", response.status());
+        assertTrue(response.publishedAt().isAfter(Instant.now().minusSeconds(10)));
+    }
+
+    @Test
+    @DisplayName("Publish by team viewer throws Forbidden (403)")
+    void publishSkill_viewer_forbidden() {
+        SkillService service = serviceForUser(new CurrentUser("bob", "Bob", Map.of("team-a", Role.VIEWER), false));
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+
+        assertThrows(ForbiddenException.class, () -> service.publishSkill("skill-1"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Publish by non-member throws ResourceNotFound (404)")
+    void publishSkill_nonMember_notFound() {
+        SkillService service = serviceForUser(new CurrentUser("carol", "Carol", Map.of("team-b", Role.EDITOR), false));
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+
+        assertThrows(ResourceNotFoundException.class, () -> service.publishSkill("skill-1"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Unpublish sets status=draft, keeps scope=open")
+    void unpublishSkill_keepsScopeOpen() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        skill.setPublishedAt(Instant.now());
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = skillService.unpublishSkill("skill-1");
+
+        assertEquals("draft", response.status());
+        assertEquals("open", response.scope());
+    }
+
+    @Test
+    @DisplayName("Admin can unpublish any team's open skill")
+    void unpublishSkill_adminAnyTeam() {
+        // default skillService uses admin provider
+        Skill skill = teamSkill("skill-1", "team-b");
+        skill.setScope("open");
+        skill.setStatus("published");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = skillService.unpublishSkill("skill-1");
+
+        assertEquals("draft", response.status());
+    }
+
+    @Test
+    @DisplayName("Copy-to-team creates independent v1 draft with sourceSkillId")
+    void copyToTeam_createsIndependentDraft() {
+        // editor of both team-a (source) and team-b (target)
+        SkillService service = serviceForUser(new CurrentUser(
+            "u", "U", Map.of("team-a", Role.EDITOR, "team-b", Role.EDITOR), false));
+        Skill source = teamSkill("src-1", "team-a");
+        when(skillRepository.findById("src-1")).thenReturn(Optional.of(source));
+        when(skillRepository.existsByTeamIdAndName("team-b", "my-skill")).thenReturn(false);
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = service.copyToTeam("src-1", "team-b", "u");
+
+        assertEquals("team-b", response.teamId());
+        assertEquals("team", response.scope());
+        assertEquals("draft", response.status());
+        assertEquals(1, response.currentVersion());
+        assertEquals("src-1", response.sourceSkillId());
+        assertNull(response.folderId());
+        assertNull(response.publishedAt());
+        assertEquals("u", response.authorId());
+    }
+
+    @Test
+    @DisplayName("Copy-to-team auto-suffixes on name collision")
+    void copyToTeam_nameCollision_autoSuffix() {
+        SkillService service = serviceForUser(new CurrentUser(
+            "u", "U", Map.of("team-a", Role.EDITOR, "team-b", Role.EDITOR), false));
+        Skill source = teamSkill("src-1", "team-a");
+        when(skillRepository.findById("src-1")).thenReturn(Optional.of(source));
+        when(skillRepository.existsByTeamIdAndName("team-b", "my-skill")).thenReturn(true);
+        when(skillRepository.existsByTeamIdAndName("team-b", "my-skill-2")).thenReturn(true);
+        when(skillRepository.existsByTeamIdAndName("team-b", "my-skill-3")).thenReturn(false);
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = service.copyToTeam("src-1", "team-b", "u");
+
+        assertEquals("my-skill-3", response.name());
+    }
+
+    @Test
+    @DisplayName("Copy-to-team where caller isn't editor of target throws Forbidden (403)")
+    void copyToTeam_notEditorOfTarget_forbidden() {
+        // member of source team-a but only viewer of target team-b
+        SkillService service = serviceForUser(new CurrentUser(
+            "u", "U", Map.of("team-a", Role.EDITOR, "team-b", Role.VIEWER), false));
+        Skill source = teamSkill("src-1", "team-a");
+        when(skillRepository.findById("src-1")).thenReturn(Optional.of(source));
+
+        assertThrows(ForbiddenException.class, () -> service.copyToTeam("src-1", "team-b", "u"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Copy-to-team where source not visible throws ResourceNotFound (404)")
+    void copyToTeam_sourceNotVisible_notFound() {
+        // editor of target team-b but not a member of source team-a; source is a private draft
+        SkillService service = serviceForUser(new CurrentUser(
+            "u", "U", Map.of("team-b", Role.EDITOR), false));
+        Skill source = teamSkill("src-1", "team-a");
+        when(skillRepository.findById("src-1")).thenReturn(Optional.of(source));
+
+        assertThrows(ResourceNotFoundException.class, () -> service.copyToTeam("src-1", "team-b", "u"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Delete of a published skill throws Conflict (409)")
+    void deleteSkill_published_conflict() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+
+        assertThrows(ConflictException.class, () -> skillService.deleteSkill("skill-1"));
+        verify(skillRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Delete of a draft skill succeeds (soft delete)")
+    void deleteSkill_draft_success() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        skillService.deleteSkill("skill-1");
+
+        verify(skillRepository).save(any(Skill.class));
     }
 
     private Skill createSkill(String id, Integer version) {
