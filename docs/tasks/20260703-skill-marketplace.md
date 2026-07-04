@@ -64,11 +64,13 @@ Status: active (2026-07-03)
       全員可讀；publish 需該團隊 editor 以上。`teamId` 語意 = 未來 Keycloak
       group id（公司 IdP 已確認有 groups），接回時只換 Provider 實作
       → 驗證：授權矩陣整合測試（Testcontainers，stub 身分）全綠
-- [~] 1.3 發布與複製 API（implementer in worktree + commander 閘門）：`POST /api/skills/{id}/publish`、
+- [x] 1.3 發布與複製 API（implementer in worktree + commander 閘門）：`POST /api/skills/{id}/publish`、
       `DELETE /api/skills/{id}/publish`、`POST /api/skills/{id}/copy-to-team`
       → 驗證：整合測試——draft 對外不可見 / published 可見 / 複製後獨立演化且記 sourceSkillId
-- [ ] 1.4 搜尋接可見性（orchestrator）：$text index（照原設計 MVP），
-      結果按呼叫者可見範圍過濾
+- [~] 1.4 搜尋接可見性 + view=open 清單（implementer in worktree + commander 閘門）：
+      $text index（照原設計 MVP），結果按呼叫者可見範圍過濾；含 GET /api/skills
+      ?view=open 清單（1.2 刻意留給 1.4）；順帶修 updateSkill 吞 RuntimeException
+      把 403 遮成 404 的既有 bug（1.3 交接）
       → 驗證：整合測試——他團隊 draft 不出現在結果
 - [ ] 1.5 Dev 身分與 seed 更新（STANDARD）：定義 demo 團隊（team-a/team-b）
       與 dev 使用者（stub，含 editor/viewer 角色）；seed-data.sh 產生兩團隊
@@ -111,7 +113,9 @@ Status: active (2026-07-03)
 
 - [ ] 4.1 全站 loading/empty/error states（CHEAP，模式定型後批次套用）
       → 驗證：空資料/斷網情境 screenshot 清單
-- [ ] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋三主流程
+- [ ] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋三主流程；
+      修/汰換舊 SkillControllerIntegrationTest（仍用 X-User-Id，1.2 auth 下會 401，
+      1.3 交接）；Docker 回來後補跑所有 @*IntegrationTest（1.1/1.2/1.3 累積）
       → 驗證：`./mvnw test` + `npm test` 全綠，覆蓋對照 acceptance criteria
 - [ ] 4.3 E2E 冒煙（STANDARD）：docker-compose 全起，兩個 dev 身分跨團隊情境
       腳本走完
@@ -178,6 +182,13 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   無越界、無刪測試，收進 main（commit 59cc971），1.2 標 [x]。
   缺口：HTTP 層 Testcontainers 整合測試未寫成（agent 中斷）→ 併入 4.2。
   ⚠️ 帳務上限問題仍在：後續 dispatch 前須確認 spend limit 已調高
+- 2026-07-04 | 1.3 | done，merge 89c0fff（impl commit cdf9895，opus）。
+  publish/unpublish/copy-to-team 三 endpoint + 已發布不可刪 409 守衛；
+  12 新單元測試 + SkillPublishIntegrationTest（用 X-Dev-User）。commander
+  閘門重跑：unit exit 0（47 tests）、package exit 0；diff 範圍僅 skill/
+  無越界。使用者切 opus 續作，本步無撞上限。2 個 1.3 交接的既有問題已
+  分派：updateSkill 遮 403→1.4 順修；舊 SkillControllerIntegrationTest
+  用 X-User-Id 會 401→4.2 汰換
 
 ## Decisions
 
