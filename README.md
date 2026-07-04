@@ -24,7 +24,34 @@ docker-compose logs -f
 - Backend: http://localhost:8080 (Swagger: http://localhost:8080/swagger-ui.html)
 - MongoDB: localhost:27017
 
-> **Auth note:** Keycloak is currently disabled (deferred). All requests are permitted without authentication. See `docs/decisions/20260703-defer-keycloak-stub-identity.md`.
+> **Auth note:** Keycloak is currently disabled (deferred). Identity is a dev
+> stub read from the `X-Dev-User` header. See
+> `docs/decisions/20260703-defer-keycloak-stub-identity.md`.
+
+### 跨團隊 Demo 資料
+
+兩個團隊、兩個開發身分（無 Keycloak，靠 `X-Dev-User` header 切換身分）：
+
+| 身分 | 團隊 | 角色 |
+| --- | --- | --- |
+| alice | team-a（平台團隊） | editor |
+| carol | team-b（資料團隊） | editor |
+| bob | team-a | viewer |
+
+```bash
+docker-compose up -d                                   # 啟動（含 mongo/backend，無 keycloak）
+until curl -sf http://localhost:8080/api/health; do sleep 1; done   # 等後端就緒
+./seed-data.sh                                         # 跑 migration 並灌入跨團隊資料（--reset 可清空重灌）
+
+# 以 alice 身分看 team-a 的 skills
+curl -H 'X-Dev-User: alice' 'http://localhost:8080/api/skills?teamId=team-a'
+# 以 carol 身分看 team-b 的 skills
+curl -H 'X-Dev-User: carol' 'http://localhost:8080/api/skills?teamId=team-b'
+# 任一身分都看得到開放空間（已發布的 skills）
+curl -H 'X-Dev-User: bob' 'http://localhost:8080/api/skills?view=open'
+```
+
+每個團隊各保留至少一份 draft，用來驗證草稿不會跨團隊可見。前端的身分切換 UI 為 Phase 2.2。
 
 ### 單獨運行後端
 
