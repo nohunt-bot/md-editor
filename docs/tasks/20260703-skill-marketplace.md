@@ -105,14 +105,15 @@ Status: active (2026-07-03)
 
 ### Phase 3 — 開放空間體驗
 
-- [ ] 3.1 開放空間瀏覽頁（orchestrator）：最新發布、tag 篩選、搜尋結果
-      → 驗證：Playwright——team-b 身分能找到 team-a 發布的 skill
-- [ ] 3.2 發布流程 UI（orchestrator）：draft→published 確認 dialog、
-      可見性 badge、unpublish
-      → 驗證：Playwright 全流程
-- [ ] 3.3 複製到團隊 UI（STANDARD）：確認 dialog（顯示目標團隊）、
-      複製後導向自己團隊的新 skill
-      → 驗證：Playwright 全流程
+- [x] 3.1 開放空間瀏覽頁（commander inline）：最新發布、tag 篩選、搜尋結果
+      → 驗證：Playwright——team-b 身分能找到 team-a 發布的 skill（實機併 4.3）；
+        元件測試 5 情境（卡片/來源團隊/tag chips/兩種空狀態/chip 帶 tag 查詢）
+- [x] 3.2 發布流程 UI（已於 2.4 SkillDetail 交付）：draft→published 確認 dialog
+      （警語「全公司可見」）、可見性 badge、unpublish（警語「副本不受影響」）
+      → 驗證：SkillDetailPage 元件測試涵蓋 editor 顯示發布鈕；實機流程併 4.3
+- [x] 3.3 複製到團隊 UI（已於 2.4 SkillDetail 交付）：多團隊者顯示選團隊 dialog、
+      複製後導向新 skill；單一團隊直接複製（無歧義，刻意不多一步 dialog）
+      → 驗證：元件測試涵蓋 open+published 顯示複製鈕；實機流程併 4.3
 
 ### Phase 4 — Polish 與總驗證
 
@@ -256,6 +257,14 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   vitest(19) exit 0。★ Phase 2 前端全數完成（tokens→雙區 shell→卡片→詳情頁
   →編輯器）。⚠️ MDXEditor jsdom 難測，toolbar 快照 + 貼上不損毀 →併入 4.3 E2E
   互動驗證。
+- 2026-07-04 | 3.1 | done，commit f8bdc1b（commander inline）。OpenSpacePage
+  增強為卡片 grid（來源團隊 + 發布日期 provenance）、tag chips 篩選（honour
+  ?tag）、?q from 全域搜尋、三空狀態。閘門：tsc/build/vitest(24) exit 0。
+- 2026-07-04 | 3.2+3.3 | done——核對確認發布/下架/複製流程已完整落在 2.4 的
+  SkillDetailPage（ConfirmDialog 用 PRD 原文警語、copy 選團隊 dialog、複製後
+  navigate 新 skill）。無需重複派工。單一團隊複製直接執行為刻意 UX 決策。
+  ★ Phase 3 開放空間體驗完成。實機跨團隊互動驗證（team-b 找到 team-a 發布、
+  完整發布/複製流程）統一併入 4.3 E2E（需 Docker）。
 
 ## Decisions
 
