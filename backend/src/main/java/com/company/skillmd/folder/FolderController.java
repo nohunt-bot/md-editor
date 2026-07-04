@@ -29,7 +29,7 @@ public class FolderController {
 
     @PostMapping
     public ResponseEntity<FolderResponse> create(@RequestBody CreateFolderRequest request) {
-        return ResponseEntity.ok(folderService.createFolder(request.name(), request.parentId()));
+        return ResponseEntity.ok(folderService.createFolder(request.name(), request.teamId(), request.parentId()));
     }
 
     @PatchMapping("/{id}")
@@ -52,7 +52,7 @@ public class FolderController {
         return ResponseEntity.noContent().build();
     }
 
-    public record CreateFolderRequest(String name, String parentId) {}
+    public record CreateFolderRequest(String name, String teamId, String parentId) {}
 
     public record RenameFolderRequest(String name) {}
 

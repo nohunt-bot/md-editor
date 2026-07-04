@@ -27,6 +27,11 @@ public class SkillService {
         skill.setDisplayName(request.displayName());
         skill.setDescription(request.description());
         skill.setContent(request.content());
+        skill.setTeamId(request.teamId());
+        skill.setScope("team");
+        skill.setStatus("draft");
+        skill.setPublishedAt(null);
+        skill.setSourceSkillId(null);
         skill.setFolderId(request.folderId());
         skill.setTags(request.tags() != null ? request.tags() : List.of());
         skill.setCurrentVersion(1);
@@ -90,6 +95,11 @@ public class SkillService {
             skill.getDisplayName(),
             skill.getDescription(),
             skill.getContent(),
+            skill.getTeamId(),
+            skill.getScope(),
+            skill.getStatus(),
+            skill.getPublishedAt(),
+            skill.getSourceSkillId(),
             skill.getFolderId(),
             skill.getTags(),
             List.of(), // TODO: resolve references

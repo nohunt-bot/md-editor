@@ -7,18 +7,34 @@ import java.time.Instant;
 import java.util.List;
 
 @Document(collection = "skills")
+@CompoundIndexes({
+    @CompoundIndex(name = "teamId_name_unique", def = "{'teamId': 1, 'name': 1}", unique = true),
+    @CompoundIndex(name = "scope_status_publishedAt", def = "{'scope': 1, 'status': 1, 'publishedAt': -1}"),
+    @CompoundIndex(name = "teamId_folderId", def = "{'teamId': 1, 'folderId': 1}")
+})
 public class Skill {
 
     @Id
     private String id;
 
-    @Indexed(unique = true)
+    @TextIndexed
     private String name;
 
+    @TextIndexed
     private String displayName;
+
+    @TextIndexed
     private String description;
+
     private String content;
+    private String teamId;
+    private String scope;
+    private String status;
+    private Instant publishedAt;
+    private String sourceSkillId;
     private String folderId;
+
+    @TextIndexed
     private List<String> tags;
     private List<SkillReference> references;
     private List<SkillPrerequisite> prerequisites;
@@ -53,6 +69,21 @@ public class Skill {
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public String getTeamId() { return teamId; }
+    public void setTeamId(String teamId) { this.teamId = teamId; }
+
+    public String getScope() { return scope; }
+    public void setScope(String scope) { this.scope = scope; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public Instant getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(Instant publishedAt) { this.publishedAt = publishedAt; }
+
+    public String getSourceSkillId() { return sourceSkillId; }
+    public void setSourceSkillId(String sourceSkillId) { this.sourceSkillId = sourceSkillId; }
 
     public String getFolderId() { return folderId; }
     public void setFolderId(String folderId) { this.folderId = folderId; }

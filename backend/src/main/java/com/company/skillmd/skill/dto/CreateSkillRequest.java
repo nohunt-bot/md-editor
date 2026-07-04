@@ -8,6 +8,7 @@ public record CreateSkillRequest(
     String displayName,
     String description,
     @NotBlank String content,
+    @NotBlank String teamId,
     String folderId,
     List<String> tags,
     List<ReferenceDTO> references,

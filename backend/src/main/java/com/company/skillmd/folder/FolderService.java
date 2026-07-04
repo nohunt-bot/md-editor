@@ -18,9 +18,12 @@ public class FolderService {
         this.skillRepository = skillRepository;
     }
 
-    public FolderResponse createFolder(String name, String parentId) {
+    public FolderResponse createFolder(String name, String teamId, String parentId) {
         name = validateName(name);
-        if (isDuplicateName(name, parentId)) {
+        if (teamId == null || teamId.isBlank()) {
+            throw new IllegalArgumentException("teamId is required");
+        }
+        if (isDuplicateName(teamId, name, parentId)) {
             throw new IllegalArgumentException("A folder named '" + name + "' already exists here");
         }
         if (parentId != null) {
@@ -29,6 +32,7 @@ public class FolderService {
         }
         Folder folder = new Folder();
         folder.setName(name);
+        folder.setTeamId(teamId);
         folder.setParentId(parentId);
         return toResponse(folderRepository.save(folder));
     }
@@ -36,7 +40,7 @@ public class FolderService {
     public FolderResponse renameFolder(String id, String newName) {
         newName = validateName(newName);
         Folder folder = findById(id);
-        if (!folder.getName().equals(newName) && isDuplicateName(newName, folder.getParentId())) {
+        if (!folder.getName().equals(newName) && isDuplicateName(folder.getTeamId(), newName, folder.getParentId())) {
             throw new IllegalArgumentException("A folder named '" + newName + "' already exists here");
         }
         folder.setName(newName);
@@ -88,10 +92,10 @@ public class FolderService {
             .toList();
     }
 
-    private boolean isDuplicateName(String name, String parentId) {
+    private boolean isDuplicateName(String teamId, String name, String parentId) {
         return parentId == null
-            ? folderRepository.existsByNameAndParentIdIsNull(name)
-            : folderRepository.existsByNameAndParentId(name, parentId);
+            ? folderRepository.existsByTeamIdAndNameAndParentIdIsNull(teamId, name)
+            : folderRepository.existsByTeamIdAndNameAndParentId(teamId, name, parentId);
     }
 
     // Returns true if targetId is a descendant of ancestorId
@@ -117,11 +121,11 @@ public class FolderService {
     }
 
     private FolderResponse toResponse(Folder folder) {
-        return new FolderResponse(folder.getId(), folder.getName(), folder.getParentId(),
+        return new FolderResponse(folder.getId(), folder.getName(), folder.getTeamId(), folder.getParentId(),
             folder.getCreatedAt(), folder.getUpdatedAt());
     }
 
-    public record FolderResponse(String id, String name, String parentId,
+    public record FolderResponse(String id, String name, String teamId, String parentId,
                                  java.time.Instant createdAt, java.time.Instant updatedAt) {}
 
     public record FolderNode(String id, String name, String parentId, List<FolderNode> children) {}

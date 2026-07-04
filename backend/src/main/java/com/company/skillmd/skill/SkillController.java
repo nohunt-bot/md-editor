@@ -1,6 +1,7 @@
 package com.company.skillmd.skill;
 
 import com.company.skillmd.skill.dto.*;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class SkillController {
 
     @PostMapping
     public ResponseEntity<SkillResponse> createSkill(
-            @RequestBody CreateSkillRequest request,
+            @Valid @RequestBody CreateSkillRequest request,
             @RequestHeader("X-User-Id") String userId) {
         SkillResponse response = skillService.createSkill(request, userId);
         return ResponseEntity.ok(response);
