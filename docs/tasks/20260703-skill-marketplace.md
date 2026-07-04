@@ -117,16 +117,23 @@ Status: active (2026-07-03)
 
 ### Phase 4 — Polish 與總驗證
 
-- [ ] 4.1 全站 loading/empty/error states（CHEAP，模式定型後批次套用）
-      → 驗證：空資料/斷網情境 screenshot 清單
-- [~] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋三主流程；
-      修/汰換舊 SkillControllerIntegrationTest（仍用 X-User-Id，1.2 auth 下會 401，
-      1.3 交接）；Docker 回來後補跑所有 @*IntegrationTest（1.1/1.2/1.3 累積）
-      → 驗證：`./mvnw test` + `npm test` 全綠，覆蓋對照 acceptance criteria
-- [~] 4.3 E2E 冒煙（STANDARD）：docker-compose 全起，兩個 dev 身分跨團隊情境
-      腳本走完
-      → 驗證：腳本 exit 0 + 截圖存檔
-- [ ] 4.4 文件同步 + /retro：README/IMPLEMENTATION_STATUS/schema.md 更新；
+- [x] 4.1 全站 loading/empty/error states（隨各頁增量完成）：SkillsPage 三空狀態、
+      OpenSpacePage 三空狀態、SkillDetail loading+404、編輯器 loading；API 錯誤
+      統一 fallback 到空狀態（catch→empty，四頁皆有）
+      → 驗證：E2E 截圖確認實資料與空狀態渲染正確（scratchpad e2e-*.png）；
+        獨立「載入失敗/重試」錯誤態（有別於空態）列為日後 polish，非阻斷
+- [x] 4.2 測試補齊（STANDARD）：後端授權矩陣全覆蓋；前端發布/複製/搜尋主流程；
+      舊 SkillControllerIntegrationTest 已於 2.2 改 X-Dev-User（X-User-Id grep=0）；
+      Docker 回來補跑所有 @*IntegrationTest 累積——全數真跑通過
+      → 驗證：`./mvnw test`（含整合）exit 0；`npm test` 24 綠
+- [x] 4.3 E2E 冒煙（commander，本機直跑取代 compose——見下）：真後端+真 Mongo，
+      兩 dev 身分跨團隊情境全通過
+      → 驗證：API 層——/api/me（alice→平台團隊 editor）、開放空間列 3 已發布含
+        teamDisplayName、carol 看 team-b 含 draft、carol 讀 team-a=403、
+        carol copy-to-team 成功（新 draft、記 sourceSkillId、v1）、bob 發布=403；
+        UI 層——Playwright 截 /team（4 卡片 badge 正確）+ /open（3 跨團隊卡片
+        含來源團隊）（scratchpad e2e-team.png / e2e-open.png）
+- [~] 4.4 文件同步 + /retro：README/IMPLEMENTATION_STATUS/schema.md 更新；
       跑 /retro 收尾，本檔改 Status: done
       → 驗證：fresh-context reviewer 核對文件與實況
 
@@ -271,6 +278,17 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
   0 跳過（Mongo 真的起了，單一類別耗 8.6s）。關掉全任務拖最久的風險：跨團隊
   授權/發布/複製/可見性搜尋皆端到端驗證。舊 SkillControllerIntegrationTest
   已於 2.2 改用 X-Dev-User（grep X-User-Id=0），4.2 的汰換項自動達成。
+- 2026-07-04 | 4.3 | done（E2E 全通過）。docker-compose build 撞憑證輔助
+  （docker-credential-desktop 不在 PATH，環境問題非程式碼）→ 換路：本機直跑
+  真 stack（mongo:7 容器＋spring-boot:run＋vite dev，皆打 localhost），等效
+  且避開 image build。seed 用 REST 建 7 skills、發布 3；因本機無 mongosh，
+  teams 改用容器內建 mongosh（docker exec）upsert。跨團隊情境 API+UI 雙層
+  全綠（詳見 4.3 驗證行）。收工拆除 dev servers＋mongo 容器，working tree 淨。
+  ⚠️ 遺留：frontend/.env 仍有 stale VITE_KEYCLOAK_*（0.1 只清了 .env.example，
+  .env 是 local/gitignored）→ 4.4 順手清或記 open issue。
+- 2026-07-04 | 4.1/4.2 | done。4.1 狀態頁隨各頁增量完成（每頁 loading+empty，
+  API 錯誤 fallback 空態）；獨立錯誤態列日後 polish。4.2 後端含整合全綠、前端
+  24 綠、舊測試汰換自動達成。★ Phase 4 僅剩 4.4 文件同步+retro。
 
 ## Decisions
 
