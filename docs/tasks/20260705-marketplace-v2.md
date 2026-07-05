@@ -89,7 +89,7 @@ Status: active (2026-07-05 使用者核准開跑)
 ### Phase E — WebSocket 在線提示 + 軟鎖（最大工程；orchestrator 級，~3-5d）
 > 注意：E 的所有新 UI 字串一律走 F 建好的 i18n（t('...')），不再硬編。
 
-- [ ] E1 後端 WS 基礎：spring-boot-starter-websocket；`/ws` endpoint；
+- [~] E1 後端 WS 基礎：spring-boot-starter-websocket；`/ws` endpoint；
       presence 協議——client 進編輯頁送 `editing:start {skillId}`、離開/逾時
       （30s heartbeat）自動清除；儲存成功後 server 廣播
       `skill:updated {skillId, version, editorId}`。身分沿 dev-stub
