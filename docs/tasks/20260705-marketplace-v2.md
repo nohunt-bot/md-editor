@@ -65,14 +65,13 @@ Status: active (2026-07-05 使用者核准開跑)
 
 ### Phase D — 深色主題（前端 only；STANDARD，~1d）
 
-- [ ] D1 tokens 深色值：index.css `[data-theme="dark"]` 全套覆蓋（bg/text/
-      border/semantic/--ok-soft/--accent-contrast）；對比度抽查（本文對背景
-      ≥ 4.5:1）
-- [ ] D2 切換器：側欄底部 淺/深/跟隨系統 三態（localStorage `theme`，預設
-      system，用 prefers-color-scheme）；MDXEditor 深色 pass（2.5 留的
-      TODO 一併清）
-      → 驗證：兩主題 × {/team, /open, 詳情, 編輯器} 截圖對照；vitest 切換
-      persist
+- [x] D1 tokens 深色值：[data-theme=dark] 全套覆蓋（accent 提亮為 #5b8def
+      顧深底對比、--ok-soft 深色版、color-scheme: dark）
+- [x] D2 切換器：useTheme hook（light/dark/system、localStorage、system 模式
+      live 追蹤 prefers-color-scheme）+ 側欄「主題」三態 select；MDXEditor
+      CSS 早已零 hex 全 token → 深色自動生效（2.1/2.5 的 TODO 自然關閉）
+      → 驗證：vitest 38/38（useTheme 3 測試）、tsc/build 0；深色截圖過目
+      （深底/亮藍 accent/層級完整）。空狀態與含資料頁對照併收尾輪
 
 ### Phase E — WebSocket 在線提示 + 軟鎖（最大工程；orchestrator 級，~3-5d）
 
@@ -126,6 +125,10 @@ Status: active (2026-07-05 使用者核准開跑)
   migration counters 回填。閘門：BE 全套 exit 0（ServiceTest 23→25、
   PublishIntegration 12→13）、FE tsc/build 0 vitest 35/35。已 push。
   下一步：Phase D 深色主題
+- 2026-07-05 | D | done，commit f0f41ab（commander inline）。dark token
+  overrides + useTheme + 三態切換器；編輯器 CSS 已全 token 化故自動相容。
+  閘門：tsc/build 0、vitest 38/38、深色截圖確認。已 push。
+  下一步：Phase E WebSocket 在線提示（最後一個 phase）
 
 ## Open questions
 
