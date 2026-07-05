@@ -29,22 +29,22 @@ export function ConflictDialog({
     <div className="conflict-dialog-overlay">
       <div className="conflict-dialog">
         <div className="conflict-header">
-          <h2>⚠️ Edit Conflict Detected</h2>
+          <h2>⚠️ 偵測到編輯衝突</h2>
           <p className="conflict-message">{message}</p>
         </div>
 
         <div className="conflict-info">
           <p>
-            <strong>Version:</strong> {currentVersion} (by {currentEditorId})
+            <strong>版本：</strong>v{currentVersion}（由 {currentEditorId}）
           </p>
           <p>
-            This skill was modified while you were editing. Please review the changes below.
+            這份 skill 在你編輯期間被修改了，請檢視下方差異後再決定。
           </p>
         </div>
 
         <div className="conflict-actions">
           <button onClick={() => setShowDiff(!showDiff)}>
-            {showDiff ? 'Hide Diff' : 'Show Diff'}
+            {showDiff ? '隱藏差異' : '顯示差異'}
           </button>
         </div>
 
@@ -54,31 +54,31 @@ export function ConflictDialog({
               oldValue={currentContent}
               newValue={newContent}
               splitView={true}
-              leftTitle={`Server (v${currentVersion})`}
-              rightTitle="Your changes"
+              leftTitle={`伺服器（v${currentVersion}）`}
+              rightTitle="你的變更"
               useDarkTheme={true}
             />
           </div>
         )}
 
         <div className="conflict-actions">
-          <button 
-            className="btn-override" 
+          <button
+            className="btn-override"
             onClick={onOverride}
           >
-            Override (Force Save)
+            覆蓋（強制儲存）
           </button>
-          <button 
-            className="btn-merge" 
+          <button
+            className="btn-merge"
             onClick={() => onMerge(currentContent)}
           >
-            Use Server Version
+            改用伺服器版本
           </button>
-          <button 
-            className="btn-abandon" 
+          <button
+            className="btn-abandon"
             onClick={onAbandon}
           >
-            Abandon Changes
+            放棄變更
           </button>
         </div>
       </div>

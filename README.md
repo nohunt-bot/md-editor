@@ -1,6 +1,28 @@
-# Skill.md Service
+# Skill.md Service — 公司內部 Skill Marketplace
 
-一個團隊共享的 Skill.md 編輯與管理服務，作為 AI agent 系統的 skill knowledge base。
+公司內部的 skill marketplace：各團隊在自己的空間撰寫、維護 SKILL.md，成熟後
+發布到「開放空間」供全公司搜尋、瀏覽、複製回自己團隊使用。作為 AI agent 系統
+的 skill knowledge base。
+
+## 功能總覽
+
+- **團隊空間 / 開放空間**：雙區側欄，登入零點擊即分清「我的團隊」與「開放空間」
+- **發布 / 下架 / 複製到團隊**：draft → published 狀態機；複製後獨立演化（記
+  來源），支援跨團隊探索
+- **發布版本凍結**：非團隊成員永遠看到發布當下的版本；團隊再編輯不外洩，重新
+  發布才更新（見 `docs/decisions/20260705-publish-freeze-embedded-snapshot.md`）
+- **搜尋 / 分頁 / 排序**：$text 可見性搜尋（分「我的團隊 / 開放空間」兩群）、
+  清單分頁、開放空間「最新 / 最熱」排序
+- **讚 / 引用數**：每人一票的讚、被複製次數（引用數）
+- **淺色 / 深色主題**：token 驅動，淺 / 深 / 跟隨系統三態切換
+- **權限矩陣**：team editor / viewer / admin × 讀 / 寫 / 發布 / 複製；不可見資源
+  一律 404（不洩露存在性）
+- **身分（MVP）**：dev-stub（`X-Dev-User` header），Keycloak 接回為 deferred
+  （換 `CurrentUserProvider` 實作即可）
+
+> 規劃與決策：v1 主檔 `docs/tasks/20260703-skill-marketplace.md`、v2 主檔
+> `docs/tasks/20260705-marketplace-v2.md`；spec `docs/design/PRD.md`；ADR 在
+> `docs/decisions/`。
 
 ## 快速開始
 
@@ -117,11 +139,15 @@ md-editor/
 │       └── common/   # Shared utilities
 ├── frontend/         # React app
 │   └── src/
-│       ├── pages/    # SkillsPage (list/grid/filter view)
+│       ├── app/      # 應用外殼：Sidebar, GlobalSearch, useIdentity,
+│       │             #   useTheme, TeamFilterContext
+│       ├── pages/    # SkillsPage(團隊清單), OpenSpacePage(開放空間),
+│       │             #   SkillDetailPage(詳情)
 │       ├── components/
-│       │   ├── editor/     # SkillEditor, MdxEditorWrapper
+│       │   ├── editor/     # SkillEditor, MdxEditorWrapper（精簡 toolbar）
 │       │   ├── tree/       # FolderTree
-│       │   └── dialog/     # ConflictDialog
+│       │   ├── dialog/     # ConflictDialog
+│       │   └── common/     # Badge, Pagination, ErrorBanner, Markdown
 │       ├── api/      # API client
 │       ├── hooks/    # (空目錄 — 規劃中)
 │       └── stores/   # (空目錄 — Zustand 規劃中)
@@ -130,26 +156,45 @@ md-editor/
 
 ## API Endpoints
 
-| Method | Path | Description |
+所有請求帶 `X-Dev-User` header（dev-stub 身分）。
+
+| Method | Path | 說明 |
 |---|---|---|
-| POST | `/api/skills` | Create skill |
-| GET | `/api/skills` | List skills (paginated) |
-| GET | `/api/skills/{id}` | Get skill detail |
-| PUT | `/api/skills/{id}` | Update skill |
-| DELETE | `/api/skills/{id}` | Soft delete |
-| GET | `/api/health` | Health check |
+| GET | `/api/me` | 目前身分 + 團隊 + 角色 |
+| GET | `/api/teams` | 全部團隊 |
+| POST | `/api/skills` | 建立 skill（歸屬 body.teamId） |
+| GET | `/api/skills?view=team&teamId=` | 團隊清單（分頁） |
+| GET | `/api/skills?view=open&sort=publishedAt\|likes` | 開放空間清單（分頁、排序） |
+| GET | `/api/skills/{id}` | 詳情（非成員得凍結版） |
+| PUT / DELETE | `/api/skills/{id}` | 更新 / 軟刪 |
+| POST / DELETE | `/api/skills/{id}/publish` | 發布 / 下架 |
+| POST | `/api/skills/{id}/copy-to-team` | 複製到團隊 |
+| PUT / DELETE | `/api/skills/{id}/like` | 讚 / 收回讚（冪等） |
+| GET | `/api/search?q=&scope=all\|team\|open` | 可見性搜尋（分兩群） |
+| GET/POST | `/api/skills/{id}/versions...` | 版本清單 / 還原 |
+| GET/POST/... | `/api/folders...`, `/api/tags` | 資料夾 / 標籤 |
+| GET | `/api/health` | 健康檢查 |
 
 ## 開發階段
 
-- [x] Phase 0: Foundation (專案骨架)
-- [x] Phase 1: MVP CRUD
-- [ ] Phase 2: 編輯體驗 (MDXEditor) — partial（進行中）
-- [ ] Phase 3: 版本與權限
-- [ ] Phase 4: LLM Discovery
-- [ ] Phase 5: Polish
+**Marketplace v1**（`docs/tasks/20260703-skill-marketplace.md`）— 全數完成
+- [x] 後端核心：schema、身分授權、發布 / 複製、可見性搜尋、seed
+- [x] 前端：淺色 tokens、雙區 shell、卡片、詳情頁、精簡編輯器
+- [x] 開放空間體驗、UX 補完（導向 / 錯誤處理 / 中文化）、E2E 驗證
+
+**Marketplace v2**（`docs/tasks/20260705-marketplace-v2.md`）
+- [x] A 分頁 UI
+- [x] B 發布版本凍結
+- [x] C 讚 + 引用數 + 最熱排序
+- [x] D 深色主題
+- [ ] E WebSocket 在線提示 + 軟鎖（進行中）
+
+**Deferred**（原設計明確排除）：LLM discovery 前端、Keycloak 接回、發布審核流。
 
 ## 參考文檔
 
 - 實作規格：`docs/design/PRD.md`
-- 任務追蹤：`docs/tasks/20260703-skill-marketplace.md`
-- Auth 決策：`docs/decisions/20260703-defer-keycloak-stub-identity.md`
+- 任務追蹤：`docs/tasks/20260703-skill-marketplace.md`（v1）、
+  `docs/tasks/20260705-marketplace-v2.md`（v2）
+- 決策記錄：`docs/decisions/`（team scope、Keycloak 延後、編輯器收斂、
+  發布凍結 snapshot）

@@ -145,8 +145,9 @@ export const folderApi = {
   list: () =>
     api.get('/api/folders'),
 
-  create: (name: string, parentId?: string) =>
-    api.post('/api/folders', { name, parentId }),
+  // teamId is required by the backend (folders are team-scoped since v1 1.1).
+  create: (name: string, teamId: string, parentId?: string) =>
+    api.post('/api/folders', { name, teamId, parentId }),
 
   rename: (id: string, name: string) =>
     api.patch(`/api/folders/${id}`, { name }),

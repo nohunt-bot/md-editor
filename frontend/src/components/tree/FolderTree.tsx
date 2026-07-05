@@ -13,9 +13,10 @@ interface FolderTreeProps {
   folders: FolderNode[]
   selectedFolder: string | null
   onSelectFolder: (folderId: string | null) => void
+  teamId?: string | null
 }
 
-export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTreeProps) {
+export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: FolderTreeProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
 
   function toggleExpand(folderId: string) {
@@ -68,15 +69,18 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTr
   if (!folders || folders.length === 0) {
     return (
       <div className="folder-tree-empty">
-        <p>No folders</p>
-        <button 
+        <p>尚無資料夾</p>
+        <button
           className="btn-small"
+          disabled={!teamId}
+          title={!teamId ? '請先選擇團隊' : undefined}
           onClick={() => {
-            const name = prompt('Enter folder name:')
-            if (name) folderApi.create(name)
+            if (!teamId) return
+            const name = prompt('輸入資料夾名稱：')
+            if (name) folderApi.create(name, teamId)
           }}
         >
-          + New Folder
+          + 新增資料夾
         </button>
       </div>
     )
@@ -89,7 +93,7 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTr
         onClick={() => onSelectFolder(null)}
       >
         <span className="folder-icon">📂</span>
-        <span className="folder-name">All Skills</span>
+        <span className="folder-name">全部 skill</span>
       </div>
       {folders.map(folder => renderFolder(folder))}
     </div>

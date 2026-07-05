@@ -129,6 +129,13 @@ Status: active (2026-07-05 使用者核准開跑)
   overrides + useTheme + 三態切換器；編輯器 CSS 已全 token 化故自動相容。
   閘門：tsc/build 0、vitest 38/38、深色截圖確認。已 push。
   下一步：Phase E WebSocket 在線提示（最後一個 phase）
+- 2026-07-05 | i18n + docs | 使用者回饋：介面殘餘英文 + 更新專案 markdown。
+  掃出並 zh 化 FolderTree（No folders/All Skills/+New Folder/prompt）、
+  ConflictDialog（衝突對話全部 6 處 + 測試斷言）、Sidebar「Tags」。順修
+  folderApi.create 未帶 teamId 的既有 bug（後端 1.1 起要求；FolderTree 加
+  teamId prop、無團隊時 disable）。README 全面改寫（功能總覽 / API 表 / 結構樹
+  / v1+v2 階段）、IMPLEMENTATION_STATUS 加 v2 摘要。閘門：tsc/build 0、
+  vitest 38/38（ConflictDialog 測試已更新）。全站 UI = zh-TW。
 
 ## Open questions
 

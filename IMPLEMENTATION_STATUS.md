@@ -1,10 +1,16 @@
 # Skill.md Service - Implementation Status
 
-> **Marketplace 轉型（2026-07-03-05）已完成 Phase 0–4**：公司內部 skill
-> marketplace（團隊空間 + 開放空間、發布/複製/搜尋、淺色極簡前端、dev-stub
-> 身分）。主檔 `docs/tasks/20260703-skill-marketplace.md`；spec `docs/design/PRD.md`。
-> 後端單元+整合測試全綠（含 Testcontainers），前端 24 tests 綠，跨團隊 E2E
-> 已於真 stack 驗證。以下為早期 Phase 0/1 骨架記錄，marketplace 增量見任務檔。
+> **Marketplace v1（2026-07-03-05）完成 Phase 0–5**：團隊 / 開放空間、發布 /
+> 複製 / 搜尋、淺色前端、UX 補完、dev-stub 身分。主檔
+> `docs/tasks/20260703-skill-marketplace.md`。
+>
+> **Marketplace v2（2026-07-05）完成 Phase A–D**：分頁、發布版本凍結
+> （內嵌 snapshot）、讚 + 引用數 + 最熱排序、深色主題；**Phase E**（WebSocket
+> 在線提示 + 軟鎖）進行中。主檔 `docs/tasks/20260705-marketplace-v2.md`。
+>
+> 後端單元 + 整合測試全綠（含 Testcontainers 真 Mongo），前端 38 tests 綠，
+> 跨團隊 E2E 已於真 stack 驗證。以下為早期 Phase 0/1 骨架記錄，marketplace
+> 增量見任務檔。UI 全 zh-TW。
 
 ## ✅ Completed (early skeleton — Phase 0 + Phase 1)
 

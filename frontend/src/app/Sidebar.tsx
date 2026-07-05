@@ -72,11 +72,12 @@ export function Sidebar({ identity }: { identity: Identity }) {
               folders={folders}
               selectedFolder={selectedFolder}
               onSelectFolder={setSelectedFolder}
+              teamId={teamId}
             />
           </div>
 
           <div className="zone-block">
-            <div className="zone-subtitle">Tags</div>
+            <div className="zone-subtitle">標籤</div>
             <div className="tag-filter">
               <button
                 className={`tag-chip ${!selectedTag ? 'active' : ''}`}
