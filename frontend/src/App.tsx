@@ -7,7 +7,11 @@ import { SettingsPage } from './pages/SettingsPage'
 import { Sidebar } from './app/Sidebar'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
+import { useEffect } from 'react'
 import { useIdentity } from './app/useIdentity'
+import { setThemeMode, type ThemeMode } from './app/useTheme'
+import { getPreferences } from './api/api'
+import { setLanguage, type LanguageCode } from './i18n'
 import { useTranslation } from 'react-i18next'
 import './App.css'
 
@@ -16,6 +20,20 @@ function App() {
   // backend), useIdentity falls back to an empty identity so both zones render.
   const identity = useIdentity()
   const { t } = useTranslation()
+
+  // Preferences follow the user: localStorage is applied instantly on boot
+  // (no FOUC); once identity is known, the server's saved theme/language
+  // override it. Silent-degrade if offline. Applying here does NOT re-save.
+  useEffect(() => {
+    if (identity.loading || identity.offline) return
+    getPreferences()
+      .then((res) => {
+        const { theme, language } = res.data
+        if (theme) setThemeMode(theme as ThemeMode)
+        if (language) setLanguage(language as LanguageCode)
+      })
+      .catch(() => {})
+  }, [identity.loading, identity.offline, identity.userId])
 
   return (
     <BrowserRouter>

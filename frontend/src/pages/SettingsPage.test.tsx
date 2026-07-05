@@ -1,6 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { SettingsPage } from './SettingsPage'
+
+const saveMock = vi.fn((_p: unknown) => Promise.resolve({ data: {} }))
+vi.mock('../api/api', async () => {
+  const actual = await vi.importActual<typeof import('../api/api')>('../api/api')
+  return { ...actual, savePreferences: (p: unknown) => saveMock(p) }
+})
 
 // useIdentity reads /api/me; mock it to a stub identity.
 vi.mock('../app/useIdentity', () => ({
@@ -32,5 +38,18 @@ describe('SettingsPage', () => {
     expect(screen.getByLabelText('語言')).toBeInTheDocument()
     // Deferred hints present (account + team management)
     expect(screen.getAllByText('需接上 Keycloak 後啟用').length).toBe(2)
+  })
+
+  it('persists theme + language changes to the backend', () => {
+    saveMock.mockClear()
+    render(
+      <MemoryRouter>
+        <SettingsPage />
+      </MemoryRouter>,
+    )
+    fireEvent.change(screen.getByLabelText('主題'), { target: { value: 'dark' } })
+    expect(saveMock).toHaveBeenCalledWith({ theme: 'dark' })
+    fireEvent.change(screen.getByLabelText('語言'), { target: { value: 'en' } })
+    expect(saveMock).toHaveBeenCalledWith({ language: 'en' })
   })
 })

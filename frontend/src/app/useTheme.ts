@@ -22,6 +22,12 @@ export function applyTheme(mode: ThemeMode) {
   document.documentElement.dataset.theme = resolved
 }
 
+/** Persist + apply a theme mode without the hook (used to apply server prefs). */
+export function setThemeMode(mode: ThemeMode) {
+  localStorage.setItem(KEY, mode)
+  applyTheme(mode)
+}
+
 export function useTheme(): { mode: ThemeMode; setMode: (m: ThemeMode) => void } {
   const [mode, setModeState] = useState<ThemeMode>(readThemeMode)
 

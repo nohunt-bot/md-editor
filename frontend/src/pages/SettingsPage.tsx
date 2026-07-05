@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentity } from '../app/useIdentity'
-import { useTheme, type ThemeMode } from '../app/useTheme'
+import { useTheme, readThemeMode, type ThemeMode } from '../app/useTheme'
 import { LANGUAGES, setLanguage, readLang, type LanguageCode } from '../i18n'
+import { savePreferences } from '../api/api'
 import './SettingsPage.css'
 
 // /settings — the full settings surface (docs/tasks/20260705-user-menu-
@@ -46,8 +47,15 @@ export function SettingsPage() {
           <label htmlFor="settings-theme">{t('common:theme')}</label>
           <select
             id="settings-theme"
-            value={theme.mode}
-            onChange={(e) => theme.setMode(e.target.value as ThemeMode)}
+            /* Read from storage each render (like language) so it stays correct
+               when prefs load async from the backend on a fresh device. */
+            value={readThemeMode()}
+            onChange={(e) => {
+              const mode = e.target.value as ThemeMode
+              theme.setMode(mode)
+              // Persist to the account (silent-degrade if offline).
+              savePreferences({ theme: mode }).catch(() => {})
+            }}
           >
             <option value="system">{t('common:themeSystem')}</option>
             <option value="light">{t('common:themeLight')}</option>
@@ -59,7 +67,11 @@ export function SettingsPage() {
           <select
             id="settings-lang"
             value={readLang()}
-            onChange={(e) => setLanguage(e.target.value as LanguageCode)}
+            onChange={(e) => {
+              const lang = e.target.value as LanguageCode
+              setLanguage(lang)
+              savePreferences({ language: lang }).catch(() => {})
+            }}
           >
             {LANGUAGES.map((l) => (
               <option key={l.code} value={l.code}>

@@ -61,6 +61,17 @@ export function getMe() {
   return api.get<MeResponse>('/api/me')
 }
 
+// User preferences (theme + language) that follow the account across devices.
+export type PreferencesPayload = { theme?: string | null; language?: string | null }
+
+export function getPreferences() {
+  return api.get<PreferencesPayload>('/api/me/preferences')
+}
+
+export function savePreferences(prefs: PreferencesPayload) {
+  return api.put<PreferencesPayload>('/api/me/preferences', prefs)
+}
+
 export function getTeams() {
   return api.get('/api/teams')
 }
