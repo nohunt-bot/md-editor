@@ -141,20 +141,21 @@ Status: active (2026-07-05 reopened — 使用者回饋迭代：對接/UX 補完
 
 ### Phase 5 — 對接與 UX 補完（2026-07-05 使用者回饋迭代；驗證一律 commander）
 
-- [ ] 5.1 核心流程順暢度（implementer in worktree，pin base）：
+- [x] 5.1 核心流程順暢度（agent 撞 spend-limit→commander inline）：
       (a) 建立後導向新 skill 詳情頁、更新後導回 `/skills/:id`（修 F1 斷鏈：
       目前存檔一律丟回 /team，發布入口斷）；(b) 錯誤處理去 alert() 化——
       inline 中文錯誤提示（editor 頂部 error banner，token 樣式）；(c) 無
       activeTeam 時「+ 新增 Skill」disabled + title 提示，editor 內同步防呆；
       (d) 編輯器文案統一中文（Edit Skill/Save/Name...→中文）
       → 驗證：commander 跑 build/tsc/vitest + live Playwright 走 F1
-- [ ] 5.2 搜尋補完（併入 5.1 或獨立）：「查看全部結果」列（→ /open?q=）+
-      ⌘K focus 搜尋
-      → 驗證：Playwright 搜尋流程
-- [ ] 5.3 fresh-context reviewer findings 修復（等 aa4118e 回報後排定）
-      → 驗證：commander 逐項復核
-- [ ] 5.4 最終驗證 + push GitHub：live 全流程（F1 建立→發布、F2 複製、F3 搜尋、
-      F5 下架）Playwright 走查 + 全測試綠 → push origin main
+- [x] 5.2 搜尋補完（併入 5.1 inline）：「在開放空間查看全部結果」列 + ⌘K
+      → 驗證：GlobalSearch.test.tsx + live 截圖見（⌘K）placeholder
+- [x] 5.3 fresh-context reviewer findings 修復（commander inline）：
+      IMPLEMENTATION_STATUS 陳舊聲明 4 處（auth/search 已實作、toolbar、
+      dark theme、SkillDetail placeholder）+ App.css #fff→--accent-contrast
+      → 驗證：reviewer verdict FIX-FIRST 唯一 FAIL 即此文件；修正後逐項對照
+- [~] 5.4 最終驗證 + push GitHub：live 全流程 Playwright 走查 + 全測試綠
+      → push origin main
       → 驗證：git push 成功、遠端 HEAD=本地 HEAD
 
 ### 明確不做（本任務範圍外）
@@ -312,6 +313,15 @@ LLM discovery 前端與 `/api/discovery/match` 串接（確認排在 marketplace
 - 2026-07-05 | 4.4 | done——結案。文件同步（IMPLEMENTATION_STATUS 加 marketplace
   摘要）、2 則教訓入 ~/.claude/harness/LESSONS.md（worktree base 過期、
   spend-limit 搶救協議）。★★ 全任務 Phase 0-4 完成，Status: done。
+- 2026-07-05 | 覆核+P5 | fresh-context reviewer（獨立起 stack 自產證據）判
+  FIX-FIRST：7 條驗收 6 PASS（授權矩陣每格 live 驗證 404/403/401 全對、
+  71 後端測試 0 skip），唯一 FAIL=IMPLEMENTATION_STATUS 陳舊聲明。
+  Phase 5 使用者回饋迭代（commit fbc4a36，agent 又死 spend-limit→commander
+  inline）：儲存導向修復（create→新詳情頁/update→原詳情頁，F1 斷鏈接回）、
+  alert 全滅→ErrorBanner（中文）、no-team 防呆（topbar+editor）、編輯器全面
+  中文化、⌘K+查看全部結果、reviewer findings 全修。閘門：build/tsc 0、
+  vitest 28/28。Live 走查（真 stack）：F1 建立→儲存落詳情→發布 dialog→
+  published；F2 carol 開放空間找到→複製→落 team-b 新 draft（截圖）。
   ⚠️ 誠實缺口：所有 phase 的驗證由 commander 自跑（閘門重跑+E2E），非
   fresh-context 覆核——spend-limit 使 subagent 反覆死，circuit-breaker 換
   inline。judgment §2「作者不自驗」未完全滿足，如實記錄。Follow-ups 見結案報告。
