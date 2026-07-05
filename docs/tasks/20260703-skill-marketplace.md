@@ -1,6 +1,6 @@
 # Task: 把 md-editor（Skill.md Service）發展成公司內部 skill marketplace——團隊空間 + 開放空間、發布/瀏覽/搜尋、淺色極簡前端
 
-Status: active (2026-07-05 reopened — 使用者回饋迭代：對接/UX 補完後推 GitHub)
+Status: done (2026-07-05 — Phase 0-5 全數完成；已推 GitHub origin/main 6604119)
 
 > 執行協議：`~/.claude/harness/rules/long-tasks.md`。接手的 subagent 先讀本檔，
 > 信任 Progress log 而非記憶，從第一個未打勾的步驟繼續。每個 phase 以
@@ -154,9 +154,10 @@ Status: active (2026-07-05 reopened — 使用者回饋迭代：對接/UX 補完
       IMPLEMENTATION_STATUS 陳舊聲明 4 處（auth/search 已實作、toolbar、
       dark theme、SkillDetail placeholder）+ App.css #fff→--accent-contrast
       → 驗證：reviewer verdict FIX-FIRST 唯一 FAIL 即此文件；修正後逐項對照
-- [~] 5.4 最終驗證 + push GitHub：live 全流程 Playwright 走查 + 全測試綠
+- [x] 5.4 最終驗證 + push GitHub：live 全流程 Playwright 走查 + 全測試綠
       → push origin main
-      → 驗證：git push 成功、遠端 HEAD=本地 HEAD
+      → 驗證：push f184d82..6604119 成功；`git rev-parse HEAD origin/main`
+        兩者一致（6604119）
 
 ### 明確不做（本任務範圍外）
 
