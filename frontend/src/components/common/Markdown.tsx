@@ -1,6 +1,23 @@
 import { Fragment, type ReactNode } from 'react'
 import './Markdown.css'
 
+// Security: only allow safe link schemes. Published skills render in every
+// viewer's browser, so a `[x](javascript:…)` link must NOT become a live anchor.
+// Allow http/https/mailto and relative (path/anchor) URLs; reject any other
+// scheme. Control chars are stripped before the scheme check to defeat tricks
+// like `java\tscript:`. Returns the safe href, or null if it must be inert.
+export function safeHref(raw: string): string | null {
+  const url = raw.trim()
+  if (/^(https?:|mailto:)/i.test(url)) return url
+  // Relative path or in-page anchor — no scheme, safe.
+  if (/^[/#]/.test(url) || /^\.{0,2}\//.test(url)) return url
+  const stripped = url.replace(/[\u0000-\u0020]/g, "")
+  // Has a scheme we didn't allow (javascript:, data:, vbscript:, …) → unsafe.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(stripped)) return null
+  // No scheme at all → treat as a relative link.
+  return url
+}
+
 // Minimal, dependency-free markdown renderer for the read view (§6.4 left
 // column). Supports the subset the editor toolbar produces: headings, fenced
 // code blocks (monospaced via --font-mono), unordered/ordered lists, blockquote,
@@ -135,11 +152,17 @@ function inline(text: string, keyBase: string): ReactNode[] {
     } else {
       const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
       if (linkMatch) {
-        nodes.push(
-          <a key={key} href={linkMatch[2]} target="_blank" rel="noreferrer">
-            {linkMatch[1]}
-          </a>,
-        )
+        const href = safeHref(linkMatch[2])
+        if (href) {
+          nodes.push(
+            <a key={key} href={href} target="_blank" rel="noreferrer">
+              {linkMatch[1]}
+            </a>,
+          )
+        } else {
+          // Unsafe scheme (javascript:, data:, …) — render inert text, not a link.
+          nodes.push(linkMatch[1])
+        }
       } else {
         nodes.push(token)
       }
