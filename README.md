@@ -15,6 +15,9 @@
   清單分頁、開放空間「最新 / 最熱」排序
 - **讚 / 引用數**：每人一票的讚、被複製次數（引用數）
 - **淺色 / 深色主題**：token 驅動，淺 / 深 / 跟隨系統三態切換
+- **多語系**：繁體中文 / English（react-i18next，側欄即時切換）
+- **在線提示**：編輯同一 skill 時顯示「某某也在編輯」+ 他人儲存後的更新警示
+  （DB 輪詢軟提示，樂觀鎖 409 為最後防線）
 - **權限矩陣**：team editor / viewer / admin × 讀 / 寫 / 發布 / 複製；不可見資源
   一律 404（不洩露存在性）
 - **身分（MVP）**：dev-stub（`X-Dev-User` header），Keycloak 接回為 deferred
@@ -187,7 +190,8 @@ md-editor/
 - [x] B 發布版本凍結
 - [x] C 讚 + 引用數 + 最熱排序
 - [x] D 深色主題
-- [ ] E WebSocket 在線提示 + 軟鎖（進行中）
+- [x] E 在線提示 + 軟鎖（DB 輪詢，非 WebSocket——見 decisions/）
+- [x] F 多語系框架（react-i18next，繁中/English）
 
 **Deferred**（原設計明確排除）：LLM discovery 前端、Keycloak 接回、發布審核流。
 

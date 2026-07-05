@@ -4,13 +4,14 @@
 > 複製 / 搜尋、淺色前端、UX 補完、dev-stub 身分。主檔
 > `docs/tasks/20260703-skill-marketplace.md`。
 >
-> **Marketplace v2（2026-07-05）完成 Phase A–D**：分頁、發布版本凍結
-> （內嵌 snapshot）、讚 + 引用數 + 最熱排序、深色主題；**Phase E**（WebSocket
-> 在線提示 + 軟鎖）進行中。主檔 `docs/tasks/20260705-marketplace-v2.md`。
+> **Marketplace v2（2026-07-05）完成 Phase A–F**：分頁、發布版本凍結（內嵌
+> snapshot）、讚 + 引用數 + 最熱排序、深色主題、在線提示 + 軟鎖（DB 輪詢）、
+> 多語系框架（react-i18next 繁中/English）。主檔
+> `docs/tasks/20260705-marketplace-v2.md`。
 >
-> 後端單元 + 整合測試全綠（含 Testcontainers 真 Mongo），前端 38 tests 綠，
-> 跨團隊 E2E 已於真 stack 驗證。以下為早期 Phase 0/1 骨架記錄，marketplace
-> 增量見任務檔。UI 全 zh-TW。
+> 後端單元 + 整合測試全綠（含 Testcontainers 真 Mongo），前端 46 tests 綠，
+> 跨團隊 + 在線提示 E2E 已於真 stack 驗證。以下為早期 Phase 0/1 骨架記錄，
+> marketplace 增量見任務檔。UI 支援繁中/English 切換。
 
 ## ✅ Completed (early skeleton — Phase 0 + Phase 1)
 

@@ -1,6 +1,6 @@
 # Task: Marketplace v2 —— 分頁、發布版本凍結、讚/引用數、深色主題、WebSocket 在線提示
 
-Status: active (2026-07-05 使用者核准開跑)
+Status: done (2026-07-05 — Phase A-F 全數完成，已推 GitHub)
 
 > 執行協議沿用 v1（`docs/tasks/20260703-skill-marketplace.md` 驗證過的模式）：
 > implementer in worktree + **pin base SHA（首要驗收條件）** + commander 在
@@ -86,28 +86,31 @@ Status: active (2026-07-05 使用者核准開跑)
       → 驗證：live 英文截圖確認全站切換（My Team/Open Space/Create your
       first skill…）
 
-### Phase E — WebSocket 在線提示 + 軟鎖（最大工程；orchestrator 級，~3-5d）
-> 注意：E 的所有新 UI 字串一律走 F 建好的 i18n（t('...')），不再硬編。
+### Phase E — 在線提示 + 軟鎖（改採 DB 輪詢；使用者選型 2026-07-05）
+> ⚠️ 選型變更：原規劃 WebSocket，使用者於討論後改 **DB 輪詢**（避開新 infra、
+> 天生多實例相容）→ ADR 20260705-presence-db-poll-over-websocket。WS handler
+> 一度寫好但未 commit，已整條移除。E 的新 UI 字串走 F 的 i18n。
 
-- [~] E1 後端 WS 基礎：spring-boot-starter-websocket；`/ws` endpoint；
-      presence 協議——client 進編輯頁送 `editing:start {skillId}`、離開/逾時
-      （30s heartbeat）自動清除；儲存成功後 server 廣播
-      `skill:updated {skillId, version, editorId}`。身分沿 dev-stub
-      （query param，設計為 Keycloak token 可直接替換——記入 ADR 接點）
-      → 驗證：整合測試（WS client 模擬兩連線）——presence 廣播、逾時清除、
-      updated 推播
-- [ ] E2 前端：編輯器頂部在線提示（「⚠ carol 也在編輯」）；收到他人
-      `skill:updated` 時**立即**顯示衝突橫幅（早於送出；現有 409 樂觀鎖流程
-      保留為最後防線）；斷線自動重連、WS 不可用時靜默退化（功能照舊）
-      → 驗證：vitest（mock WS）+ live 雙瀏覽器走查——A/B 同開、A 見 B 在線、
-      B 儲存 A 立刻見警示
-- [ ] E3 明確不做（本 phase 邊界）：共同編輯、游標/選取同步、內容即時合併
-      ——維持原設計 ADR（OT/CRDT 排除）
+- [x] E1 後端 presence：skill_presence collection（lastSeen TTL index 60s 自動
+      清除）；`PUT /api/skills/{id}/presence`（心跳+讀取合一：upsert 自己、回
+      其他在線編輯者 + 該 skill currentVersion）、`DELETE`（離開）；需 edit 權限；
+      身分沿 dev-stub（Keycloak 接回只換 CurrentUserProvider）
+      → 驗證：整合測試 presenceHeartbeat（兩人互見、版本漂移回報、viewer=403、
+      leave 移除）全綠（真 Mongo）
+- [x] E2 前端：usePresence hook 每 5s 輪詢；編輯器顯示「X 也在編輯」；
+      currentVersion 超前載入版本時顯示「已被更新」警示（早於送出；409 樂觀鎖
+      留最後防線）；錯誤靜默退化（回空、編輯照常）；離開 best-effort DELETE
+      → 驗證：hook 單元 5 測試；live 雙身分走查——alice 編輯器顯示
+      「admin is also editing」（截圖）
+- [x] E3 明確不做：共同編輯、游標同步、即時合併——維持 OT/CRDT 排除（原 ADR）
 
 ### 收尾
 
-- [ ] F1 /retro：done-check、新 ADR 檢查（B1、E1 身分接點）、LESSONS、
-      本檔 Status: done、最終 push
+- [x] 收尾 /retro：done-check（每 phase 閘門 + live 驗證證據見各 progress
+      行）；ADR 落檔（publish-freeze、presence-db-poll）；教訓入
+      ~/.claude/harness/LESSONS.md（live-E2E 抓 index/upsert bug）；README +
+      IMPLEMENTATION_STATUS 同步；本檔 Status: done；最終 push
+      → 驗證：git rev-parse HEAD origin/main 一致
 
 ## 順序依據（Decisions）
 
@@ -156,6 +159,17 @@ Status: active (2026-07-05 使用者核准開跑)
   ⚠️ 注意 SkillDetailPage 的 targetTeams.map((t)=>) 原本會遮蔽 i18n 的 t，
   已改名 tm。閘門：tsc/build 0、vitest 41/41、英文全站截圖確認。已 push。
   ★ Phase E（WebSocket）現在可在 i18n 基礎上開跑——E 新字串一律走 t()。
+- 2026-07-05 | E | done，commit 5deb4de（commander inline）。★ 選型變更：
+  使用者質疑「為何不用 DB lock 要 WebSocket」，討論後改 DB 輪詢（ADR
+  presence-db-poll-over-websocket）；已寫好的 WS handler 整條移除、pom
+  還原。skill_presence + TTL、PUT/DELETE presence endpoint、usePresence
+  hook、編輯器在線提示 + 版本漂移警示。閘門：BE 全套 exit 0（Publish
+  Integration 14 含 presence）、FE tsc/build 0 vitest 46/46。
+  ⚠️★ live E2E 抓到單元/整合測試漏掉的 bug：presence 用 find-then-save +
+  unique index，但 Spring Boot 預設關閉 auto-index-creation → 實跑累積重複列、
+  findBySkillIdAndUserId 拋 IncorrectResultSize 500。改 MongoTemplate 原子
+  upsert 根治。教訓：靠 unique index 去重的寫入，測試（每次清空 collection）
+  不會暴露，必須 live 或 upsert。★ v2 全數完成（A-F + E）。已 push。
 
 ## Open questions
 
