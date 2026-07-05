@@ -36,20 +36,19 @@ Status: active (2026-07-05 使用者核准開跑)
 
 ### Phase B — 發布版本凍結（核心語意變更；orchestrator 級，~2-3d）
 
-- [ ] B1 決策落檔（ADR）：**內嵌 publishedSnapshot** over 版本指標 join——
-      skills 加 `publishedSnapshot {displayName, description, content, tags,
-      version}`+`publishedVersion`；讀取零 join、清單/詳情一致；代價＝內容
-      雙份儲存（可接受）。publish/re-publish 時重建 snapshot
-      → 驗證：docs/decisions/ 新 ADR + schema.md 同步
-- [ ] B2 後端：publish 建 snapshot；非成員讀 detail/open 清單/搜尋一律取
-      snapshot 欄位；成員與 admin 讀最新；unpublish 後 snapshot 保留（不可見）；
-      migration：現有已發布 3 筆以現行內容回填
-      → 驗證：整合測試——非成員讀到凍結內容、成員讀到最新、re-publish 刷新
-- [ ] B3 前端：詳情頁非成員顯示「發布版 v{n}」badge；團隊成員在
-      currentVersion > publishedVersion 時看到「有未發布的更新——重新發布」
-      提示與按鈕（確認 dialog 沿用）
-      → 驗證：vitest 三情境 + live 走查（alice 編輯已發布件→carol 看仍是舊版
-      →alice 重新發布→carol 看到新版）
+- [x] B1 決策落檔：ADR 20260705-publish-freeze-embedded-snapshot（內嵌
+      snapshot over 版本指標 join——版本指標另有 versions 保留策略懸空引用
+      風險）+ schema.md 同步
+- [x] B2 後端：publish/re-publish 重建 snapshot；非成員 detail 走
+      toFrozenResponse、open 清單與 open 搜尋 bucket 走 snapshot metadata
+      （pre-migration fallback live）；SkillResponse 加 publishedVersion；
+      冪等 migration scripts/migrate-20260705-v2-freeze.js
+      → 驗證：單元 2 新測試（freeze/雙視角）+ 整合 freeze 流程（alice 發布→
+      編輯→carol 看舊→re-publish→carol 看新）全綠（真 Mongo，套件 exit 0）
+- [x] B3 前端：非成員版本列標「（發布版）」；成員 currentVersion >
+      publishedVersion 時顯示「有未發布的更新（開放空間仍顯示 vN）」+
+      重新發布按鈕（沿用 publish confirm dialog）
+      → 驗證：vitest 2 新情境（33/33）；tsc/build 0。live 走查併 F1 收尾輪
 
 ### Phase C — 讚 + 引用數（STANDARD，~1.5-2d）
 
@@ -116,6 +115,12 @@ Status: active (2026-07-05 使用者核准開跑)
   （25 筆→2 頁）。閘門：FE tsc/build 0、vitest 31/31；BE 全套含整合 exit 0
   （SkillControllerIntegrationTest 4→5）。已 push。下一步：Phase B 凍結
   （先落 B1 ADR）
+- 2026-07-05 | B | done，commit 6cefeae（commander inline）。ADR+schema、
+  entity snapshot、publish 凍結、非成員三讀取路徑（detail/open 清單/open
+  搜尋）snapshot 化、前端凍結視角+重新發布提示、冪等 migration。閘門：BE
+  全套 exit 0（ServiceTest 21→23、PublishIntegration 11→12 含完整 freeze
+  流程）、FE tsc/build 0 vitest 33/33、migration node --check OK。已 push。
+  下一步：Phase C 讚+引用數
 
 ## Open questions
 
