@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { search, type SearchResult } from '../api/api'
 
-// TODO(2.x): ⌘K keyboard shortcut to focus this input (PRD §6.5).
-
 export function GlobalSearch() {
   const navigate = useNavigate()
   const [q, setQ] = useState('')
@@ -13,6 +11,19 @@ export function GlobalSearch() {
   })
   const [open, setOpen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // ⌘K / Ctrl+K focuses the search input (PRD §6.5).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   // Debounced search.
   useEffect(() => {
@@ -67,9 +78,10 @@ export function GlobalSearch() {
   return (
     <div className="global-search" ref={boxRef}>
       <input
+        ref={inputRef}
         className="global-search-input"
         type="search"
-        placeholder="搜尋 skill…"
+        placeholder="搜尋 skill…（⌘K）"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onFocus={() => q.trim() && setOpen(true)}
@@ -83,6 +95,17 @@ export function GlobalSearch() {
             <>
               <SearchGroup title="我的團隊" items={results.team} onPick={go} />
               <SearchGroup title="開放空間" items={results.open} onPick={go} />
+              <button
+                className="search-row search-all-row"
+                onClick={() => {
+                  const term = q.trim()
+                  setOpen(false)
+                  setQ('')
+                  navigate(`/open?q=${encodeURIComponent(term)}`)
+                }}
+              >
+                在開放空間查看全部結果 →
+              </button>
             </>
           )}
         </div>

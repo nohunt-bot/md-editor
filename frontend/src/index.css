@@ -10,6 +10,8 @@
   --bg: #fff;
   --bg-subtle: #f8f9fa;
   --bg-hover: #f1f3f5;
+  /* Text on accent-coloured surfaces (primary buttons, active chips) */
+  --accent-contrast: #fff;
 
   /* Border (1px solid) */
   --border: #e9ecef;

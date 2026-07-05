@@ -1,6 +1,12 @@
 /* Phase 2.4 SkillDetail — two-column read page, light-minimal (PRD §6.4/§6.1).
    Consumes 2.1 tokens; separation via 1px border + whitespace, no heavy shadow. */
 
+/* Wrap exists so the action-error banner can sit above the two columns. */
+.skill-detail-wrap > .error-banner {
+  max-width: 1052px; /* .skill-detail 1100px minus its side padding */
+  margin: var(--sp-6) auto 0;
+}
+
 .skill-detail {
   display: flex;
   gap: var(--sp-8);

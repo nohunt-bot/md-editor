@@ -22,9 +22,20 @@ function App() {
           <div className="app-body">
             <header className="app-topbar">
               <GlobalSearch />
-              <Link to="/skills/new" className="btn-primary">
-                ＋ 新增 Skill
-              </Link>
+              {identity.activeTeamId ? (
+                <Link to="/skills/new" className="btn-primary">
+                  ＋ 新增 Skill
+                </Link>
+              ) : (
+                // Phase 5.1 no-team guard: creating needs an owning team.
+                <button
+                  className="btn-primary"
+                  disabled
+                  title="請先在左側選擇團隊"
+                >
+                  ＋ 新增 Skill
+                </button>
+              )}
             </header>
             <main className="app-main">
               <Routes>

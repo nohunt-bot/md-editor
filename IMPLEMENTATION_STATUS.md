@@ -59,7 +59,7 @@
 **Core Infrastructure:**
 - [x] Vite + React 18 + TypeScript setup
 - [x] React Router configuration
-- [x] Dark theme styling with Inter + JetBrains Mono fonts
+- [x] Light-minimal design-token styling（Inter + JetBrains Mono；2.1 深→淺翻轉）
 - [x] Environment configuration
 
 **Authentication:**
@@ -80,7 +80,8 @@
 - [x] List/Grid view toggle
 - [x] SkillCard component (inline in SkillsPage.tsx)
 - [x] SkillEditor (Create/Edit form with MDXEditor WYSIWYG) — SkillEditor.tsx
-- [x] SkillDetail page (placeholder in App.tsx)
+- [x] SkillDetail page — SkillDetailPage.tsx（完整閱讀頁：rendered markdown、
+      metadata、權限閘控動作、版本歷史；2.4）
 
 **Components:**
 - [x] FolderTree (collapsible tree structure) — FolderTree.tsx
@@ -90,8 +91,9 @@
 
 **Editor:**
 - [x] MDXEditor WYSIWYG integration
-- [x] Toolbar (headings, bold/italic/underline, lists, links, code blocks, tables)
-- [x] Dark theme styling
+- [x] Toolbar — 精簡版（headings, bold/italic, lists, links, code blocks；
+      無 underline/table/image 按鈕，2.5 ADR editor-feature-reduction）
+- [x] Light token-based styling
 - [x] Syntax highlighting support (JavaScript, TypeScript, Python)
 
 ### DevOps
@@ -188,10 +190,12 @@ md-editor/
 │   │   │   ├── TagRepository.java ✅
 │   │   │   ├── TagService.java ✅
 │   │   │   └── TagController.java ✅
-│   │   ├── search/     (空目錄 — 未實作)
+│   │   ├── search/     ✅ SearchController/SearchService（$text 可見性搜尋，1.4）
 │   │   ├── discovery/  (空目錄 — 未實作，LLM discovery deferred)
 │   │   ├── audit/      (空目錄 — 未實作)
-│   │   ├── auth/       (空目錄 — auth deferred)
+│   │   ├── auth/       ✅ CurrentUserProvider/AuthorizationService/MeController
+│   │   │                  等 10 檔（dev-stub 身分＋授權矩陣，1.2）
+│   │   ├── team/       ✅ Team/TeamService/TeamController（1.1）
 │   │   ├── common/     (僅空子目錄 exception/、validation/ — 未實作)
 │   │   ├── SkillMdApplication.java ✅
 │   │   └── HealthController.java ✅

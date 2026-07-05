@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { skillApi } from '../api/api'
 import { Badge } from '../components/common/Badge'
+import { ErrorBanner } from '../components/common/ErrorBanner'
 import { Markdown } from '../components/common/Markdown'
 import { useIdentity, type Identity } from '../app/useIdentity'
 import './SkillDetailPage.css'
@@ -65,6 +66,7 @@ export function SkillDetailPage() {
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [busy, setBusy] = useState(false)
   const [copyTeam, setCopyTeam] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -117,7 +119,7 @@ export function SkillDetailPage() {
       await reload()
       setConfirm(null)
     } catch (e: any) {
-      alert('發布失敗：' + (e.response?.data?.message || e.message))
+      setActionError('發布失敗：' + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
@@ -131,7 +133,7 @@ export function SkillDetailPage() {
       await reload()
       setConfirm(null)
     } catch (e: any) {
-      alert('下架失敗：' + (e.response?.data?.message || e.message))
+      setActionError('下架失敗：' + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
@@ -146,7 +148,7 @@ export function SkillDetailPage() {
       setCopyTeam(null)
       if (newId) navigate(`/skills/${newId}`)
     } catch (e: any) {
-      alert('複製失敗：' + (e.response?.data?.message || e.message))
+      setActionError('複製失敗：' + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
@@ -178,7 +180,9 @@ export function SkillDetailPage() {
     identity.teams.find((t) => t.id === skill.teamId)?.displayName ?? skill.teamId
 
   return (
-    <div className="skill-detail">
+    <div className="skill-detail-wrap">
+      <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />
+      <div className="skill-detail">
       <article className="detail-reading">
         <h1 className="detail-title">{skill.displayName || skill.name}</h1>
         {skill.description && <p className="detail-desc">{skill.description}</p>}
@@ -333,6 +337,7 @@ export function SkillDetailPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

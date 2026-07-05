@@ -126,7 +126,7 @@
 }
 
 .tag-chip.active {
-  color: #fff;
+  color: var(--accent-contrast);
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -239,6 +239,12 @@
   background: var(--bg-hover);
 }
 
+.search-all-row {
+  border-top: 1px solid var(--border);
+  color: var(--accent);
+  font-size: var(--fs-sm);
+}
+
 .search-row-name {
   font-size: var(--fs-base);
   color: var(--text);
@@ -323,7 +329,7 @@
 .btn-primary {
   display: inline-block;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
   padding: var(--sp-2) var(--sp-4);
   border-radius: var(--radius);
   font-weight: 500;

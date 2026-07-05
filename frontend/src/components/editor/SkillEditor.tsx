@@ -4,6 +4,7 @@ import { skillApi, getActiveTeamId, type CreateSkillData, type UpdateSkillData }
 import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import { ConflictDialog } from '../dialog/ConflictDialog'
 import { Badge } from '../common/Badge'
+import { ErrorBanner } from '../common/ErrorBanner'
 import './SkillEditor.css'
 
 interface Conflict {
@@ -23,6 +24,10 @@ export function SkillEditor() {
   const [saving, setSaving] = useState(false)
   const [conflict, setConflict] = useState<Conflict | null>(null)
   const [status, setStatus] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<string | null>(null)
+  // Phase 5.1 no-team guard: creating requires an active team (belt-and-braces
+  // with the top-bar guard in App.tsx).
+  const noTeam = !isEditing && !getActiveTeamId()
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -60,18 +65,23 @@ export function SkillEditor() {
       })
     } catch (error) {
       console.error('Failed to load skill:', error)
-      alert('Failed to load skill')
+      setError('無法載入 skill，請稍後再試')
     } finally {
       setLoading(false)
     }
   }
 
   async function handleSave() {
+    if (noTeam) {
+      setError('請先在左側選擇團隊，再建立 skill')
+      return
+    }
     if (!formData.name || !formData.content) {
-      alert('Name and content are required')
+      setError('名稱與內容為必填')
       return
     }
 
+    setError(null)
     setSaving(true)
     try {
       if (isEditing && id) {
@@ -81,6 +91,9 @@ export function SkillEditor() {
           expectedVersion: formData.currentVersion
         }
         await skillApi.update(id, updateData)
+        // Back to the detail page they came from (F1: 儲存→詳情→發布).
+        navigate(`/skills/${id}`)
+        return
       } else {
         const createData: CreateSkillData = {
           name: formData.name,
@@ -92,9 +105,12 @@ export function SkillEditor() {
           folderId: formData.folderId || undefined,
           tags: formData.tags.length > 0 ? formData.tags : undefined
         }
-        await skillApi.create(createData)
+        const res = await skillApi.create(createData)
+        // Land on the new skill's detail page, where the publish button
+        // lives (PRD §7 F1 step 4) — not back on the list.
+        navigate(`/skills/${res.data.id}`)
+        return
       }
-      navigate('/team')
     } catch (error: any) {
       if (error.response?.status === 409) {
         // Optimistic lock conflict
@@ -109,7 +125,7 @@ export function SkillEditor() {
         return  // Don't navigate away
       }
       console.error('Failed to save skill:', error)
-      alert('Failed to save: ' + (error.response?.data?.message || error.message))
+      setError('儲存失敗：' + (error.response?.data?.message || error.message))
       setSaving(false)
     }
   }
@@ -126,10 +142,10 @@ export function SkillEditor() {
         forceUpdate: true
       }
       await skillApi.update(id, updateData)
-      navigate('/team')
+      navigate(`/skills/${id}`)
     } catch (error: any) {
       console.error('Failed to force save:', error)
-      alert('Failed to save: ' + (error.response?.data?.message || error.message))
+      setError('儲存失敗：' + (error.response?.data?.message || error.message))
     } finally {
       setSaving(false)
     }
@@ -142,7 +158,7 @@ export function SkillEditor() {
 
   function handleAbandon() {
     setConflict(null)
-    navigate('/team')
+    navigate(isEditing && id ? `/skills/${id}` : '/team')
   }
 
   function handleTagInput(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -164,76 +180,85 @@ export function SkillEditor() {
   }
 
   if (loading) {
-    return <div className="skill-editor loading">Loading...</div>
+    return <div className="skill-editor loading">載入中…</div>
   }
 
   return (
     <div className="skill-editor">
       <div className="editor-header">
-        <button className="btn-back" onClick={() => navigate('/team')}>← Back</button>
+        <button
+          className="btn-back"
+          onClick={() => navigate(isEditing && id ? `/skills/${id}` : '/team')}
+        >
+          ← 返回
+        </button>
         <h1>
-          {isEditing ? 'Edit Skill' : 'Create New Skill'}
+          {isEditing ? '編輯 Skill' : '建立 Skill'}
           {isEditing && <Badge status={status} />}
         </h1>
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || noTeam}
+          title={noTeam ? '請先在左側選擇團隊' : undefined}
         >
-          {saving ? 'Saving...' : 'Save'}
+          {saving ? '儲存中…' : '儲存'}
         </button>
       </div>
+
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
+      {noTeam && <ErrorBanner message="請先在左側選擇團隊，再建立 skill" />}
 
       <div className="editor-content">
         <div className="editor-main">
           <div className="form-group">
-            <label htmlFor="name">Name *</label>
+            <label htmlFor="name">名稱 *</label>
             <input
               id="name"
               type="text"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="e.g., hermes-agent, github-pr-workflow"
+              placeholder="例：github-pr-workflow"
             />
-            <small>Unique identifier (lowercase, hyphens)</small>
+            <small>唯一識別（小寫、連字號；團隊內不可重複）</small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="displayName">Display Name</label>
+            <label htmlFor="displayName">顯示名稱</label>
             <input
               id="displayName"
               type="text"
               value={formData.displayName}
               onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-              placeholder="e.g., Hermes Agent Configuration"
+              placeholder="例：GitHub PR 工作流程"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">描述</label>
             <textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Brief description of this skill"
+              placeholder="這個 skill 的簡短說明"
               rows={2}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="content">Content (Markdown) *</label>
+            <label htmlFor="content">內容（Markdown）*</label>
             <MdxEditorWrapper
               ref={editorRef}
               markdown={formData.content}
               onChange={(markdown) => setFormData(prev => ({ ...prev, content: markdown }))}
             />
-            <small>Markdown supported. Use @skill-name to reference other skills.</small>
+            <small>支援 Markdown；code block 用 ```language。</small>
           </div>
         </div>
 
         <aside className="editor-sidebar">
           <div className="form-group">
-            <label>Tags</label>
+            <label>標籤</label>
             <div className="tags-input-container">
               <div className="tags-list">
                 {formData.tags.map(tag => (
@@ -245,44 +270,43 @@ export function SkillEditor() {
               </div>
               <input
                 type="text"
-                placeholder="Add tag + Enter"
+                placeholder="輸入標籤後按 Enter"
                 onKeyDown={handleTagInput}
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="folderId">Folder</label>
+            <label htmlFor="folderId">資料夾</label>
             <select
               id="folderId"
               value={formData.folderId}
               onChange={(e) => setFormData(prev => ({ ...prev, folderId: e.target.value }))}
             >
-              <option value="">No folder</option>
+              <option value="">未分類</option>
               {/* TODO: Load and display folder options */}
             </select>
           </div>
 
           {isEditing && (
             <div className="form-group">
-              <label htmlFor="commitMessage">Commit Message</label>
+              <label htmlFor="commitMessage">版本說明</label>
               <input
                 id="commitMessage"
                 type="text"
                 value={formData.commitMessage}
                 onChange={(e) => setFormData(prev => ({ ...prev, commitMessage: e.target.value }))}
-                placeholder="Describe your changes..."
+                placeholder="描述這次的變更…"
               />
             </div>
           )}
 
           <div className="editor-info">
-            <h4>Tips</h4>
+            <h4>小提示</h4>
             <ul>
-              <li>Use <code># Heading</code> for sections</li>
-              <li>Use <code>@skill-name</code> to reference other skills</li>
-              <li>Code blocks: <code>```language</code></li>
-              <li>Lists: <code>- item</code> or <code>1. item</code></li>
+              <li>章節用 <code># 標題</code></li>
+              <li>程式碼區塊：<code>```language</code></li>
+              <li>清單：<code>- 項目</code> 或 <code>1. 項目</code></li>
             </ul>
           </div>
         </aside>

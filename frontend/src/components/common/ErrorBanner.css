@@ -1,0 +1,32 @@
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-4);
+  background: var(--bg-subtle);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+}
+
+.error-banner-text {
+  font-size: var(--fs-sm);
+  color: var(--danger);
+  line-height: var(--lh);
+}
+
+.error-banner-close {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: var(--fs-md);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 var(--sp-1);
+}
+
+.error-banner-close:hover {
+  color: var(--text);
+}
