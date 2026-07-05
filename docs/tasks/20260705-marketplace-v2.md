@@ -73,7 +73,20 @@ Status: active (2026-07-05 使用者核准開跑)
       → 驗證：vitest 38/38（useTheme 3 測試）、tsc/build 0；深色截圖過目
       （深底/亮藍 accent/層級完整）。空狀態與含資料頁對照併收尾輪
 
+### Phase F — 多語系框架（i18n，使用者 2026-07-05 追加；排在 E 之前避免 E 新字串返工）
+
+- [ ] F1 框架建置：安裝 react-i18next + i18next；`src/i18n/` config；資源檔
+      `zh-TW`（預設）與 `en`；`<html lang>` 同步；語言選擇 localStorage 持久化
+      → 驗證：切換語言後 UI 字串改變；build/tsc 綠
+- [ ] F2 字串抽取：全 UI 硬編中文 → `t('key')`；命名空間分組（shell/skills/
+      open/detail/editor/common）；zh-TW 值＝現況中文、en 值＝對應英文
+      → 驗證：grep 無殘留硬編中文於 JSX 文字節點（範例值/識別符除外）；
+      vitest 全綠（測試改用 key 或 zh-TW 值）
+- [ ] F3 語言切換器：側欄底部（主題切換器旁）中/EN 三態或雙態
+      → 驗證：vitest persist + live 截圖雙語
+
 ### Phase E — WebSocket 在線提示 + 軟鎖（最大工程；orchestrator 級，~3-5d）
+> 注意：E 的所有新 UI 字串一律走 F 建好的 i18n（t('...')），不再硬編。
 
 - [ ] E1 後端 WS 基礎：spring-boot-starter-websocket；`/ws` endpoint；
       presence 協議——client 進編輯頁送 `editing:start {skillId}`、離開/逾時
