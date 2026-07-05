@@ -32,8 +32,11 @@ public class SkillController {
     @GetMapping
     public ResponseEntity<Page<SkillResponse>> listSkills(
             @RequestParam String teamId,
+            @RequestParam(required = false) String folderId,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String q,
             Pageable pageable) {
-        return ResponseEntity.ok(skillService.listSkills(teamId, pageable));
+        return ResponseEntity.ok(skillService.listSkills(teamId, folderId, tag, q, pageable));
     }
 
     @GetMapping(params = "view=open")

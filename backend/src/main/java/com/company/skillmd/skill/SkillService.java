@@ -206,8 +206,33 @@ public class SkillService {
     }
 
     public Page<SkillResponse> listSkills(String teamId, Pageable pageable) {
+        return listSkills(teamId, null, null, null, pageable);
+    }
+
+    /**
+     * Team skill list with server-side filtering (folder + tag + text) so the
+     * filters apply across all pages, not just the current one.
+     */
+    public Page<SkillResponse> listSkills(String teamId, String folderId, String tag, String q,
+                                          Pageable pageable) {
         authorizationService.requireTeamMember(teamId);
-        return skillRepository.findByTeamIdAndDeletedAtNull(teamId, pageable).map(this::toResponse);
+        org.springframework.data.mongodb.core.query.Criteria criteria =
+            org.springframework.data.mongodb.core.query.Criteria
+                .where("teamId").is(teamId).and("deletedAt").isNull();
+        if (folderId != null && !folderId.isBlank()) criteria = criteria.and("folderId").is(folderId);
+        if (tag != null && !tag.isBlank()) criteria = criteria.and("tags").is(tag);
+
+        org.springframework.data.mongodb.core.query.Query query =
+            new org.springframework.data.mongodb.core.query.Query(criteria);
+        if (q != null && !q.isBlank()) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.TextCriteria
+                .forDefaultLanguage().matching(q));
+        }
+        long total = mongoTemplate.count(query, Skill.class);
+        query.with(pageable);
+        java.util.List<SkillResponse> content = mongoTemplate.find(query, Skill.class).stream()
+            .map(this::toResponse).toList();
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, total);
     }
 
     /**

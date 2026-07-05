@@ -102,8 +102,22 @@ export function search(q: string, scope: string = 'all') {
 
 // Skill API
 export const skillApi = {
-  list: (teamId: string, page = 0, size = 20) =>
-    api.get('/api/skills', { params: { teamId, page, size } }),
+  list: (
+    teamId: string,
+    page = 0,
+    opts: { folderId?: string | null; tag?: string | null; q?: string } = {},
+    size = 20,
+  ) =>
+    api.get('/api/skills', {
+      params: {
+        teamId,
+        page,
+        size,
+        folderId: opts.folderId || undefined,
+        tag: opts.tag || undefined,
+        q: opts.q || undefined,
+      },
+    }),
 
   listOpen: (params: { tag?: string; q?: string; sort?: string; page?: number; size?: number } = {}) =>
     api.get('/api/skills', { params: { view: 'open', ...params } }),

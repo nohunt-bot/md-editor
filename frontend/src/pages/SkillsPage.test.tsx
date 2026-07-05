@@ -68,19 +68,20 @@ describe('SkillsPage empty states (§6.4)', () => {
   })
 
   it('(c) filter active, no match → 沒有符合的 skill', async () => {
-    listMock.mockResolvedValue({
-      data: { content: [{ id: 's1', name: 'alpha', displayName: 'Alpha', tags: ['x'] }] },
-    })
-    // Provider whose default tag never matches the skill's tags.
-    const FilteredProvider = ({ children }: { children: React.ReactNode }) => (
-      <TeamFilterProvider>{children}</TeamFilterProvider>
+    // Server-side filtering: the search API returns matches based on the query.
+    // Initial load returns one skill; a query that matches nothing returns [].
+    listMock.mockImplementation((_teamId: string, _page: number, opts: any) =>
+      Promise.resolve({
+        data: {
+          content: opts?.q
+            ? []
+            : [{ id: 's1', name: 'alpha', displayName: 'Alpha', tags: ['x'] }],
+        },
+      }),
     )
-    const { container } = renderPage(baseIdentity(), ['/team'], FilteredProvider)
-    // Wait for skills to load, then set search that matches nothing.
+    const { container } = renderPage(baseIdentity())
     await screen.findByText('Alpha')
     const input = container.querySelector('.search-input') as HTMLInputElement
-    input.focus()
-    // Type a query with no match.
     const { fireEvent } = await import('@testing-library/react')
     fireEvent.change(input, { target: { value: 'zzzznomatch' } })
     await waitFor(() =>

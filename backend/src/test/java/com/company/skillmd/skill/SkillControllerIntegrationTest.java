@@ -188,6 +188,28 @@ class SkillControllerIntegrationTest extends AbstractIntegrationTest {
             "second page should hold 5 items: " + snippet(page2.getBody()));
     }
 
+    @Test
+    @DisplayName("Server-side tag filter counts across all pages, not just the current one")
+    void listSkills_serverSideTagFilter() {
+        for (int i = 0; i < 3; i++) createTagged("alpha-" + i, "alpha");
+        for (int i = 0; i < 2; i++) createTagged("beta-" + i, "beta");
+
+        ResponseEntity<String> filtered = restTemplate.exchange(
+            baseUrl + "?teamId=team-a&tag=alpha&page=0&size=2",
+            HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.OK, filtered.getStatusCode());
+        // 3 matches total even though the page size is 2 → server filtered, not client.
+        assertTrue(filtered.getBody().contains("\"totalElements\":3"),
+            "tag filter should count all matches: " + snippet(filtered.getBody()));
+    }
+
+    private void createTagged(String suffix, String tag) {
+        CreateSkillRequest request = new CreateSkillRequest(
+            "skill-" + suffix + "-" + System.currentTimeMillis(),
+            "Test", "desc", "# c", "team-a", null, List.of(tag), null, null);
+        restTemplate.postForEntity(baseUrl, new HttpEntity<>(request, headers), String.class);
+    }
+
     private String snippet(String body) {
         return body == null ? "null" : body.substring(0, Math.min(body.length(), 300));
     }

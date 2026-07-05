@@ -37,9 +37,18 @@ export function SkillsPage({ identity }: { identity: Identity }) {
   }, [view])
 
   // New team → back to the first page.
+  // Debounce the search box so we don't hit the API on every keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  useEffect(() => {
+    const h = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300)
+    return () => clearTimeout(h)
+  }, [searchQuery])
+
+  // Server-side filtering (folder/tag/search) — applies across all pages, not
+  // just the current one. Any filter change resets to the first page.
   useEffect(() => {
     setPage(0)
-  }, [teamId])
+  }, [teamId, selectedFolder, selectedTag, debouncedSearch])
 
   useEffect(() => {
     if (!teamId) {
@@ -50,7 +59,11 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     let cancelled = false
     setLoading(true)
     skillApi
-      .list(teamId, page)
+      .list(teamId, page, {
+        folderId: selectedFolder,
+        tag: selectedTag,
+        q: debouncedSearch,
+      })
       .then((res) => {
         if (cancelled) return
         setSkills(res.data.content || [])
@@ -65,20 +78,11 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     return () => {
       cancelled = true
     }
-  }, [teamId, page])
+  }, [teamId, page, selectedFolder, selectedTag, debouncedSearch])
 
-  const filterActive = Boolean(selectedFolder || selectedTag || searchQuery)
-
-  const filteredSkills = skills.filter((skill) => {
-    const matchFolder = !selectedFolder || skill.folderId === selectedFolder
-    const matchTag = !selectedTag || skill.tags?.includes(selectedTag)
-    const matchSearch =
-      !searchQuery ||
-      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchFolder && matchTag && matchSearch
-  })
+  const filterActive = Boolean(selectedFolder || selectedTag || debouncedSearch)
+  // Server already filtered; render the returned page as-is.
+  const filteredSkills = skills
 
   function renderBody() {
     // (a) no team selected
@@ -92,8 +96,16 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     if (loading) {
       return <div className="loading">{t('common:loading')}</div>
     }
-    // (b) team selected but zero skills at all
+    // Empty result: distinguish "filter matched nothing" from "team has no
+    // skills at all" (server-side filtering returns the same empty list).
     if (skills.length === 0) {
+      if (filterActive) {
+        return (
+          <div className="empty-state">
+            <p className="empty-state-title">{t('skills:emptyNoMatch')}</p>
+          </div>
+        )
+      }
       return (
         <div className="empty-state">
           <p className="empty-state-title">{t('skills:emptyCreateFirst')}</p>
@@ -101,14 +113,6 @@ export function SkillsPage({ identity }: { identity: Identity }) {
           <Link to="/skills/new" className="btn-primary">
             {t('skills:createSkill')}
           </Link>
-        </div>
-      )
-    }
-    // (c) filter active but no match
-    if (filteredSkills.length === 0) {
-      return (
-        <div className="empty-state">
-          <p className="empty-state-title">{t('skills:emptyNoMatch')}</p>
         </div>
       )
     }
