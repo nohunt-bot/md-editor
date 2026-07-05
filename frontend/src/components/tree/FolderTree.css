@@ -68,7 +68,18 @@
 }
 
 .folder-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+/* Selected row tints the icon with the accent (currentColor drives the SVG). */
+.folder-item.selected .folder-icon {
+  color: var(--accent);
+}
+
+.folder-svg {
+  display: block;
 }
 
 .folder-name {

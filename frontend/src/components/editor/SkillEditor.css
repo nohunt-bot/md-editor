@@ -41,6 +41,9 @@
 .editor-header h1 {
   font-size: 1.75rem;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
 
 .btn-back {
@@ -83,9 +86,24 @@
   font-size: 0.875rem;
 }
 
+/* Base input/textarea appearance (selects use the global select style). */
 .form-group input,
-.form-group textarea,
-/* .form-group select: appearance from the global select style. */
+.form-group textarea {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-sm);
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.12s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted);
+}
 
 .form-group input:focus,
 .form-group textarea:focus,

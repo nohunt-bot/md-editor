@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FolderIcon } from './FolderIcon'
 import './FolderTree.css'
 
 interface FolderNode {
@@ -18,6 +20,14 @@ interface FolderTreeProps {
 export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTreeProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  // Selecting a folder filters the team list AND takes you there — clicking a
+  // folder from /open or /settings previously did nothing visible.
+  function selectFolder(folderId: string | null) {
+    onSelectFolder(folderId)
+    navigate('/team')
+  }
 
   function toggleExpand(folderId: string) {
     setExpandedFolders(prev => {
@@ -41,7 +51,7 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTr
         <div
           className={`folder-item ${isSelected ? 'selected' : ''}`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
-          onClick={() => onSelectFolder(isSelected ? null : folder.id)}
+          onClick={() => selectFolder(isSelected ? null : folder.id)}
         >
           {hasChildren && (
             <button
@@ -54,7 +64,9 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTr
               ▶
             </button>
           )}
-          <span className="folder-icon">📁</span>
+          <span className="folder-icon">
+            <FolderIcon open={isSelected} />
+          </span>
           <span className="folder-name">{folder.name}</span>
         </div>
         {hasChildren && isExpanded && (
@@ -77,11 +89,13 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTr
 
   return (
     <div className="folder-tree">
-      <div 
+      <div
         className={`folder-item ${selectedFolder === null ? 'selected' : ''}`}
-        onClick={() => onSelectFolder(null)}
+        onClick={() => selectFolder(null)}
       >
-        <span className="folder-icon">📂</span>
+        <span className="folder-icon">
+          <FolderIcon open={selectedFolder === null} />
+        </span>
         <span className="folder-name">{t('folders:allSkills')}</span>
       </div>
       {folders.map(folder => renderFolder(folder))}
