@@ -57,6 +57,7 @@ function fmtTime(iso?: string): string {
 type Confirm =
   | { action: 'publish' }
   | { action: 'unpublish' }
+  | { action: 'restore'; version: number }
   | null
 
 export function SkillDetailPage() {
@@ -134,6 +135,31 @@ export function SkillDetailPage() {
       setActionError(t('detail:publishFailed') + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function doRestore(version: number) {
+    if (!id) return
+    setBusy(true)
+    try {
+      await skillApi.restoreVersion(id, version)
+      await reload()
+      await refreshVersions()
+      setConfirm(null)
+    } catch (e: any) {
+      setActionError(t('detail:restoreFailed') + (e.response?.data?.message || e.message))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function refreshVersions() {
+    if (!id) return
+    try {
+      const res = await skillApi.getVersions(id)
+      setVersions(res.data || [])
+    } catch {
+      /* keep existing list */
     }
   }
 
@@ -337,13 +363,19 @@ export function SkillDetailPage() {
                   <span className="version-num">v{v.version}</span>
                   <span className="version-editor">{v.editorId}</span>
                   <span className="version-time">{fmtTime(v.createdAt)}</span>
+                  {editable && v.version !== skill.currentVersion && (
+                    <button
+                      type="button"
+                      className="version-restore"
+                      onClick={() => setConfirm({ action: 'restore', version: v.version })}
+                    >
+                      {t('detail:restore')}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-          {/* TODO(2.x): version restore (canEdit only) — POST
-              /api/skills/{id}/versions/{v}/restore. Not wired this phase;
-              VersionController's X-User-Id restore handler left untouched. */}
         </section>
       </aside>
 
@@ -364,6 +396,16 @@ export function SkillDetailPage() {
           confirmLabel={t('detail:unpublishConfirm')}
           busy={busy}
           onConfirm={doUnpublish}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+      {confirm?.action === 'restore' && (
+        <ConfirmDialog
+          title={t('detail:restoreTitle')}
+          message={t('detail:restoreMsg', { version: confirm.version })}
+          confirmLabel={t('detail:restore')}
+          busy={busy}
+          onConfirm={() => doRestore(confirm.version)}
           onCancel={() => setConfirm(null)}
         />
       )}

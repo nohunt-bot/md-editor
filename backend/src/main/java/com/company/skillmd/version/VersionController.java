@@ -1,5 +1,6 @@
 package com.company.skillmd.version;
 
+import com.company.skillmd.auth.AuthorizationService;
 import com.company.skillmd.version.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +12,11 @@ import java.util.stream.Collectors;
 public class VersionController {
 
     private final VersionService versionService;
+    private final AuthorizationService authorizationService;
 
-    public VersionController(VersionService versionService) {
+    public VersionController(VersionService versionService, AuthorizationService authorizationService) {
         this.versionService = versionService;
+        this.authorizationService = authorizationService;
     }
 
     @GetMapping
@@ -43,8 +46,10 @@ public class VersionController {
     @PostMapping("/{version}/restore")
     public ResponseEntity<Void> restoreVersion(
             @PathVariable String skillId,
-            @PathVariable Integer version,
-            @RequestHeader("X-User-Id") String userId) {
+            @PathVariable Integer version) {
+        // Identity from the auth abstraction (not a client-supplied header);
+        // VersionService enforces editor rights on the skill's team.
+        String userId = authorizationService.currentUser().getUserId();
         versionService.restoreToVersion(skillId, version, userId);
         return ResponseEntity.ok().build();
     }

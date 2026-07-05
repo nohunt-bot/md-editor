@@ -31,6 +31,7 @@ public class SkillService {
     private final MongoTemplate mongoTemplate;
     private final SkillLikeRepository skillLikeRepository;
     private final SkillPresenceRepository skillPresenceRepository;
+    private final com.company.skillmd.version.VersionService versionService;
 
     // Phase E (v2): editors heartbeating within this window are "active".
     private static final long PRESENCE_WINDOW_SECONDS = 15;
@@ -38,7 +39,8 @@ public class SkillService {
     public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver,
                          AuthorizationService authorizationService, TeamService teamService,
                          MongoTemplate mongoTemplate, SkillLikeRepository skillLikeRepository,
-                         SkillPresenceRepository skillPresenceRepository) {
+                         SkillPresenceRepository skillPresenceRepository,
+                         com.company.skillmd.version.VersionService versionService) {
         this.skillRepository = skillRepository;
         this.referenceResolver = referenceResolver;
         this.authorizationService = authorizationService;
@@ -46,6 +48,7 @@ public class SkillService {
         this.mongoTemplate = mongoTemplate;
         this.skillLikeRepository = skillLikeRepository;
         this.skillPresenceRepository = skillPresenceRepository;
+        this.versionService = versionService;
     }
 
     public SkillResponse createSkill(CreateSkillRequest request, String userId) {
@@ -67,6 +70,8 @@ public class SkillService {
         skill.setLastEditorId(userId);
         
         Skill saved = skillRepository.save(skill);
+        // Snapshot v1 so version history + restore work from the start.
+        versionService.createVersion(saved, "Created", userId);
         return toResponse(saved);
     }
 
@@ -97,8 +102,10 @@ public class SkillService {
         
         skill.setLastEditorId(userId);
         skill.setCurrentVersion(skill.getCurrentVersion() + 1);
-        
+
         Skill saved = skillRepository.save(skill);
+        // Snapshot the new version so it appears in history and can be restored.
+        versionService.createVersion(saved, request.commitMessage(), userId);
         return toResponse(saved);
     }
 

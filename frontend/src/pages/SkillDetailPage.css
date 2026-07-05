@@ -219,6 +219,22 @@
   font-size: var(--fs-xs);
 }
 
+.version-restore {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 2px var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.version-restore:hover {
+  background: var(--bg-hover);
+}
+
 .detail-empty {
   font-size: var(--fs-sm);
   color: var(--text-muted);

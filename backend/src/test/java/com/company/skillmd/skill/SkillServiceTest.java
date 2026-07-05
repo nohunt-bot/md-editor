@@ -52,13 +52,16 @@ class SkillServiceTest {
     @Mock
     private SkillPresenceRepository skillPresenceRepository;
 
+    @Mock
+    private com.company.skillmd.version.VersionService versionService;
+
     private SkillService skillService;
 
     @BeforeEach
     void setUp() {
         CurrentUserProvider adminProvider = () -> new CurrentUser("admin", "Admin", Map.of(), true);
         AuthorizationService authorizationService = new AuthorizationService(adminProvider);
-        skillService = new SkillService(skillRepository, referenceResolver, authorizationService, teamService, mongoTemplate, skillLikeRepository, skillPresenceRepository);
+        skillService = new SkillService(skillRepository, referenceResolver, authorizationService, teamService, mongoTemplate, skillLikeRepository, skillPresenceRepository, versionService);
     }
 
     @Test
@@ -206,7 +209,7 @@ class SkillServiceTest {
     private SkillService serviceForUser(CurrentUser user) {
         CurrentUserProvider provider = () -> user;
         return new SkillService(skillRepository, referenceResolver, new AuthorizationService(provider),
-            teamService, mongoTemplate, skillLikeRepository, skillPresenceRepository);
+            teamService, mongoTemplate, skillLikeRepository, skillPresenceRepository, versionService);
     }
 
     private Skill teamSkill(String id, String teamId) {
