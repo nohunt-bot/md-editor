@@ -26,12 +26,13 @@ Status: active (2026-07-05 使用者核准開跑)
 
 ### Phase A — 分頁 UI（快贏；CHEAP-STANDARD，~0.5-1d）
 
-- [~] A1 後端確認：`GET /api/skills`（view=team/open）回應含 totalPages/
-      totalElements（Spring Page 已有——驗證序列化外露）；缺就補 DTO 欄位
-      → 驗證：integration test 斷言分頁 metadata
-- [ ] A2 前端分頁元件（共用）：「上一頁/下一頁 + 第 x / y 頁」，token 樣式；
-      接上 SkillsPage 與 OpenSpacePage（size=20；換頁保持篩選條件）
-      → 驗證：vitest（>1 頁時渲染、換頁帶 filter）；live 用 seed 灌 25 筆走查
+- [x] A1 後端確認：Page 序列化已外露 totalPages/totalElements；integration
+      test 鎖住契約（25 筆→2 頁、第二頁 numberOfElements=5）
+      → 驗證：SkillControllerIntegrationTest 5/5（真 Mongo）
+- [x] A2 前端分頁元件（共用 Pagination）：接上 SkillsPage（teamId 變更 reset）
+      與 OpenSpacePage（q/tag 變更 reset）；單頁時隱藏
+      → 驗證：vitest 31/31（含 Pagination 3 測試）；tsc/build 0；
+      已知限制記於程式碼註解——團隊清單側欄篩選仍為前端過濾（backlog）
 
 ### Phase B — 發布版本凍結（核心語意變更；orchestrator 級，~2-3d）
 
@@ -110,6 +111,11 @@ Status: active (2026-07-05 使用者核准開跑)
 
 - 2026-07-05 | planning | 任務檔建立；兩個範圍決策由使用者拍板（WS=軟鎖、
   評分=讚）；五 phase 排序含依據；等核准開跑
+- 2026-07-05 | A | done，commit 76fb415（commander inline——沿 v1 教訓不再
+  重派進 spend-limit 牆）。共用 Pagination + 兩清單接線 + 分頁契約整合測試
+  （25 筆→2 頁）。閘門：FE tsc/build 0、vitest 31/31；BE 全套含整合 exit 0
+  （SkillControllerIntegrationTest 4→5）。已 push。下一步：Phase B 凍結
+  （先落 B1 ADR）
 
 ## Open questions
 
