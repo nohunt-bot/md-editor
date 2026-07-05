@@ -52,16 +52,16 @@ Status: active (2026-07-05 使用者核准開跑)
 
 ### Phase C — 讚 + 引用數（STANDARD，~1.5-2d）
 
-- [ ] C1 Schema/後端：`skill_likes {skillId, userId, createdAt}` unique
-      compound；skills 加 denormalized `likeCount`、`copyCount`；
-      `PUT/DELETE /api/skills/{id}/like`（冪等）；copy-to-team 時 copyCount+1；
-      migration 以 sourceSkillId aggregate 回填 copyCount
-      → 驗證：整合測試——重複讚不重計、收回讚遞減、copy 遞增
-- [ ] C2 開放空間排序：`sort=publishedAt|likes`（預設最新）
-      → 驗證：整合測試排序正確
-- [ ] C3 前端：詳情動作區讚 toggle（♥/♡ + 數字）；卡片 footer 顯示 ♥ n ·
-      引用 n；開放空間「最新/最熱」切換 chips
-      → 驗證：vitest + live 走查（alice 讚 carol 的 skill、排序改變）
+- [x] C1 Schema/後端：skill_likes unique compound、likeCount/copyCount
+      denormalized（讚後由 countBySkillId 重算防漂移）、like/unlike endpoint
+      （可見即可讚）、copy 遞增來源 copyCount、migration 附 counters 回填
+      → 驗證：單元 2（冪等/遞減）+ 整合 like 流程（雙讚不重計/likedByMe/
+      unlike 歸零/copy 遞增）全綠（真 Mongo）
+- [x] C2 開放空間排序：sort=likes（likeCount desc、publishedAt 決勝）
+      → 驗證：service 層排序邏輯 + 前端傳參測試
+- [x] C3 前端：詳情 metadata 區讚 toggle（♥/♡+數字，likedByMe 種子）+
+      「引用 n 次」；open 卡片 ♥ n · 引用 n；最新/最熱 chips（?sort=likes）
+      → 驗證：vitest 35/35（新 2 測試）；tsc/build 0。live 走查併收尾輪
 
 ### Phase D — 深色主題（前端 only；STANDARD，~1d）
 
@@ -121,6 +121,11 @@ Status: active (2026-07-05 使用者核准開跑)
   全套 exit 0（ServiceTest 21→23、PublishIntegration 11→12 含完整 freeze
   流程）、FE tsc/build 0 vitest 33/33、migration node --check OK。已 push。
   下一步：Phase C 讚+引用數
+- 2026-07-05 | C | done，commit aabf916（commander inline）。skill_likes +
+  denormalized 計數 + like/unlike API + 最熱排序 + 前端 toggle/計數/chips +
+  migration counters 回填。閘門：BE 全套 exit 0（ServiceTest 23→25、
+  PublishIntegration 12→13）、FE tsc/build 0 vitest 35/35。已 push。
+  下一步：Phase D 深色主題
 
 ## Open questions
 
