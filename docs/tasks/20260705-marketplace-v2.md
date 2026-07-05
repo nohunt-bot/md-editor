@@ -1,6 +1,6 @@
 # Task: Marketplace v2 —— 分頁、發布版本凍結、讚/引用數、深色主題、WebSocket 在線提示
 
-Status: planned (2026-07-05，等使用者核准開跑)
+Status: active (2026-07-05 使用者核准開跑)
 
 > 執行協議沿用 v1（`docs/tasks/20260703-skill-marketplace.md` 驗證過的模式）：
 > implementer in worktree + **pin base SHA（首要驗收條件）** + commander 在
@@ -26,7 +26,7 @@ Status: planned (2026-07-05，等使用者核准開跑)
 
 ### Phase A — 分頁 UI（快贏；CHEAP-STANDARD，~0.5-1d）
 
-- [ ] A1 後端確認：`GET /api/skills`（view=team/open）回應含 totalPages/
+- [~] A1 後端確認：`GET /api/skills`（view=team/open）回應含 totalPages/
       totalElements（Spring Page 已有——驗證序列化外露）；缺就補 DTO 欄位
       → 驗證：integration test 斷言分頁 metadata
 - [ ] A2 前端分頁元件（共用）：「上一頁/下一頁 + 第 x / y 頁」，token 樣式；
