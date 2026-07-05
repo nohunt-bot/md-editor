@@ -1,0 +1,63 @@
+.settings-page {
+  max-width: 720px;
+}
+
+.settings-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  background: var(--bg);
+}
+
+.settings-section-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 var(--sp-3);
+}
+
+.settings-dl {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+}
+
+.settings-dl dt {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.settings-dl dd {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  margin: 0;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-2) 0;
+}
+
+.settings-field label {
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.settings-field select {
+  min-width: 180px;
+}
+
+.settings-deferred {
+  opacity: 0.7;
+}
+
+.settings-deferred-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin: 0;
+}

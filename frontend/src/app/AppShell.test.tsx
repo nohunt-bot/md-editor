@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import App from '../App'
 
 // §B: the shell must render BOTH zones even when /api/me fails (no backend).
@@ -34,8 +34,12 @@ describe('App shell (two zones, offline)', () => {
     expect(screen.getByText('開放空間')).toBeInTheDocument()
   })
 
-  it('renders the dev identity switcher', () => {
+  it('renders the user menu (identity + logout on open)', () => {
     render(<App />)
-    expect(screen.getByText('開發身分（僅 dev）')).toBeInTheDocument()
+    // Offline identity falls back to the dev user; the menu trigger renders it.
+    const trigger = document.querySelector('.user-menu-trigger') as HTMLElement
+    expect(trigger).toBeTruthy()
+    fireEvent.click(trigger)
+    expect(screen.getByText('登出')).toBeInTheDocument()
   })
 })

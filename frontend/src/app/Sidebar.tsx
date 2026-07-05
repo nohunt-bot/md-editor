@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { folderApi, tagApi, getDevUser, setDevUser, DEV_USERS } from '../api/api'
+import { folderApi, tagApi } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
 import { useTeamFilter } from './TeamFilterContext'
-import { useTheme, type ThemeMode } from './useTheme'
+import { UserMenu } from './UserMenu'
 import { useTranslation } from 'react-i18next'
-import { LANGUAGES, setLanguage, readLang, type LanguageCode } from '../i18n'
 import type { Identity } from './useIdentity'
 
 export function Sidebar({ identity }: { identity: Identity }) {
   const { selectedFolder, setSelectedFolder, selectedTag, setSelectedTag } = useTeamFilter()
-  const theme = useTheme()
   const { t } = useTranslation()
   const [folders, setFolders] = useState<any[]>([])
   const [tags, setTags] = useState<any[]>([])
@@ -117,44 +115,8 @@ export function Sidebar({ identity }: { identity: Identity }) {
         </section>
       </div>
 
-      {/* Bottom: language + theme switchers + dev identity switcher (§2.1) */}
-      <div className="dev-switcher">
-        <label className="dev-switcher-label">{t('common:language')}</label>
-        <select
-          value={readLang()}
-          onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-        >
-          {LANGUAGES.map((l) => (
-            <option key={l.code} value={l.code}>
-              {l.label}
-            </option>
-          ))}
-        </select>
-        <label className="dev-switcher-label">{t('common:theme')}</label>
-        <select
-          value={theme.mode}
-          onChange={(e) => theme.setMode(e.target.value as ThemeMode)}
-        >
-          <option value="system">{t('common:themeSystem')}</option>
-          <option value="light">{t('common:themeLight')}</option>
-          <option value="dark">{t('common:themeDark')}</option>
-        </select>
-        <label className="dev-switcher-label">{t('common:devUser')}</label>
-        <select
-          value={getDevUser()}
-          onChange={(e) => {
-            setDevUser(e.target.value)
-            // Reload so all data refetches as the new identity.
-            window.location.reload()
-          }}
-        >
-          {DEV_USERS.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Bottom: user menu (identity, quick prefs, settings, logout) */}
+      <UserMenu identity={identity} />
     </aside>
   )
 }

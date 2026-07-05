@@ -1,0 +1,122 @@
+.user-menu {
+  position: relative;
+  border-top: 1px solid var(--border);
+  padding: var(--sp-2);
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-2);
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-menu-trigger:hover {
+  background: var(--bg-hover);
+}
+
+.user-menu-avatar {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.user-menu-id {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-menu-name {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu-team {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu-caret {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.user-menu-pop {
+  position: absolute;
+  bottom: calc(100% + var(--sp-1));
+  left: var(--sp-2);
+  right: var(--sp-2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  z-index: 20;
+}
+
+.user-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.user-menu-item {
+  display: block;
+  padding: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  text-decoration: none;
+  border: none;
+  background: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.user-menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.user-menu-logout {
+  color: var(--danger);
+}
+
+.user-menu-label {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: 0 var(--sp-2);
+}
+
+.user-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--sp-1) 0;
+}
