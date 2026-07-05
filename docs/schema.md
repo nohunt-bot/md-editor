@@ -41,6 +41,14 @@
   "scope": "string",                 // "team" | "open"
   "status": "string",                // "draft" | "published"
   "publishedAt": "ISODate",          // null = 未發布
+  "publishedVersion": "number",      // v2：發布當下的版本；null = 未發布過
+  "publishedSnapshot": {             // v2：發布凍結內容（非成員讀此，非 live 欄位）
+    "displayName": "string",         //   ADR: 20260705-publish-freeze-embedded-snapshot
+    "description": "string",
+    "content": "string",
+    "tags": ["string"],
+    "version": "number"
+  },
   "sourceSkillId": "string",         // null；複製來源 skills._id
   "folderId": "string",
   "tags": ["string"],

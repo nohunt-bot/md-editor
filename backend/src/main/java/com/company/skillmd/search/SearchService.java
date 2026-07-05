@@ -87,22 +87,25 @@ public class SearchService {
         Map<String, String> displayNames = teamService.resolveDisplayNames(teamIds);
 
         return new SearchResponse(
-            teamHits.stream().map(s -> toResult(s, displayNames.get(s.getTeamId()))).collect(Collectors.toList()),
-            openHits.stream().map(s -> toResult(s, displayNames.get(s.getTeamId()))).collect(Collectors.toList())
+            teamHits.stream().map(s -> toResult(s, displayNames.get(s.getTeamId()), false)).collect(Collectors.toList()),
+            // Phase B (v2): the open bucket is the frozen-publish view —
+            // metadata from the snapshot so results match the frozen detail.
+            openHits.stream().map(s -> toResult(s, displayNames.get(s.getTeamId()), true)).collect(Collectors.toList())
         );
     }
 
-    private SearchResultResponse toResult(Skill s, String teamDisplayName) {
+    private SearchResultResponse toResult(Skill s, String teamDisplayName, boolean frozenView) {
+        Skill.PublishedSnapshot snap = frozenView ? s.getPublishedSnapshot() : null;
         return new SearchResultResponse(
             s.getId(),
             s.getName(),
-            s.getDisplayName(),
-            s.getDescription(),
+            snap != null ? snap.getDisplayName() : s.getDisplayName(),
+            snap != null ? snap.getDescription() : s.getDescription(),
             s.getTeamId(),
             teamDisplayName,
             s.getScope(),
             s.getStatus(),
-            s.getTags(),
+            snap != null ? snap.getTags() : s.getTags(),
             s.getPublishedAt(),
             s.getUpdatedAt()
         );

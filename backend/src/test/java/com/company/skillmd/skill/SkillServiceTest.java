@@ -233,6 +233,48 @@ class SkillServiceTest {
     }
 
     @Test
+    @DisplayName("Publish freezes a snapshot: publishedVersion + snapshot content (Phase B v2)")
+    void publishSkill_freezesSnapshot() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillResponse response = skillService.publishSkill("skill-1");
+
+        assertEquals(3, response.publishedVersion());
+        assertNotNull(skill.getPublishedSnapshot());
+        assertEquals("# content", skill.getPublishedSnapshot().getContent());
+        assertEquals(3, skill.getPublishedSnapshot().getVersion());
+    }
+
+    @Test
+    @DisplayName("Non-member reads the frozen snapshot; member reads live (Phase B v2)")
+    void getSkill_nonMemberSeesFrozen_memberSeesLive() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        skill.setPublishedVersion(3);
+        skill.setPublishedSnapshot(Skill.PublishedSnapshot.of(skill));
+        // Team edits after publishing — live content moves ahead of the snapshot.
+        skill.setContent("# edited after publish");
+        skill.setCurrentVersion(4);
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+
+        SkillService asOutsider = serviceForUser(
+            new CurrentUser("carol", "Carol", Map.of("team-b", Role.EDITOR), false));
+        SkillResponse frozen = asOutsider.getSkill("skill-1").orElseThrow();
+        assertEquals("# content", frozen.content());
+        assertEquals(3, frozen.currentVersion());
+        assertEquals(3, frozen.publishedVersion());
+
+        SkillService asMember = serviceForUser(
+            new CurrentUser("alice", "Alice", Map.of("team-a", Role.EDITOR), false));
+        SkillResponse live = asMember.getSkill("skill-1").orElseThrow();
+        assertEquals("# edited after publish", live.content());
+        assertEquals(4, live.currentVersion());
+    }
+
+    @Test
     @DisplayName("Re-publishing an already-published skill just refreshes (no error)")
     void publishSkill_idempotent() {
         Skill skill = teamSkill("skill-1", "team-a");

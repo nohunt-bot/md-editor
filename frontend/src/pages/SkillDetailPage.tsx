@@ -21,6 +21,7 @@ type Skill = {
   scope: string
   status: string
   currentVersion?: number
+  publishedVersion?: number // Phase B (v2): version frozen at last publish
   lastEditorId?: string
   updatedAt?: string
   tags?: string[]
@@ -172,6 +173,15 @@ export function SkillDetailPage() {
 
   const editable = canEdit(identity, skill.teamId)
   const isOpenPublished = skill.scope === 'open' && skill.status === 'published'
+  // Phase B (v2): the team edited after publishing — the open space still
+  // shows the frozen snapshot until re-publish.
+  const hasUnpublishedChanges =
+    editable &&
+    skill.status === 'published' &&
+    skill.publishedVersion != null &&
+    (skill.currentVersion ?? 1) > skill.publishedVersion
+  // Non-members of a published skill are looking at the frozen view.
+  const frozenView = !editable && isOpenPublished && skill.publishedVersion != null
   // "複製到我的團隊" — any authenticated viewer of an open+published skill (§2.3).
   const canCopy = isOpenPublished && Boolean(identity.userId)
   // Teams the caller may copy into (editor or admin). Admin sees all teams.
@@ -202,7 +212,10 @@ export function SkillDetailPage() {
               <Badge status={skill.status} />
             </dd>
             <dt>版本</dt>
-            <dd>v{skill.currentVersion ?? 1}</dd>
+            <dd>
+              v{skill.currentVersion ?? 1}
+              {frozenView && <span className="frozen-note">（發布版）</span>}
+            </dd>
             <dt>最後編輯</dt>
             <dd>{skill.lastEditorId ?? '—'}</dd>
             <dt>更新時間</dt>
@@ -247,6 +260,20 @@ export function SkillDetailPage() {
               >
                 從開放空間下架
               </button>
+            )}
+            {hasUnpublishedChanges && (
+              <div className="unpublished-hint">
+                <p>
+                  有未發布的更新（開放空間仍顯示 v{skill.publishedVersion}）
+                </p>
+                <button
+                  type="button"
+                  className="btn-primary detail-action"
+                  onClick={() => setConfirm({ action: 'publish' })}
+                >
+                  重新發布
+                </button>
+              </div>
             )}
             {canCopy && (
               <button

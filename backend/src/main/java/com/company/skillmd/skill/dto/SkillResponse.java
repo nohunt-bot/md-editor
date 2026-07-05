@@ -19,6 +19,7 @@ public record SkillResponse(
     List<ResolvedReference> references,
     List<ResolvedPrerequisite> prerequisites,
     Integer currentVersion,
+    Integer publishedVersion, // Phase B (v2): version frozen at last publish; null = never published
     String authorId,
     String lastEditorId,
     Instant createdAt,

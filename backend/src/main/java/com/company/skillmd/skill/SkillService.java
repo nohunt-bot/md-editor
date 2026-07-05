@@ -100,7 +100,11 @@ public class SkillService {
             .map(skill -> {
                 boolean openAndPublished = "open".equals(skill.getScope()) && "published".equals(skill.getStatus());
                 authorizationService.requireResourceReadable(skill.getTeamId(), openAndPublished);
-                return toResponse(skill);
+                // Phase B (v2): team members and admins read the live fields;
+                // everyone else reads the frozen publish snapshot.
+                var user = authorizationService.currentUser();
+                boolean memberView = user.isAdmin() || user.isMemberOf(skill.getTeamId());
+                return memberView ? toResponse(skill) : toFrozenResponse(skill);
             });
     }
 
@@ -168,6 +172,10 @@ public class SkillService {
         skill.setScope("open");
         skill.setStatus("published");
         skill.setPublishedAt(Instant.now());
+        // Phase B (v2): freeze the publish-time content. Non-members read the
+        // snapshot; re-publishing rebuilds it (ADR 20260705-publish-freeze).
+        skill.setPublishedVersion(skill.getCurrentVersion());
+        skill.setPublishedSnapshot(Skill.PublishedSnapshot.of(skill));
         return toResponse(skillRepository.save(skill));
     }
 
@@ -232,19 +240,24 @@ public class SkillService {
     }
 
     private OpenSkillResponse toOpenResponse(Skill skill, String teamDisplayName) {
+        // Phase B (v2): the open space is the frozen-publish view for
+        // everyone — listing metadata comes from the snapshot so cards always
+        // match the frozen detail. Fallback to live fields for pre-migration
+        // rows without a snapshot.
+        Skill.PublishedSnapshot snap = skill.getPublishedSnapshot();
         return new OpenSkillResponse(
             skill.getId(),
             skill.getName(),
-            skill.getDisplayName(),
-            skill.getDescription(),
+            snap != null ? snap.getDisplayName() : skill.getDisplayName(),
+            snap != null ? snap.getDescription() : skill.getDescription(),
             skill.getTeamId(),
             teamDisplayName,
             skill.getScope(),
             skill.getStatus(),
             skill.getPublishedAt(),
             skill.getSourceSkillId(),
-            skill.getTags(),
-            skill.getCurrentVersion(),
+            snap != null ? snap.getTags() : skill.getTags(),
+            snap != null ? snap.getVersion() : skill.getCurrentVersion(),
             skill.getAuthorId(),
             skill.getLastEditorId(),
             skill.getCreatedAt(),
@@ -269,6 +282,41 @@ public class SkillService {
             List.of(), // TODO: resolve references
             List.of(), // TODO: resolve prerequisites
             skill.getCurrentVersion(),
+            skill.getPublishedVersion(),
+            skill.getAuthorId(),
+            skill.getLastEditorId(),
+            skill.getCreatedAt(),
+            skill.getUpdatedAt()
+        );
+    }
+
+    /**
+     * Phase B (v2): non-member view of an open+published skill — content
+     * fields come from the publish-time snapshot, never the live draft.
+     * Falls back to live fields for pre-migration rows without a snapshot.
+     */
+    private SkillResponse toFrozenResponse(Skill skill) {
+        Skill.PublishedSnapshot snap = skill.getPublishedSnapshot();
+        if (snap == null) {
+            return toResponse(skill);
+        }
+        return new SkillResponse(
+            skill.getId(),
+            skill.getName(),
+            snap.getDisplayName(),
+            snap.getDescription(),
+            snap.getContent(),
+            skill.getTeamId(),
+            skill.getScope(),
+            skill.getStatus(),
+            skill.getPublishedAt(),
+            skill.getSourceSkillId(),
+            skill.getFolderId(),
+            snap.getTags(),
+            List.of(),
+            List.of(),
+            snap.getVersion(), // the frozen version is the visible version
+            skill.getPublishedVersion(),
             skill.getAuthorId(),
             skill.getLastEditorId(),
             skill.getCreatedAt(),

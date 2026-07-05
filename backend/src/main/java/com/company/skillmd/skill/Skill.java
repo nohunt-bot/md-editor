@@ -54,6 +54,12 @@ public class Skill {
 
     private Instant deletedAt;
 
+    // Phase B (v2): publish freeze — snapshot of the content as of the last
+    // publish. Non-members read this, never the live fields. See
+    // docs/decisions/20260705-publish-freeze-embedded-snapshot.md.
+    private Integer publishedVersion;
+    private PublishedSnapshot publishedSnapshot;
+
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -114,6 +120,46 @@ public class Skill {
 
     public Instant getDeletedAt() { return deletedAt; }
     public void setDeletedAt(Instant deletedAt) { this.deletedAt = deletedAt; }
+
+    public Integer getPublishedVersion() { return publishedVersion; }
+    public void setPublishedVersion(Integer publishedVersion) { this.publishedVersion = publishedVersion; }
+
+    public PublishedSnapshot getPublishedSnapshot() { return publishedSnapshot; }
+    public void setPublishedSnapshot(PublishedSnapshot publishedSnapshot) { this.publishedSnapshot = publishedSnapshot; }
+
+    /** Frozen copy of the publish-time content (Phase B v2). */
+    public static class PublishedSnapshot {
+        private String displayName;
+        private String description;
+        private String content;
+        private List<String> tags;
+        private Integer version;
+
+        public static PublishedSnapshot of(Skill s) {
+            PublishedSnapshot snap = new PublishedSnapshot();
+            snap.displayName = s.getDisplayName();
+            snap.description = s.getDescription();
+            snap.content = s.getContent();
+            snap.tags = s.getTags();
+            snap.version = s.getCurrentVersion();
+            return snap;
+        }
+
+        public String getDisplayName() { return displayName; }
+        public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
+
+        public List<String> getTags() { return tags; }
+        public void setTags(List<String> tags) { this.tags = tags; }
+
+        public Integer getVersion() { return version; }
+        public void setVersion(Integer version) { this.version = version; }
+    }
 
     public static class SkillReference {
         private String skillId;

@@ -108,6 +108,30 @@ describe('SkillDetailPage actions (§2.3)', () => {
     expect(await screen.findByText('複製到我的團隊')).toBeInTheDocument()
   })
 
+  it('shows 重新發布 hint to an editor when live version is ahead of published (Phase B)', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: { ...openPublishedSkill, currentVersion: 4, publishedVersion: 3 },
+    })
+    renderAt('s2')
+    expect(await screen.findByText('重新發布')).toBeInTheDocument()
+    expect(screen.getByText(/開放空間仍顯示 v3/)).toBeInTheDocument()
+  })
+
+  it('marks the version as 發布版 for a non-member frozen view (Phase B)', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: { ...openPublishedSkill, currentVersion: 3, publishedVersion: 3 },
+    })
+    renderAt('s2')
+    expect(await screen.findByText('（發布版）')).toBeInTheDocument()
+    expect(screen.queryByText('重新發布')).not.toBeInTheDocument()
+  })
+
   it('renders the 找不到或無權限 state on 404', async () => {
     mockIdentity = identity({})
     getMock.mockRejectedValue({ response: { status: 404 } })

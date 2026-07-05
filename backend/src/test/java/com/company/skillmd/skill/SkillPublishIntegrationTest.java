@@ -223,4 +223,51 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
+
+    // --- Phase B (v2): publish freeze ---
+
+    @Test
+    @DisplayName("Freeze flow: non-member sees publish-time content until re-publish")
+    void publishFreeze_nonMemberSeesFrozenUntilRepublish() {
+        Skill skill = persistSkill("freeze-flow", "team-a", "team", "draft");
+        String id = skill.getId();
+
+        // alice publishes v1 content
+        ResponseEntity<String> publish = restTemplate.exchange(
+            baseUrl + "/" + id + "/publish", HttpMethod.POST,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertEquals(HttpStatus.OK, publish.getStatusCode());
+
+        // alice edits after publishing (live moves ahead of the snapshot)
+        UpdateSkillRequest update = new UpdateSkillRequest(
+            null, null, null, "# secret rewrite", null, null, null, null, "wip", 1, false);
+        ResponseEntity<String> updated = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.PUT,
+            new HttpEntity<>(update, headersFor("alice")), String.class);
+        assertEquals(HttpStatus.OK, updated.getStatusCode());
+
+        // carol (non-member) still reads the frozen publish-time content
+        ResponseEntity<String> carolView = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, carolView.getStatusCode());
+        assertTrue(carolView.getBody().contains("# content"), "carol should see frozen content");
+        assertFalse(carolView.getBody().contains("secret rewrite"), "draft edit must not leak");
+
+        // alice (member) reads the live edit
+        ResponseEntity<String> aliceView = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.GET,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(aliceView.getBody().contains("secret rewrite"), "member should see live content");
+
+        // re-publish refreshes the freeze; carol now sees the new content
+        restTemplate.exchange(
+            baseUrl + "/" + id + "/publish", HttpMethod.POST,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        ResponseEntity<String> carolAfter = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertTrue(carolAfter.getBody().contains("secret rewrite"),
+            "after re-publish carol sees the refreshed content");
+    }
 }
