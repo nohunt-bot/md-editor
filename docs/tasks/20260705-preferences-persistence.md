@@ -1,6 +1,6 @@
 # Task: 使用者偏好後端持久化（主題 + 語言，綁 userId）
 
-Status: active (2026-07-05)
+Status: done (2026-07-05 — 已推 GitHub b8c1693)
 
 > 使用者要求偏好跨裝置跟著人走。dev-stub 的 userId 已穩定，現在就綁；接
 > Keycloak 後同一 CurrentUserProvider.getUserId() 無縫接軌。localStorage 保留
@@ -38,6 +38,14 @@ Status: active (2026-07-05)
 ## Progress log
 
 - 2026-07-05 | planning | 任務檔建立；範圍與離線快取策略定案
+- 2026-07-05 | done | commit b8c1693（commander inline）。後端 user_preferences
+  + GET/PUT /api/me/preferences（原子 upsert、per-user 隔離）；前端身分載入後
+  fetch+套用（localStorage 先套避免 FOUC、後端覆蓋、離線靜默退化）、SettingsPage
+  變更 PUT。只持久化 theme+language；其餘裝置本地。閘門：BE 全套 exit 0
+  （PreferencesIntegration 2）、FE tsc/build 0 vitest 50/50。★ live 跨裝置
+  證明：清 localStorage → app 開機從後端讀回 dark+English 並套用（data-theme=
+  dark/lang=en，下拉標籤同步）。修：主題 select 改讀 localStorage（同語言），
+  解非同步載入時標籤滯後。接 Keycloak 時同 userId keying 無需 migration。
 
 ## Open questions
 （無）
