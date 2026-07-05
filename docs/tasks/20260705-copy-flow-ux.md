@@ -1,6 +1,6 @@
 # Task: 複製到團隊流程 UX 修正（4 項）
 
-Status: active (2026-07-05)
+Status: done (2026-07-06 — sonnet 實作、commander 驗收通過，commit 9623a57)
 
 > 派工 sonnet（worktree，pin base 6b332c9），commander 驗收（閘門 + live +
 > UI/UX 合理性）。i18n 走 t()。
@@ -38,6 +38,14 @@ skill 同時在「團隊清單」與「開放空間」。複製到團隊只對�
 
 ## Progress log
 - 2026-07-05 | planning | 四項界定；派 sonnet worktree（pin base 6b332c9）
+- 2026-07-06 | done | sonnet 實作 commit 9623a57。commander 驗收（不信自報）：
+  ★ 隔離失效——agent 沒進 worktree，直接把 commit 打在 **main 分支** 上
+  （worktree 分支空的）。因已 committed 且無 push，就地驗收：閘門 tsc/build 0、
+  vitest 63/63、diff 僅 9 前端檔無越界。live 走查四項全通過——carol 開放空間：
+  自己團隊 skill 無複製鈕、team-a skill 有；快速複製→直接建 team-b draft+導向
+  新 skill；詳情頁範圍=「團隊 + 開放空間」；disabled+hint 由單元測試涵蓋。
+  ⚠️★ 教訓：`isolation: worktree` 參數在本機不可靠，agent 會落 main。下次起
+  commander 自建 worktree + 絕對路徑派工 + 驗收時檢查 main tree 保持乾淨。
 
 ## Open questions
 （無）
