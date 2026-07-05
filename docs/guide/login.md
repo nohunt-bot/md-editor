@@ -36,6 +36,22 @@ public CurrentUser getCurrentUser() {
 - 帶了合法值 → 後端從 `application.yml` 的 `app.dev-users` 設定查出
   `displayName`、所屬團隊與角色、是否 admin，組成當次請求的身分。
 
+身分解析流程：
+
+```
+[請求進來]
+      │
+      ▼
+ 有帶 X-Dev-User？ ──無──▶ [401 Unauthorized]
+      │是
+      ▼
+ 值在 app.dev-users 名單內？ ──否──▶ [401 Unauthorized]
+      │是
+      ▼
+[組成 CurrentUser
+ (userId／顯示名稱／團隊／角色／admin)]
+```
+
 這個設計是刻意留的抽象層：未來接 Keycloak 時，只要換一個
 `CurrentUserProvider` 的實作（讀 JWT 而非 header），授權矩陣測試與其他
 程式碼都不需要改。詳見決策記錄
