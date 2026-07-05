@@ -6,6 +6,7 @@ import { ErrorBanner } from '../components/common/ErrorBanner'
 import { Markdown } from '../components/common/Markdown'
 import { useTranslation } from 'react-i18next'
 import { useIdentity, type Identity } from '../app/useIdentity'
+import { useCopyToTeam } from '../app/useCopyToTeam'
 import './SkillDetailPage.css'
 
 // §6.4 detail: two columns. Left = rendered markdown; right = metadata + a
@@ -65,6 +66,7 @@ export function SkillDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const identity = useIdentity()
+  const { copy, targetTeams, canCopyTeam } = useCopyToTeam(identity)
 
   const [skill, setSkill] = useState<Skill | null>(null)
   const [loading, setLoading] = useState(true)
@@ -192,8 +194,8 @@ export function SkillDetailPage() {
     if (!id) return
     setBusy(true)
     try {
-      const res = await skillApi.copyToTeam(id, targetTeamId)
-      const newId = res.data?.id
+      const newSkill = await copy(id, targetTeamId)
+      const newId = newSkill?.id
       setCopyTeam(null)
       if (newId) navigate(`/skills/${newId}`)
     } catch (e: any) {
@@ -230,10 +232,10 @@ export function SkillDetailPage() {
     (skill.currentVersion ?? 1) > skill.publishedVersion
   // Non-members of a published skill are looking at the frozen view.
   const frozenView = !editable && isOpenPublished && skill.publishedVersion != null
-  // "複製到我的團隊" — any authenticated viewer of an open+published skill (§2.3).
-  const canCopy = isOpenPublished && Boolean(identity.userId)
-  // Teams the caller may copy into (editor or admin). Admin sees all teams.
-  const targetTeams = identity.teams.filter((tm) => canEdit(identity, tm.id))
+  // "複製到我的團隊" — only makes sense for a skill belonging to a team the
+  // viewer is NOT already a member of (publishing never moves it out of its
+  // home team, so a member already has it). Admin is not a real member.
+  const canCopy = isOpenPublished && canCopyTeam(skill.teamId)
   const teamName =
     identity.teams.find((tm) => tm.id === skill.teamId)?.displayName ?? skill.teamId
 
@@ -254,7 +256,13 @@ export function SkillDetailPage() {
             <dt>{t('detail:team')}</dt>
             <dd>{teamName}</dd>
             <dt>{t('detail:scope')}</dt>
-            <dd>{skill.scope === 'open' ? t('detail:scopeOpen') : t('detail:scopeTeam')}</dd>
+            <dd>
+              {skill.scope === 'open'
+                ? isOpenPublished
+                  ? t('detail:scopeTeamAndOpen')
+                  : t('detail:scopeOpen')
+                : t('detail:scopeTeam')}
+            </dd>
             <dt>{t('detail:status')}</dt>
             <dd>
               <Badge status={skill.status} />
@@ -333,21 +341,27 @@ export function SkillDetailPage() {
               </div>
             )}
             {canCopy && (
-              <button
-                type="button"
-                className="btn-primary detail-action"
-                disabled={busy || targetTeams.length === 0}
-                onClick={() => {
-                  if (targetTeams.length <= 1) {
-                    const target = targetTeams[0]?.id
-                    if (target) doCopy(target)
-                  } else {
-                    setCopyTeam(targetTeams[0].id)
-                  }
-                }}
-              >
-                {t('detail:copyToTeam')}
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="btn-primary detail-action"
+                  disabled={busy || targetTeams.length === 0}
+                  title={targetTeams.length === 0 ? t('detail:copyNeedsEditor') : undefined}
+                  onClick={() => {
+                    if (targetTeams.length <= 1) {
+                      const target = targetTeams[0]?.id
+                      if (target) doCopy(target)
+                    } else {
+                      setCopyTeam(targetTeams[0].id)
+                    }
+                  }}
+                >
+                  {t('detail:copyToTeam')}
+                </button>
+                {targetTeams.length === 0 && (
+                  <p className="detail-copy-hint">{t('detail:copyNeedsEditor')}</p>
+                )}
+              </>
             )}
           </section>
         )}

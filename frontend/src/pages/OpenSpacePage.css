@@ -97,3 +97,27 @@
   font-weight: 500;
   color: var(--text-secondary);
 }
+
+.open-card-copy {
+  align-self: flex-start;
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-xs);
+}
+
+.open-copy-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.open-copy-cancel:hover {
+  background: var(--bg-hover);
+}

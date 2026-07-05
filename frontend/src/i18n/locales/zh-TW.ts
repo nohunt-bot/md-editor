@@ -62,6 +62,7 @@ export default {
     emptyNone: '還沒有團隊發布 skill',
     emptyNoMatch: '沒有符合的 skill，試試放寬篩選',
     cite: '引用 {{count}} 次',
+    copyToTeam: '複製到我的團隊',
   },
   detail: {
     info: '資訊',
@@ -69,6 +70,7 @@ export default {
     scope: '範圍',
     scopeOpen: '開放空間',
     scopeTeam: '團隊',
+    scopeTeamAndOpen: '團隊 + 開放空間',
     status: '狀態',
     version: '版本',
     frozenTag: '（發布版）',
@@ -79,6 +81,7 @@ export default {
     publish: '發布到開放空間',
     unpublish: '從開放空間下架',
     copyToTeam: '複製到我的團隊',
+    copyNeedsEditor: '需要團隊編輯權限',
     unpublishedChanges: '有未發布的更新（開放空間仍顯示 v{{version}}）',
     republish: '重新發布',
     citeCount: '引用 {{count}} 次',

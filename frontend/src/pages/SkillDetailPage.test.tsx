@@ -110,6 +110,47 @@ describe('SkillDetailPage actions (§2.3)', () => {
     expect(await screen.findByText('複製到我的團隊')).toBeInTheDocument()
   })
 
+  it('hides 複製到我的團隊 when the viewer is already a member of the skill team', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'VIEWER' }],
+    })
+    getMock.mockResolvedValue({ data: openPublishedSkill })
+    renderAt('s2')
+    await screen.findByText('資訊')
+    expect(screen.queryByText('複製到我的團隊')).not.toBeInTheDocument()
+  })
+
+  it('shows 複製到我的團隊 for an admin who is not a real team member', async () => {
+    mockIdentity = identity({
+      admin: true,
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'VIEWER' }],
+    })
+    getMock.mockResolvedValue({ data: openPublishedSkill })
+    renderAt('s2')
+    expect(await screen.findByText('複製到我的團隊')).toBeInTheDocument()
+  })
+
+  it('shows a disabled copy button with a hint when the viewer has no editable team', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'VIEWER' }],
+    })
+    getMock.mockResolvedValue({ data: openPublishedSkill })
+    renderAt('s2')
+    const btn = await screen.findByText('複製到我的團隊')
+    expect(btn).toBeDisabled()
+    expect(btn).toHaveAttribute('title', '需要團隊編輯權限')
+    expect(screen.getByText('需要團隊編輯權限', { selector: 'p' })).toBeInTheDocument()
+  })
+
+  it('shows the combined 團隊 + 開放空間 scope label for an open+published skill', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: openPublishedSkill })
+    renderAt('s2')
+    expect(await screen.findByText('團隊 + 開放空間')).toBeInTheDocument()
+  })
+
   it('shows 重新發布 hint to an editor when live version is ahead of published (Phase B)', async () => {
     mockIdentity = identity({
       teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],

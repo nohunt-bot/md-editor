@@ -62,6 +62,7 @@ export default {
     emptyNone: 'No team has published a skill yet',
     emptyNoMatch: 'No matching skills — try relaxing the filter',
     cite: 'Cited {{count}} time(s)',
+    copyToTeam: 'Copy to my team',
   },
   detail: {
     info: 'Info',
@@ -69,6 +70,7 @@ export default {
     scope: 'Scope',
     scopeOpen: 'Open Space',
     scopeTeam: 'Team',
+    scopeTeamAndOpen: 'Team + Open Space',
     status: 'Status',
     version: 'Version',
     frozenTag: '(published)',
@@ -79,6 +81,7 @@ export default {
     publish: 'Publish to Open Space',
     unpublish: 'Unpublish from Open Space',
     copyToTeam: 'Copy to my team',
+    copyNeedsEditor: 'Requires team editor access',
     unpublishedChanges: 'Unpublished changes (Open Space still shows v{{version}})',
     republish: 'Re-publish',
     citeCount: 'Cited {{count}} time(s)',
