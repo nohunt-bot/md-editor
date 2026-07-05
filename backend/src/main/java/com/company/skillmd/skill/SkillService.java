@@ -65,10 +65,12 @@ public class SkillService {
         skill.setSourceSkillId(null);
         skill.setFolderId(request.folderId());
         skill.setTags(request.tags() != null ? request.tags() : List.of());
+        skill.setReferences(mapCreateRefs(request.references()));
+        skill.setPrerequisites(mapCreatePrereqs(request.prerequisites()));
         skill.setCurrentVersion(1);
         skill.setAuthorId(userId);
         skill.setLastEditorId(userId);
-        
+
         Skill saved = skillRepository.save(skill);
         // Snapshot v1 so version history + restore work from the start.
         versionService.createVersion(saved, "Created", userId);
@@ -99,7 +101,9 @@ public class SkillService {
         if (request.content() != null) skill.setContent(request.content());
         if (request.folderId() != null) skill.setFolderId(request.folderId());
         if (request.tags() != null) skill.setTags(request.tags());
-        
+        if (request.references() != null) skill.setReferences(mapUpdateRefs(request.references()));
+        if (request.prerequisites() != null) skill.setPrerequisites(mapUpdatePrereqs(request.prerequisites()));
+
         skill.setLastEditorId(userId);
         skill.setCurrentVersion(skill.getCurrentVersion() + 1);
 
@@ -401,8 +405,83 @@ public class SkillService {
         );
     }
 
+    // --- Reference/prerequisite mapping (DTO -> entity). Create and Update have
+    // structurally-identical but distinct DTO types, hence the small overloads.
+
+    private static Skill.SkillReference ref(String skillId, String relation) {
+        Skill.SkillReference r = new Skill.SkillReference();
+        r.setSkillId(skillId);
+        r.setRelation(relation);
+        return r;
+    }
+
+    private static Skill.SkillPrerequisite prereq(String skillId, String note) {
+        Skill.SkillPrerequisite p = new Skill.SkillPrerequisite();
+        p.setSkillId(skillId);
+        p.setNote(note);
+        return p;
+    }
+
+    // Distinct names (not overloads) — the two DTO list types erase identically.
+    private List<Skill.SkillReference> mapCreateRefs(List<CreateSkillRequest.ReferenceDTO> refs) {
+        if (refs == null) return List.of();
+        return refs.stream().map(d -> ref(d.skillId(), d.relation())).toList();
+    }
+
+    private List<Skill.SkillReference> mapUpdateRefs(List<UpdateSkillRequest.ReferenceDTO> refs) {
+        if (refs == null) return List.of();
+        return refs.stream().map(d -> ref(d.skillId(), d.relation())).toList();
+    }
+
+    private List<Skill.SkillPrerequisite> mapCreatePrereqs(List<CreateSkillRequest.PrerequisiteDTO> ps) {
+        if (ps == null) return List.of();
+        return ps.stream().map(d -> prereq(d.skillId(), d.note())).toList();
+    }
+
+    private List<Skill.SkillPrerequisite> mapUpdatePrereqs(List<UpdateSkillRequest.PrerequisiteDTO> ps) {
+        if (ps == null) return List.of();
+        return ps.stream().map(d -> prereq(d.skillId(), d.note())).toList();
+    }
+
     private SkillResponse toResponse(Skill skill) {
         return toResponse(skill, null);
+    }
+
+    /**
+     * Resolve reference/prerequisite skillIds to their name + displayName in one
+     * batch fetch (avoids N+1). Targets that no longer exist are skipped.
+     */
+    private java.util.Map<String, Skill> resolveTargets(java.util.Collection<String> ids) {
+        if (ids.isEmpty()) return java.util.Map.of();
+        java.util.Map<String, Skill> map = new java.util.HashMap<>();
+        skillRepository.findAllById(ids).forEach(s -> map.put(s.getId(), s));
+        return map;
+    }
+
+    private List<SkillResponse.ResolvedReference> resolveReferences(Skill skill) {
+        if (skill.getReferences() == null || skill.getReferences().isEmpty()) return List.of();
+        var targets = resolveTargets(skill.getReferences().stream()
+            .map(Skill.SkillReference::getSkillId).toList());
+        return skill.getReferences().stream()
+            .map(r -> {
+                Skill t = targets.get(r.getSkillId());
+                return new SkillResponse.ResolvedReference(r.getSkillId(), r.getRelation(),
+                    t != null ? t.getName() : null, t != null ? t.getDisplayName() : null);
+            })
+            .toList();
+    }
+
+    private List<SkillResponse.ResolvedPrerequisite> resolvePrerequisites(Skill skill) {
+        if (skill.getPrerequisites() == null || skill.getPrerequisites().isEmpty()) return List.of();
+        var targets = resolveTargets(skill.getPrerequisites().stream()
+            .map(Skill.SkillPrerequisite::getSkillId).toList());
+        return skill.getPrerequisites().stream()
+            .map(p -> {
+                Skill t = targets.get(p.getSkillId());
+                return new SkillResponse.ResolvedPrerequisite(p.getSkillId(), p.getNote(),
+                    t != null ? t.getName() : null, t != null ? t.getDisplayName() : null);
+            })
+            .toList();
     }
 
     private SkillResponse toResponse(Skill skill, Boolean likedByMe) {
@@ -419,8 +498,8 @@ public class SkillService {
             skill.getSourceSkillId(),
             skill.getFolderId(),
             skill.getTags(),
-            List.of(), // TODO: resolve references
-            List.of(), // TODO: resolve prerequisites
+            resolveReferences(skill),
+            resolvePrerequisites(skill),
             skill.getCurrentVersion(),
             skill.getPublishedVersion(),
             skill.getLikeCount(),

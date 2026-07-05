@@ -203,6 +203,33 @@ class SkillControllerIntegrationTest extends AbstractIntegrationTest {
             "tag filter should count all matches: " + snippet(filtered.getBody()));
     }
 
+    @Test
+    @DisplayName("References resolve to the target's name + displayName on read")
+    void references_resolvedOnRead() {
+        // Create target B
+        String bId = restTemplate.postForEntity(baseUrl,
+            new HttpEntity<>(new CreateSkillRequest(
+                "target-b-" + System.currentTimeMillis(), "Target B", "d", "# b",
+                "team-a", null, List.of(), null, null), headers),
+            String.class).getBody().split("\"id\":\"")[1].split("\"")[0];
+
+        // Create A referencing B (depends_on)
+        ResponseEntity<String> a = restTemplate.postForEntity(baseUrl,
+            new HttpEntity<>(new CreateSkillRequest(
+                "src-a-" + System.currentTimeMillis(), "Source A", "d", "# a",
+                "team-a", null, List.of(),
+                List.of(new CreateSkillRequest.ReferenceDTO(bId, "depends_on")), null), headers),
+            String.class);
+        String aId = a.getBody().split("\"id\":\"")[1].split("\"")[0];
+
+        // GET A → reference resolves to B's name/displayName (not List.of())
+        ResponseEntity<String> got = restTemplate.exchange(baseUrl + "/" + aId,
+            HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        assertTrue(got.getBody().contains("\"relation\":\"depends_on\""), got.getBody());
+        assertTrue(got.getBody().contains("\"displayName\":\"Target B\""),
+            "reference should resolve target displayName: " + snippet(got.getBody()));
+    }
+
     private void createTagged(String suffix, String tag) {
         CreateSkillRequest request = new CreateSkillRequest(
             "skill-" + suffix + "-" + System.currentTimeMillis(),
