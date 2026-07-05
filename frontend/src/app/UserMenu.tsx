@@ -2,19 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getDevUser, setDevUser, DEV_USERS } from '../api/api'
-import { LANGUAGES, setLanguage, readLang, type LanguageCode } from '../i18n'
-import { useTheme, type ThemeMode } from './useTheme'
 import type { Identity } from './useIdentity'
 import './UserMenu.css'
 
 // User menu pinned to the sidebar bottom (see docs/tasks/20260705-user-menu-
-// settings.md). Shows the current identity and opens quick theme/language
-// switches + profile/settings links + logout. In dev-stub mode the identity is
-// the X-Dev-User; when Keycloak lands, /api/me returns the real user and only
-// the logout action changes (redirect to the IdP).
+// settings.md). Shows the current identity and opens Profile/Settings links +
+// logout. Theme/language live on /settings (not duplicated here). In dev-stub
+// mode the identity is the X-Dev-User; when Keycloak lands, /api/me returns the
+// real user and only the logout action changes (redirect to the IdP).
 export function UserMenu({ identity }: { identity: Identity }) {
   const { t } = useTranslation()
-  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
 
@@ -46,30 +43,6 @@ export function UserMenu({ identity }: { identity: Identity }) {
             <NavLink to="/settings" className="user-menu-item" onClick={() => setOpen(false)}>
               {t('settings:menuSettings')}
             </NavLink>
-          </div>
-
-          <div className="user-menu-divider" />
-          <div className="user-menu-section">
-            <label className="user-menu-label">{t('common:theme')}</label>
-            <select
-              value={theme.mode}
-              onChange={(e) => theme.setMode(e.target.value as ThemeMode)}
-            >
-              <option value="system">{t('common:themeSystem')}</option>
-              <option value="light">{t('common:themeLight')}</option>
-              <option value="dark">{t('common:themeDark')}</option>
-            </select>
-            <label className="user-menu-label">{t('common:language')}</label>
-            <select
-              value={readLang()}
-              onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Dev-only: identity switching for cross-team testing. */}
