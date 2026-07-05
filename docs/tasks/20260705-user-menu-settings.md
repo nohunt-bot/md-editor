@@ -1,6 +1,6 @@
 # Task: 使用者選單（登入/登出/身分）+ /settings 設定頁 —— 前端骨架（dev-stub）
 
-Status: active (2026-07-05)
+Status: done (2026-07-05 — 前端骨架完成，已推 GitHub c7f40a2；Keycloak 接回為後續任務)
 
 > 沿用 v1/v2 驗證過的流程：commander inline（spend-limit 環境）或 worktree
 > pin-base 派工；閘門在 main 重跑；live 截圖；每步 push。i18n 一律走 t()。
@@ -45,6 +45,13 @@ Status: active (2026-07-05)
 
 - 2026-07-05 | planning | 任務檔建立；IA 兩個分岔（設定形式、時程）由使用者
   拍板（選單快切+/settings 頁、現在先做前端骨架）
+- 2026-07-05 | done | commit c7f40a2（commander inline）。UserMenu（側欄底部
+  chip+選單：Profile/Settings/主題/語言/dev身分(import.meta.env.DEV 才顯示)/
+  登出）取代三裸 select；/settings 頁（個人資料唯讀、偏好完整、帳號+團隊管理
+  deferred placeholder）；settings i18n（zh+en）。閘門：tsc/build 0、
+  vitest 49/49（更新 AppShell 測試斷言）。live 截圖選單+設定頁。
+  ⚠️ 登出為 dev-stub alert；VersionController 舊 header、真登入/登出、帳號&
+  團隊管理 = Keycloak 接回任務（接點已在 UserMenu.logout 註解）。
 
 ## Open questions
 
