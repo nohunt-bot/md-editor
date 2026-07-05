@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { skillApi, tagApi } from '../api/api'
+import { Pagination } from '../components/common/Pagination'
 import './OpenSpacePage.css'
 
 // Phase 3.1: open-space browse. Latest-published cards (backend sorts by
@@ -28,6 +29,13 @@ export function OpenSpacePage() {
   const [skills, setSkills] = useState<OpenSkill[]>([])
   const [tags, setTags] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  // Phase A (v2): server-side pagination; filter changes reset to page 0.
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+
+  useEffect(() => {
+    setPage(0)
+  }, [q, tag])
 
   useEffect(() => {
     tagApi
@@ -40,9 +48,11 @@ export function OpenSpacePage() {
     let cancelled = false
     setLoading(true)
     skillApi
-      .listOpen({ q, tag })
+      .listOpen({ q, tag, page })
       .then((res) => {
-        if (!cancelled) setSkills(res.data.content || [])
+        if (cancelled) return
+        setSkills(res.data.content || [])
+        setTotalPages(res.data.totalPages ?? 1)
       })
       .catch(() => {
         if (!cancelled) setSkills([])
@@ -53,7 +63,7 @@ export function OpenSpacePage() {
     return () => {
       cancelled = true
     }
-  }, [q, tag])
+  }, [q, tag, page])
 
   function selectTag(next?: string) {
     const p = new URLSearchParams(params)
@@ -133,6 +143,8 @@ export function OpenSpacePage() {
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   )
 }

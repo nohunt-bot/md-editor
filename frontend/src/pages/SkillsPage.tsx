@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { skillApi } from '../api/api'
 import { useTeamFilter } from '../app/TeamFilterContext'
 import { Badge } from '../components/common/Badge'
+import { Pagination } from '../components/common/Pagination'
 import type { Identity } from '../app/useIdentity'
 import './SkillsPage.css'
 
@@ -21,12 +22,22 @@ export function SkillsPage({ identity }: { identity: Identity }) {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [view, setView] = useState<View>(readView)
+  // Phase A (v2): server-side pagination. Known limit: the sidebar/search
+  // filters below are client-side and apply to the CURRENT page only —
+  // server-side team-list filtering is backlog.
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
   const teamId = identity.activeTeamId
 
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view)
   }, [view])
+
+  // New team → back to the first page.
+  useEffect(() => {
+    setPage(0)
+  }, [teamId])
 
   useEffect(() => {
     if (!teamId) {
@@ -37,9 +48,11 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     let cancelled = false
     setLoading(true)
     skillApi
-      .list(teamId)
+      .list(teamId, page)
       .then((res) => {
-        if (!cancelled) setSkills(res.data.content || [])
+        if (cancelled) return
+        setSkills(res.data.content || [])
+        setTotalPages(res.data.totalPages ?? 1)
       })
       .catch(() => {
         if (!cancelled) setSkills([])
@@ -50,7 +63,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     return () => {
       cancelled = true
     }
-  }, [teamId])
+  }, [teamId, page])
 
   const filterActive = Boolean(selectedFolder || selectedTag || searchQuery)
 
@@ -148,6 +161,8 @@ export function SkillsPage({ identity }: { identity: Identity }) {
       )}
 
       {renderBody()}
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </div>
   )
 }

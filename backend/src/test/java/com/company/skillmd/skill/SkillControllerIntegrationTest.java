@@ -153,6 +153,45 @@ class SkillControllerIntegrationTest extends AbstractIntegrationTest {
         assertTrue(response.getBody().contains("forced update"));
     }
 
+    @Test
+    @DisplayName("Team list exposes pagination metadata (totalPages/totalElements)")
+    void listSkills_paginationMetadata() {
+        // Arrange: 25 skills -> 2 pages at size 20 (Phase A v2 contract).
+        for (int i = 0; i < 25; i++) {
+            createSkill("page-" + i);
+        }
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+            baseUrl + "?teamId=team-a&page=0&size=20",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class
+        );
+
+        // Assert: Spring Page metadata must be serialized for the frontend.
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.contains("\"totalElements\":25"), "totalElements missing: " + snippet(body));
+        assertTrue(body.contains("\"totalPages\":2"), "totalPages missing: " + snippet(body));
+
+        // Second page carries the remaining 5.
+        ResponseEntity<String> page2 = restTemplate.exchange(
+            baseUrl + "?teamId=team-a&page=1&size=20",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class
+        );
+        assertEquals(HttpStatus.OK, page2.getStatusCode());
+        assertTrue(page2.getBody().contains("\"numberOfElements\":5"),
+            "second page should hold 5 items: " + snippet(page2.getBody()));
+    }
+
+    private String snippet(String body) {
+        return body == null ? "null" : body.substring(0, Math.min(body.length(), 300));
+    }
+
     private String createSkill(String nameSuffix) {
         CreateSkillRequest request = new CreateSkillRequest(
             "skill-" + nameSuffix + "-" + System.currentTimeMillis(),
