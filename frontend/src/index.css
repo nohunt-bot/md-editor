@@ -123,3 +123,38 @@ body {
 code, pre, .monospace {
   font-family: var(--font-mono);
 }
+
+/* Global select — token-based, custom caret, consistent across the app.
+   Native appearance removed; caret is an inline SVG chevron in a neutral grey
+   that reads on both light and dark surfaces. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--sp-2) center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-2) calc(var(--sp-6)) var(--sp-2) var(--sp-3);
+  line-height: var(--lh);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+select:hover {
+  background-color: var(--bg-hover);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

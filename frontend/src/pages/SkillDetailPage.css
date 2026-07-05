@@ -308,14 +308,7 @@
   line-height: var(--lh);
 }
 
-.detail-dialog select {
-  padding: var(--sp-2);
-  font-size: var(--fs-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--text);
-}
+/* .detail-dialog select: appearance from the global select style. */
 
 .detail-dialog-actions {
   display: flex;

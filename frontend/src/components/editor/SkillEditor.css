@@ -85,16 +85,7 @@
 
 .form-group input,
 .form-group textarea,
-.form-group select {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  color: var(--text);
-  font-size: 0.875rem;
-  font-family: var(--font-mono);
-  transition: border-color 0.2s;
-}
+/* .form-group select: appearance from the global select style. */
 
 .form-group input:focus,
 .form-group textarea:focus,

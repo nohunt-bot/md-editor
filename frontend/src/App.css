@@ -93,16 +93,9 @@
   margin: var(--sp-6) 0;
 }
 
-.team-switcher,
-.dev-switcher select {
+/* Team switcher: layout only — appearance comes from the global select style. */
+.team-switcher {
   width: 100%;
-  padding: var(--sp-2);
-  font-size: var(--fs-base);
-  font-family: var(--font-ui);
-  color: var(--text);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
 }
 
 .tag-filter {
