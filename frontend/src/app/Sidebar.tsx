@@ -3,10 +3,12 @@ import { NavLink } from 'react-router-dom'
 import { folderApi, tagApi, getDevUser, setDevUser, DEV_USERS } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
 import { useTeamFilter } from './TeamFilterContext'
+import { useTheme, type ThemeMode } from './useTheme'
 import type { Identity } from './useIdentity'
 
 export function Sidebar({ identity }: { identity: Identity }) {
   const { selectedFolder, setSelectedFolder, selectedTag, setSelectedTag } = useTeamFilter()
+  const theme = useTheme()
   const [folders, setFolders] = useState<any[]>([])
   const [tags, setTags] = useState<any[]>([])
 
@@ -111,8 +113,17 @@ export function Sidebar({ identity }: { identity: Identity }) {
         </section>
       </div>
 
-      {/* Bottom: dev identity switcher (§2.1) */}
+      {/* Bottom: theme switcher (Phase D v2) + dev identity switcher (§2.1) */}
       <div className="dev-switcher">
+        <label className="dev-switcher-label">主題</label>
+        <select
+          value={theme.mode}
+          onChange={(e) => theme.setMode(e.target.value as ThemeMode)}
+        >
+          <option value="system">跟隨系統</option>
+          <option value="light">淺色</option>
+          <option value="dark">深色</option>
+        </select>
         <label className="dev-switcher-label">開發身分（僅 dev）</label>
         <select
           value={getDevUser()}

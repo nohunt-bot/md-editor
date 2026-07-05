@@ -68,6 +68,35 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ============================================================
+   Phase D (v2) — dark theme. Same token contract, dark values.
+   Applied via <html data-theme="dark"> (useTheme hook); default
+   follows prefers-color-scheme when mode = system.
+   ============================================================ */
+[data-theme='dark'] {
+  --bg: #16181d;
+  --bg-subtle: #1d2026;
+  --bg-hover: #262a31;
+  --accent-contrast: #fff;
+
+  --border: #31353d;
+
+  --text: #e8eaed;
+  --text-secondary: #9aa1ab;
+  --text-muted: #707784;
+
+  --accent: #5b8def; /* lighter blue for contrast on dark */
+
+  --ok: #34c467;
+  --ok-soft: #14351f;
+  --warn: #e8a13c;
+  --danger: #ef5350;
+
+  color-scheme: dark;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
 * {
   margin: 0;
   padding: 0;
