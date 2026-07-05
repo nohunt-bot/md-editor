@@ -35,6 +35,10 @@ export default {
     allSkills: '全部 skill',
     enterName: '輸入資料夾名稱：',
     selectTeamFirst: '請先選擇團隊',
+    createTitle: '新增資料夾',
+    namePlaceholder: '資料夾名稱',
+    create: '建立',
+    createFailed: '建立失敗：',
   },
   skills: {
     teamSkills: '{{team}} Skills',

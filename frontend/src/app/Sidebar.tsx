@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { folderApi, tagApi } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
+import { NewFolderModal } from './NewFolderModal'
 import { useTeamFilter } from './TeamFilterContext'
 import { UserMenu } from './UserMenu'
 import { useTranslation } from 'react-i18next'
@@ -12,8 +13,20 @@ export function Sidebar({ identity }: { identity: Identity }) {
   const { t } = useTranslation()
   const [folders, setFolders] = useState<any[]>([])
   const [tags, setTags] = useState<any[]>([])
+  const [showNewFolder, setShowNewFolder] = useState(false)
 
   const teamId = identity.activeTeamId
+
+  const loadFolders = useCallback(() => {
+    if (!teamId) {
+      setFolders([])
+      return Promise.resolve()
+    }
+    return folderApi
+      .getTree(teamId)
+      .then((res) => setFolders(res.data || []))
+      .catch(() => setFolders([]))
+  }, [teamId])
 
   // Load team-scoped folder tree + tags whenever the active team changes.
   useEffect(() => {
@@ -73,8 +86,16 @@ export function Sidebar({ identity }: { identity: Identity }) {
               folders={folders}
               selectedFolder={selectedFolder}
               onSelectFolder={setSelectedFolder}
-              teamId={teamId}
             />
+            {teamId && (
+              <button
+                type="button"
+                className="btn-small folder-new-btn"
+                onClick={() => setShowNewFolder(true)}
+              >
+                {t('folders:newFolder')}
+              </button>
+            )}
           </div>
 
           <div className="zone-block">
@@ -117,6 +138,17 @@ export function Sidebar({ identity }: { identity: Identity }) {
 
       {/* Bottom: user menu (identity, quick prefs, settings, logout) */}
       <UserMenu identity={identity} />
+
+      {showNewFolder && teamId && (
+        <NewFolderModal
+          teamId={teamId}
+          onClose={() => setShowNewFolder(false)}
+          onCreated={() => {
+            setShowNewFolder(false)
+            loadFolders()
+          }}
+        />
+      )}
     </aside>
   )
 }

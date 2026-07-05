@@ -35,6 +35,10 @@ export default {
     allSkills: 'All skills',
     enterName: 'Enter folder name:',
     selectTeamFirst: 'Select a team first',
+    createTitle: 'New folder',
+    namePlaceholder: 'Folder name',
+    create: 'Create',
+    createFailed: 'Create failed: ',
   },
   skills: {
     teamSkills: '{{team}} Skills',

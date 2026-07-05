@@ -99,3 +99,8 @@
   background: var(--bg-subtle);
   border-color: var(--accent);
 }
+
+.folder-new-btn {
+  margin-top: var(--sp-2);
+  width: 100%;
+}

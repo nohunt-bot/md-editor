@@ -1,0 +1,58 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 29, 33, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.modal-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  width: 400px;
+  max-width: calc(100vw - var(--sp-8));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+
+.modal-title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.modal-input {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-sm);
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.modal-error {
+  font-size: var(--fs-sm);
+  color: var(--danger);
+  margin: 0;
+}

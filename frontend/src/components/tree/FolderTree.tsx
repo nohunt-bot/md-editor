@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { folderApi } from '../../api/api'
 import './FolderTree.css'
 
 interface FolderNode {
@@ -14,10 +13,9 @@ interface FolderTreeProps {
   folders: FolderNode[]
   selectedFolder: string | null
   onSelectFolder: (folderId: string | null) => void
-  teamId?: string | null
 }
 
-export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: FolderTreeProps) {
+export function FolderTree({ folders, selectedFolder, onSelectFolder }: FolderTreeProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const { t } = useTranslation()
 
@@ -69,21 +67,10 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: 
   }
 
   if (!folders || folders.length === 0) {
+    // Create moved to the sidebar (NewFolderModal); this is display-only now.
     return (
       <div className="folder-tree-empty">
         <p>{t('folders:none')}</p>
-        <button
-          className="btn-small"
-          disabled={!teamId}
-          title={!teamId ? t('folders:selectTeamFirst') : undefined}
-          onClick={() => {
-            if (!teamId) return
-            const name = prompt(t('folders:enterName'))
-            if (name) folderApi.create(name, teamId)
-          }}
-        >
-          {t('folders:newFolder')}
-        </button>
       </div>
     )
   }
