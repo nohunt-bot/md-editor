@@ -312,4 +312,62 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
         assertTrue(afterCopy.getBody().contains("\"copyCount\":1"),
             "copy-to-team should increment the source copyCount");
     }
+
+    // --- Phase E (v2): presence heartbeat ---
+
+    @Test
+    @DisplayName("Presence: two editors see each other; version drift is reported")
+    void presenceHeartbeat() {
+        Skill skill = persistSkill("presence-target", "team-a", "team", "draft");
+        String id = skill.getId();
+
+        // alice heartbeats — no other editors yet, version 1
+        ResponseEntity<String> a1 = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertEquals(HttpStatus.OK, a1.getStatusCode());
+        assertTrue(a1.getBody().contains("\"editors\":[]"), "alice alone: " + a1.getBody());
+        assertTrue(a1.getBody().contains("\"currentVersion\":1"));
+
+        // admin (can edit any team) heartbeats — should see alice
+        ResponseEntity<String> b1 = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("admin")), String.class);
+        assertTrue(b1.getBody().contains("\"alice\""), "admin should see alice: " + b1.getBody());
+
+        // alice heartbeats again — now sees admin
+        ResponseEntity<String> a2 = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(a2.getBody().contains("\"admin\""), "alice should see admin: " + a2.getBody());
+
+        // admin saves → version bumps to 2
+        UpdateSkillRequest update = new UpdateSkillRequest(
+            null, null, null, "# bumped", null, null, null, null, "b", 1, false);
+        restTemplate.exchange(baseUrl + "/" + id, HttpMethod.PUT,
+            new HttpEntity<>(update, headersFor("admin")), String.class);
+
+        // alice's next heartbeat reports the drifted version (2), warning her
+        ResponseEntity<String> a3 = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(a3.getBody().contains("\"currentVersion\":2"),
+            "version drift should surface via presence: " + a3.getBody());
+
+        // viewer bob cannot register presence (edit rights required) → 403
+        ResponseEntity<String> bob = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("bob")), String.class);
+        assertEquals(HttpStatus.FORBIDDEN, bob.getStatusCode());
+
+        // leaving removes presence
+        ResponseEntity<String> leave = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.DELETE,
+            new HttpEntity<>(headersFor("admin")), String.class);
+        assertEquals(HttpStatus.NO_CONTENT, leave.getStatusCode());
+        ResponseEntity<String> a4 = restTemplate.exchange(
+            baseUrl + "/" + id + "/presence", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(a4.getBody().contains("\"editors\":[]"), "admin left: " + a4.getBody());
+    }
 }

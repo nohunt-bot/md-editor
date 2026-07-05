@@ -5,6 +5,7 @@ import { MdxEditorWrapper, type MDXEditorMethods } from './MdxEditorWrapper'
 import { ConflictDialog } from '../dialog/ConflictDialog'
 import { Badge } from '../common/Badge'
 import { ErrorBanner } from '../common/ErrorBanner'
+import { usePresence } from '../../app/usePresence'
 import { useTranslation } from 'react-i18next'
 import './SkillEditor.css'
 
@@ -41,6 +42,12 @@ export function SkillEditor() {
     currentVersion: 0,
     updatedAt: null as string | null
   })
+
+  // Phase E (v2): soft presence — only when editing an existing skill.
+  const { editors, versionChanged } = usePresence(
+    isEditing ? id : undefined,
+    formData.currentVersion,
+  )
 
   useEffect(() => {
     if (isEditing) {
@@ -210,6 +217,16 @@ export function SkillEditor() {
 
       <ErrorBanner message={error} onDismiss={() => setError(null)} />
       {noTeam && <ErrorBanner message={t('editor:errNoTeam')} />}
+      {editors.length > 0 && (
+        <div className="presence-hint" role="status">
+          ⚠ {t('editor:presenceEditing', { editors: editors.join('、') })}
+        </div>
+      )}
+      {versionChanged && (
+        <div className="presence-updated" role="alert">
+          {t('editor:presenceUpdated')}
+        </div>
+      )}
 
       <div className="editor-content">
         <div className="editor-main">

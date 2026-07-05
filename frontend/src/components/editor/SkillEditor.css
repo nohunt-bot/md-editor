@@ -1,5 +1,28 @@
 /* NOTE(2.5): deep restyle deferred to Phase 2.5. Here: minimal token
    substitutions so the editor is readable on the light-minimal flip. */
+
+/* Phase E (v2): soft-presence hints */
+.presence-hint,
+.presence-updated {
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+  line-height: var(--lh);
+}
+
+.presence-hint {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.presence-updated {
+  background: var(--bg-subtle);
+  border: 1px solid var(--warn);
+  color: var(--warn);
+}
+
 .skill-editor {
   max-width: 1200px;
   margin: 0 auto;

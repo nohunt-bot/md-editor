@@ -123,6 +123,8 @@ export default {
     errRequired: '名稱與內容為必填',
     errNoTeam: '請先在左側選擇團隊，再建立 skill',
     errSave: '儲存失敗：',
+    presenceEditing: '{{editors}} 也正在編輯',
+    presenceUpdated: '這份 skill 已被他人更新，儲存前請重新整理以免衝突。',
   },
   conflict: {
     title: '⚠️ 偵測到編輯衝突',

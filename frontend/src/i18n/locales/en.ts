@@ -123,6 +123,8 @@ export default {
     errRequired: 'Name and content are required',
     errNoTeam: 'Select a team on the left before creating a skill',
     errSave: 'Save failed: ',
+    presenceEditing: '{{editors}} is also editing',
+    presenceUpdated: 'This skill was updated by someone else — refresh before saving to avoid a conflict.',
   },
   conflict: {
     title: '⚠️ Edit conflict detected',

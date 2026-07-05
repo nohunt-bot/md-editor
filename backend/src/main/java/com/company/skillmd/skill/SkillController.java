@@ -45,6 +45,19 @@ public class SkillController {
         return ResponseEntity.ok(skillService.listOpenSkills(tag, q, sort, pageable));
     }
 
+    // Phase E (v2): presence heartbeat (poll). Upserts the caller's presence
+    // and returns the other active editors + the live version.
+    @PutMapping("/{id}/presence")
+    public ResponseEntity<com.company.skillmd.skill.dto.PresenceResponse> presence(@PathVariable String id) {
+        return ResponseEntity.ok(skillService.heartbeatPresence(id));
+    }
+
+    @DeleteMapping("/{id}/presence")
+    public ResponseEntity<Void> leavePresence(@PathVariable String id) {
+        skillService.leavePresence(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // Phase C (v2): like / unlike (idempotent; any viewer who can see it).
     @PutMapping("/{id}/like")
     public ResponseEntity<SkillService.LikeStatus> like(@PathVariable String id) {

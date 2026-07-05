@@ -97,6 +97,13 @@ export const skillApi = {
   listOpen: (params: { tag?: string; q?: string; sort?: string; page?: number; size?: number } = {}) =>
     api.get('/api/skills', { params: { view: 'open', ...params } }),
 
+  // Phase E (v2): presence heartbeat/poll — returns { editors, currentVersion }.
+  presence: (id: string) =>
+    api.put(`/api/skills/${id}/presence`),
+
+  leavePresence: (id: string) =>
+    api.delete(`/api/skills/${id}/presence`),
+
   // Phase C (v2): like / unlike (idempotent) — returns { likeCount, likedByMe }.
   like: (id: string) =>
     api.put(`/api/skills/${id}/like`),

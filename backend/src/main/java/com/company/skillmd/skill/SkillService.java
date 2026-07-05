@@ -30,16 +30,22 @@ public class SkillService {
     private final TeamService teamService;
     private final MongoTemplate mongoTemplate;
     private final SkillLikeRepository skillLikeRepository;
+    private final SkillPresenceRepository skillPresenceRepository;
+
+    // Phase E (v2): editors heartbeating within this window are "active".
+    private static final long PRESENCE_WINDOW_SECONDS = 15;
 
     public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver,
                          AuthorizationService authorizationService, TeamService teamService,
-                         MongoTemplate mongoTemplate, SkillLikeRepository skillLikeRepository) {
+                         MongoTemplate mongoTemplate, SkillLikeRepository skillLikeRepository,
+                         SkillPresenceRepository skillPresenceRepository) {
         this.skillRepository = skillRepository;
         this.referenceResolver = referenceResolver;
         this.authorizationService = authorizationService;
         this.teamService = teamService;
         this.mongoTemplate = mongoTemplate;
         this.skillLikeRepository = skillLikeRepository;
+        this.skillPresenceRepository = skillPresenceRepository;
     }
 
     public SkillResponse createSkill(CreateSkillRequest request, String userId) {
@@ -143,6 +149,46 @@ public class SkillService {
         boolean openAndPublished = "open".equals(skill.getScope()) && "published".equals(skill.getStatus());
         authorizationService.requireResourceReadable(skill.getTeamId(), openAndPublished);
         return skill;
+    }
+
+    /**
+     * Phase E (v2): heartbeat presence and read back the current editor set +
+     * live version. `editors` excludes the caller. Only editors of the skill's
+     * team are meaningful presences, so this requires edit rights.
+     */
+    public com.company.skillmd.skill.dto.PresenceResponse heartbeatPresence(String id) {
+        Skill skill = skillRepository.findById(id)
+            .filter(s -> s.getDeletedAt() == null)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        authorizationService.requireResourceEditable(skill.getTeamId());
+        String me = authorizationService.currentUser().getUserId();
+
+        // Atomic upsert — idempotent regardless of whether the unique index was
+        // auto-created (Spring Boot disables auto-index-creation by default),
+        // so concurrent heartbeats never accumulate duplicate rows.
+        org.springframework.data.mongodb.core.query.Query q =
+            org.springframework.data.mongodb.core.query.Query.query(
+                org.springframework.data.mongodb.core.query.Criteria
+                    .where("skillId").is(id).and("userId").is(me));
+        org.springframework.data.mongodb.core.query.Update upd =
+            new org.springframework.data.mongodb.core.query.Update()
+                .set("skillId", id).set("userId", me).set("lastSeen", java.time.Instant.now());
+        mongoTemplate.upsert(q, upd, SkillPresence.class);
+
+        java.time.Instant cutoff = java.time.Instant.now().minusSeconds(PRESENCE_WINDOW_SECONDS);
+        java.util.List<String> others = skillPresenceRepository
+            .findBySkillIdAndLastSeenAfter(id, cutoff).stream()
+            .map(SkillPresence::getUserId)
+            .filter(u -> !u.equals(me))
+            .distinct()
+            .toList();
+
+        return new com.company.skillmd.skill.dto.PresenceResponse(others, skill.getCurrentVersion());
+    }
+
+    public void leavePresence(String id) {
+        String me = authorizationService.currentUser().getUserId();
+        skillPresenceRepository.deleteBySkillIdAndUserId(id, me);
     }
 
     private LikeStatus refreshLikeCount(Skill skill, boolean likedByMe) {
