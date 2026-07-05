@@ -75,15 +75,16 @@ Status: active (2026-07-05 使用者核准開跑)
 
 ### Phase F — 多語系框架（i18n，使用者 2026-07-05 追加；排在 E 之前避免 E 新字串返工）
 
-- [ ] F1 框架建置：安裝 react-i18next + i18next；`src/i18n/` config；資源檔
-      `zh-TW`（預設）與 `en`；`<html lang>` 同步；語言選擇 localStorage 持久化
-      → 驗證：切換語言後 UI 字串改變；build/tsc 綠
-- [ ] F2 字串抽取：全 UI 硬編中文 → `t('key')`；命名空間分組（shell/skills/
-      open/detail/editor/common）；zh-TW 值＝現況中文、en 值＝對應英文
-      → 驗證：grep 無殘留硬編中文於 JSX 文字節點（範例值/識別符除外）；
-      vitest 全綠（測試改用 key 或 zh-TW 值）
-- [ ] F3 語言切換器：側欄底部（主題切換器旁）中/EN 三態或雙態
-      → 驗證：vitest persist + live 截圖雙語
+- [x] F1 框架建置：react-i18next + i18next（新依賴）；src/i18n config；
+      zh-TW（預設）+ en 資源檔（9 命名空間）；<html lang> 同步；lang localStorage
+      → 驗證：i18n.test 3（default/switch/interpolate）；tsc/build 0
+- [x] F2 字串抽取：11 個 UI 檔全 t('...')；grep 殘留硬編中文＝0（範例值/
+      識別符除外）；test setup 匯入 i18n 使 t() 解析；SkillsPage 空狀態斷言
+      更新為新文案
+      → 驗證：vitest 41/41
+- [x] F3 語言切換器：側欄底部繁中/English 下拉（persist、mirror html lang）
+      → 驗證：live 英文截圖確認全站切換（My Team/Open Space/Create your
+      first skill…）
 
 ### Phase E — WebSocket 在線提示 + 軟鎖（最大工程；orchestrator 級，~3-5d）
 > 注意：E 的所有新 UI 字串一律走 F 建好的 i18n（t('...')），不再硬編。
@@ -149,6 +150,12 @@ Status: active (2026-07-05 使用者核准開跑)
   teamId prop、無團隊時 disable）。README 全面改寫（功能總覽 / API 表 / 結構樹
   / v1+v2 階段）、IMPLEMENTATION_STATUS 加 v2 摘要。閘門：tsc/build 0、
   vitest 38/38（ConflictDialog 測試已更新）。全站 UI = zh-TW。
+- 2026-07-05 | F | done，commit 720b370（commander inline）。使用者要真正的
+  多語系框架：安裝 react-i18next（新依賴）、zh-TW+en 資源（9 命名空間）、11
+  個 UI 檔字串全抽取為 t()、側欄語言切換器、test setup 初始化 i18n。
+  ⚠️ 注意 SkillDetailPage 的 targetTeams.map((t)=>) 原本會遮蔽 i18n 的 t，
+  已改名 tm。閘門：tsc/build 0、vitest 41/41、英文全站截圖確認。已 push。
+  ★ Phase E（WebSocket）現在可在 i18n 基礎上開跑——E 新字串一律走 t()。
 
 ## Open questions
 
