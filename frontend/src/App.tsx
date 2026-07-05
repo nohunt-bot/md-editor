@@ -7,12 +7,14 @@ import { Sidebar } from './app/Sidebar'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
 import { useIdentity } from './app/useIdentity'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 
 function App() {
   // Identity loads once for the whole shell. Even if /api/me fails (no
   // backend), useIdentity falls back to an empty identity so both zones render.
   const identity = useIdentity()
+  const { t } = useTranslation()
 
   return (
     <BrowserRouter>
@@ -24,16 +26,16 @@ function App() {
               <GlobalSearch />
               {identity.activeTeamId ? (
                 <Link to="/skills/new" className="btn-primary">
-                  ＋ 新增 Skill
+                  {t('common:newSkill')}
                 </Link>
               ) : (
                 // Phase 5.1 no-team guard: creating needs an owning team.
                 <button
                   className="btn-primary"
                   disabled
-                  title="請先在左側選擇團隊"
+                  title={t('common:selectTeamFirst')}
                 >
-                  ＋ 新增 Skill
+                  {t('common:newSkill')}
                 </button>
               )}
             </header>

@@ -56,7 +56,7 @@ beforeEach(() => {
 describe('SkillsPage empty states (§6.4)', () => {
   it('(a) no team selected → 選擇一個團隊', async () => {
     renderPage(baseIdentity({ activeTeamId: null, activeTeam: null }))
-    expect(await screen.findByText('選擇一個團隊')).toBeInTheDocument()
+    expect(await screen.findByText('選擇一個團隊以檢視 skill')).toBeInTheDocument()
     expect(listMock).not.toHaveBeenCalled()
   })
 
@@ -64,7 +64,7 @@ describe('SkillsPage empty states (§6.4)', () => {
     listMock.mockResolvedValue({ data: { content: [] } })
     renderPage(baseIdentity())
     expect(await screen.findByText('建立第一個 skill')).toBeInTheDocument()
-    expect(screen.getByText('+ 建立 skill')).toBeInTheDocument()
+    expect(screen.getByText('＋ 建立 skill')).toBeInTheDocument()
   })
 
   it('(c) filter active, no match → 沒有符合的 skill', async () => {
@@ -84,7 +84,7 @@ describe('SkillsPage empty states (§6.4)', () => {
     const { fireEvent } = await import('@testing-library/react')
     fireEvent.change(input, { target: { value: 'zzzznomatch' } })
     await waitFor(() =>
-      expect(screen.getByText('沒有符合的 skill')).toBeInTheDocument(),
+      expect(screen.getByText('沒有符合的 skill，試試放寬篩選')).toBeInTheDocument(),
     )
   })
 })

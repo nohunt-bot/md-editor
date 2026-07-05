@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { search, type SearchResult } from '../api/api'
 
 export function GlobalSearch() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [q, setQ] = useState('')
   const [results, setResults] = useState<{ team: SearchResult[]; open: SearchResult[] }>({
     team: [],
@@ -81,7 +83,7 @@ export function GlobalSearch() {
         ref={inputRef}
         className="global-search-input"
         type="search"
-        placeholder="搜尋 skill…（⌘K）"
+        placeholder={t('shell:searchPlaceholder')}
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onFocus={() => q.trim() && setOpen(true)}
@@ -90,11 +92,11 @@ export function GlobalSearch() {
       {open && (
         <div className="global-search-dropdown">
           {!hasResults ? (
-            <div className="search-empty">找不到符合的 skill</div>
+            <div className="search-empty">{t('shell:searchEmpty')}</div>
           ) : (
             <>
-              <SearchGroup title="我的團隊" items={results.team} onPick={go} />
-              <SearchGroup title="開放空間" items={results.open} onPick={go} />
+              <SearchGroup title={t('shell:myTeam')} items={results.team} onPick={go} />
+              <SearchGroup title={t('shell:openSpace')} items={results.open} onPick={go} />
               <button
                 className="search-row search-all-row"
                 onClick={() => {
@@ -104,7 +106,7 @@ export function GlobalSearch() {
                   navigate(`/open?q=${encodeURIComponent(term)}`)
                 }}
               >
-                在開放空間查看全部結果 →
+                {t('shell:searchViewAll')}
               </button>
             </>
           )}

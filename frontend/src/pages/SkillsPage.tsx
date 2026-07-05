@@ -4,6 +4,7 @@ import { skillApi } from '../api/api'
 import { useTeamFilter } from '../app/TeamFilterContext'
 import { Badge } from '../components/common/Badge'
 import { Pagination } from '../components/common/Pagination'
+import { useTranslation } from 'react-i18next'
 import type { Identity } from '../app/useIdentity'
 import './SkillsPage.css'
 
@@ -17,6 +18,7 @@ function readView(): View {
 }
 
 export function SkillsPage({ identity }: { identity: Identity }) {
+  const { t } = useTranslation()
   const { selectedFolder, selectedTag } = useTeamFilter()
   const [skills, setSkills] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -83,22 +85,21 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     if (!teamId) {
       return (
         <div className="empty-state">
-          <p className="empty-state-title">選擇一個團隊</p>
-          <p className="empty-state-hint">從左側切換團隊以檢視其 skill。</p>
+          <p className="empty-state-title">{t('skills:emptyNoTeam')}</p>
         </div>
       )
     }
     if (loading) {
-      return <div className="loading">載入中…</div>
+      return <div className="loading">{t('common:loading')}</div>
     }
     // (b) team selected but zero skills at all
     if (skills.length === 0) {
       return (
         <div className="empty-state">
-          <p className="empty-state-title">建立第一個 skill</p>
-          <p className="empty-state-hint">這個團隊還沒有任何 skill。</p>
+          <p className="empty-state-title">{t('skills:emptyCreateFirst')}</p>
+          <p className="empty-state-hint">{t('skills:emptyCreateFirstHint')}</p>
           <Link to="/skills/new" className="btn-primary">
-            + 建立 skill
+            {t('skills:createSkill')}
           </Link>
         </div>
       )
@@ -107,8 +108,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     if (filteredSkills.length === 0) {
       return (
         <div className="empty-state">
-          <p className="empty-state-title">沒有符合的 skill</p>
-          <p className="empty-state-hint">試試放寬篩選。</p>
+          <p className="empty-state-title">{t('skills:emptyNoMatch')}</p>
         </div>
       )
     }
@@ -124,20 +124,24 @@ export function SkillsPage({ identity }: { identity: Identity }) {
   return (
     <div className="skills-main">
       <div className="skills-header">
-        <h1>{identity.activeTeam?.displayName || '團隊'} Skills</h1>
+        <h1>
+          {identity.activeTeam?.displayName
+            ? t('skills:teamSkills', { team: identity.activeTeam.displayName })
+            : t('skills:teamSkillsGeneric')}
+        </h1>
         <div className="skills-actions">
           <input
             type="text"
             className="search-input"
-            placeholder="篩選 skill…"
+            placeholder={t('skills:filterPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <div className="view-toggle" role="group" aria-label="檢視模式">
+          <div className="view-toggle" role="group" aria-label={t('skills:viewMode')}>
             <button
               type="button"
               className={view === 'list' ? 'active' : ''}
-              aria-label="清單檢視"
+              aria-label={t('skills:viewList')}
               aria-pressed={view === 'list'}
               onClick={() => setView('list')}
             >
@@ -146,7 +150,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
             <button
               type="button"
               className={view === 'grid' ? 'active' : ''}
-              aria-label="格狀檢視"
+              aria-label={t('skills:viewGrid')}
               aria-pressed={view === 'grid'}
               onClick={() => setView('grid')}
             >
@@ -157,7 +161,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
       </div>
 
       {filterActive && teamId && skills.length > 0 && (
-        <div className="skills-count">共 {filteredSkills.length} 個符合</div>
+        <div className="skills-count">{t('skills:matchCount', { count: filteredSkills.length })}</div>
       )}
 
       {renderBody()}

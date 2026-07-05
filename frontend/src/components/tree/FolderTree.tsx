@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { folderApi } from '../../api/api'
 import './FolderTree.css'
 
@@ -18,6 +19,7 @@ interface FolderTreeProps {
 
 export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: FolderTreeProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
+  const { t } = useTranslation()
 
   function toggleExpand(folderId: string) {
     setExpandedFolders(prev => {
@@ -69,18 +71,18 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: 
   if (!folders || folders.length === 0) {
     return (
       <div className="folder-tree-empty">
-        <p>尚無資料夾</p>
+        <p>{t('folders:none')}</p>
         <button
           className="btn-small"
           disabled={!teamId}
-          title={!teamId ? '請先選擇團隊' : undefined}
+          title={!teamId ? t('folders:selectTeamFirst') : undefined}
           onClick={() => {
             if (!teamId) return
-            const name = prompt('輸入資料夾名稱：')
+            const name = prompt(t('folders:enterName'))
             if (name) folderApi.create(name, teamId)
           }}
         >
-          + 新增資料夾
+          {t('folders:newFolder')}
         </button>
       </div>
     )
@@ -93,7 +95,7 @@ export function FolderTree({ folders, selectedFolder, onSelectFolder, teamId }: 
         onClick={() => onSelectFolder(null)}
       >
         <span className="folder-icon">📂</span>
-        <span className="folder-name">全部 skill</span>
+        <span className="folder-name">{t('folders:allSkills')}</span>
       </div>
       {folders.map(folder => renderFolder(folder))}
     </div>

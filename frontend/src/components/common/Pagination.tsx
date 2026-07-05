@@ -1,7 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import './Pagination.css'
 
-// Phase A (v2): shared pagination — 「上一頁 / 第 x / y 頁 / 下一頁」.
-// Renders nothing when there is only one page.
+// Phase A (v2): shared pagination. Renders nothing when there is one page.
 export function Pagination({
   page,
   totalPages,
@@ -11,25 +11,26 @@ export function Pagination({
   totalPages: number
   onPage: (page: number) => void
 }) {
+  const { t } = useTranslation()
   if (totalPages <= 1) return null
   return (
-    <nav className="pagination" aria-label="分頁">
+    <nav className="pagination" aria-label={t('pagination:label')}>
       <button
         className="pagination-btn"
         disabled={page <= 0}
         onClick={() => onPage(page - 1)}
       >
-        ← 上一頁
+        {t('pagination:prev')}
       </button>
       <span className="pagination-status">
-        第 {page + 1} / {totalPages} 頁
+        {t('pagination:status', { page: page + 1, total: totalPages })}
       </span>
       <button
         className="pagination-btn"
         disabled={page >= totalPages - 1}
         onClick={() => onPage(page + 1)}
       >
-        下一頁 →
+        {t('pagination:next')}
       </button>
     </nav>
   )

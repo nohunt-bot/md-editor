@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 import './ConflictDialog.css'
 
@@ -24,27 +25,26 @@ export function ConflictDialog({
   onAbandon
 }: ConflictDialogProps) {
   const [showDiff, setShowDiff] = useState(true)
+  const { t } = useTranslation()
 
   return (
     <div className="conflict-dialog-overlay">
       <div className="conflict-dialog">
         <div className="conflict-header">
-          <h2>⚠️ 偵測到編輯衝突</h2>
+          <h2>{t('conflict:title')}</h2>
           <p className="conflict-message">{message}</p>
         </div>
 
         <div className="conflict-info">
           <p>
-            <strong>版本：</strong>v{currentVersion}（由 {currentEditorId}）
+            <strong>{t('conflict:version')}</strong>v{currentVersion}（{t('conflict:by', { editor: currentEditorId })}）
           </p>
-          <p>
-            這份 skill 在你編輯期間被修改了，請檢視下方差異後再決定。
-          </p>
+          <p>{t('conflict:body')}</p>
         </div>
 
         <div className="conflict-actions">
           <button onClick={() => setShowDiff(!showDiff)}>
-            {showDiff ? '隱藏差異' : '顯示差異'}
+            {showDiff ? t('conflict:hideDiff') : t('conflict:showDiff')}
           </button>
         </div>
 
@@ -54,31 +54,22 @@ export function ConflictDialog({
               oldValue={currentContent}
               newValue={newContent}
               splitView={true}
-              leftTitle={`伺服器（v${currentVersion}）`}
-              rightTitle="你的變更"
+              leftTitle={t('conflict:serverTitle', { version: currentVersion })}
+              rightTitle={t('conflict:yourChanges')}
               useDarkTheme={true}
             />
           </div>
         )}
 
         <div className="conflict-actions">
-          <button
-            className="btn-override"
-            onClick={onOverride}
-          >
-            覆蓋（強制儲存）
+          <button className="btn-override" onClick={onOverride}>
+            {t('conflict:override')}
           </button>
-          <button
-            className="btn-merge"
-            onClick={() => onMerge(currentContent)}
-          >
-            改用伺服器版本
+          <button className="btn-merge" onClick={() => onMerge(currentContent)}>
+            {t('conflict:useServer')}
           </button>
-          <button
-            className="btn-abandon"
-            onClick={onAbandon}
-          >
-            放棄變更
+          <button className="btn-abandon" onClick={onAbandon}>
+            {t('conflict:abandon')}
           </button>
         </div>
       </div>

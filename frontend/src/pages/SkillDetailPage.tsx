@@ -4,6 +4,7 @@ import { skillApi } from '../api/api'
 import { Badge } from '../components/common/Badge'
 import { ErrorBanner } from '../components/common/ErrorBanner'
 import { Markdown } from '../components/common/Markdown'
+import { useTranslation } from 'react-i18next'
 import { useIdentity, type Identity } from '../app/useIdentity'
 import './SkillDetailPage.css'
 
@@ -59,6 +60,7 @@ type Confirm =
   | null
 
 export function SkillDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const identity = useIdentity()
@@ -129,7 +131,7 @@ export function SkillDetailPage() {
       await reload()
       setConfirm(null)
     } catch (e: any) {
-      setActionError('發布失敗：' + (e.response?.data?.message || e.message))
+      setActionError(t('detail:publishFailed') + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
@@ -143,7 +145,7 @@ export function SkillDetailPage() {
       await reload()
       setConfirm(null)
     } catch (e: any) {
-      setActionError('下架失敗：' + (e.response?.data?.message || e.message))
+      setActionError(t('detail:unpublishFailed') + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
@@ -156,7 +158,7 @@ export function SkillDetailPage() {
       setLiked(res.data.likedByMe)
       setLikeCount(res.data.likeCount)
     } catch (e: any) {
-      setActionError('操作失敗：' + (e.response?.data?.message || e.message))
+      setActionError(t('detail:likeFailed') + (e.response?.data?.message || e.message))
     }
   }
 
@@ -169,23 +171,23 @@ export function SkillDetailPage() {
       setCopyTeam(null)
       if (newId) navigate(`/skills/${newId}`)
     } catch (e: any) {
-      setActionError('複製失敗：' + (e.response?.data?.message || e.message))
+      setActionError(t('detail:copyFailed') + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
     }
   }
 
   if (loading) {
-    return <div className="detail-loading">載入中…</div>
+    return <div className="detail-loading">{t('common:loading')}</div>
   }
 
   if (notFound || !skill) {
     return (
       <div className="detail-notfound">
-        <p className="detail-notfound-title">找不到或無權限</p>
-        <p className="detail-notfound-hint">此 skill 不存在，或你沒有檢視權限。</p>
+        <p className="detail-notfound-title">{t('detail:notFound')}</p>
+        <p className="detail-notfound-hint">{t('detail:notFoundHint')}</p>
         <Link to="/team" className="btn-secondary">
-          回到團隊
+          {t('detail:backToTeam')}
         </Link>
       </div>
     )
@@ -205,9 +207,9 @@ export function SkillDetailPage() {
   // "複製到我的團隊" — any authenticated viewer of an open+published skill (§2.3).
   const canCopy = isOpenPublished && Boolean(identity.userId)
   // Teams the caller may copy into (editor or admin). Admin sees all teams.
-  const targetTeams = identity.teams.filter((t) => canEdit(identity, t.id))
+  const targetTeams = identity.teams.filter((tm) => canEdit(identity, tm.id))
   const teamName =
-    identity.teams.find((t) => t.id === skill.teamId)?.displayName ?? skill.teamId
+    identity.teams.find((tm) => tm.id === skill.teamId)?.displayName ?? skill.teamId
 
   return (
     <div className="skill-detail-wrap">
@@ -221,28 +223,28 @@ export function SkillDetailPage() {
 
       <aside className="detail-sidebar">
         <section className="detail-meta">
-          <h2 className="detail-section-title">資訊</h2>
+          <h2 className="detail-section-title">{t('detail:info')}</h2>
           <dl>
-            <dt>團隊</dt>
+            <dt>{t('detail:team')}</dt>
             <dd>{teamName}</dd>
-            <dt>範圍</dt>
-            <dd>{skill.scope === 'open' ? '開放空間' : '團隊'}</dd>
-            <dt>狀態</dt>
+            <dt>{t('detail:scope')}</dt>
+            <dd>{skill.scope === 'open' ? t('detail:scopeOpen') : t('detail:scopeTeam')}</dd>
+            <dt>{t('detail:status')}</dt>
             <dd>
               <Badge status={skill.status} />
             </dd>
-            <dt>版本</dt>
+            <dt>{t('detail:version')}</dt>
             <dd>
               v{skill.currentVersion ?? 1}
-              {frozenView && <span className="frozen-note">（發布版）</span>}
+              {frozenView && <span className="frozen-note">{t('detail:frozenTag')}</span>}
             </dd>
-            <dt>最後編輯</dt>
+            <dt>{t('detail:lastEditor')}</dt>
             <dd>{skill.lastEditorId ?? '—'}</dd>
-            <dt>更新時間</dt>
+            <dt>{t('detail:updatedAt')}</dt>
             <dd>{fmtTime(skill.updatedAt)}</dd>
             {skill.tags && skill.tags.length > 0 && (
               <>
-                <dt>標籤</dt>
+                <dt>{t('common:tags')}</dt>
                 <dd className="detail-tags">
                   {skill.tags.map((tag) => (
                     <span key={tag} className="tag">
@@ -262,16 +264,16 @@ export function SkillDetailPage() {
             >
               {liked ? '♥' : '♡'} {likeCount}
             </button>
-            <span className="copy-cite">引用 {skill.copyCount ?? 0} 次</span>
+            <span className="copy-cite">{t('detail:citeCount', { count: skill.copyCount ?? 0 })}</span>
           </div>
         </section>
 
         {(editable || canCopy) && (
           <section className="detail-actions">
-            <h2 className="detail-section-title">動作</h2>
+            <h2 className="detail-section-title">{t('detail:actions')}</h2>
             {editable && (
               <Link to={`/skills/${skill.id}/edit`} className="btn-secondary detail-action">
-                編輯
+                {t('detail:edit')}
               </Link>
             )}
             {editable && skill.status !== 'published' && (
@@ -280,7 +282,7 @@ export function SkillDetailPage() {
                 className="btn-primary detail-action"
                 onClick={() => setConfirm({ action: 'publish' })}
               >
-                發布到開放空間
+                {t('detail:publish')}
               </button>
             )}
             {editable && skill.status === 'published' && (
@@ -289,20 +291,18 @@ export function SkillDetailPage() {
                 className="btn-secondary detail-action"
                 onClick={() => setConfirm({ action: 'unpublish' })}
               >
-                從開放空間下架
+                {t('detail:unpublish')}
               </button>
             )}
             {hasUnpublishedChanges && (
               <div className="unpublished-hint">
-                <p>
-                  有未發布的更新（開放空間仍顯示 v{skill.publishedVersion}）
-                </p>
+                <p>{t('detail:unpublishedChanges', { version: skill.publishedVersion })}</p>
                 <button
                   type="button"
                   className="btn-primary detail-action"
                   onClick={() => setConfirm({ action: 'publish' })}
                 >
-                  重新發布
+                  {t('detail:republish')}
                 </button>
               </div>
             )}
@@ -320,16 +320,16 @@ export function SkillDetailPage() {
                   }
                 }}
               >
-                複製到我的團隊
+                {t('detail:copyToTeam')}
               </button>
             )}
           </section>
         )}
 
         <section className="detail-versions">
-          <h2 className="detail-section-title">版本歷史</h2>
+          <h2 className="detail-section-title">{t('detail:versionHistory')}</h2>
           {versions.length === 0 ? (
-            <p className="detail-empty">尚無版本紀錄。</p>
+            <p className="detail-empty">{t('detail:noVersions')}</p>
           ) : (
             <ul className="version-list">
               {versions.map((v) => (
@@ -349,9 +349,9 @@ export function SkillDetailPage() {
 
       {confirm?.action === 'publish' && (
         <ConfirmDialog
-          title="發布到開放空間"
-          message="發布後此 skill 將全公司可見。確定要發布嗎？"
-          confirmLabel="發布"
+          title={t('detail:publishTitle')}
+          message={t('detail:publishMsg')}
+          confirmLabel={t('detail:publishConfirm')}
           busy={busy}
           onConfirm={doPublish}
           onCancel={() => setConfirm(null)}
@@ -359,9 +359,9 @@ export function SkillDetailPage() {
       )}
       {confirm?.action === 'unpublish' && (
         <ConfirmDialog
-          title="從開放空間下架"
-          message="下架後其他團隊已複製的副本不受影響。確定要下架嗎？"
-          confirmLabel="下架"
+          title={t('detail:unpublishTitle')}
+          message={t('detail:unpublishMsg')}
+          confirmLabel={t('detail:unpublishConfirm')}
           busy={busy}
           onConfirm={doUnpublish}
           onCancel={() => setConfirm(null)}
@@ -370,18 +370,18 @@ export function SkillDetailPage() {
       {copyTeam !== null && (
         <div className="detail-dialog-backdrop" role="dialog" aria-modal="true">
           <div className="detail-dialog">
-            <h3>複製到我的團隊</h3>
-            <p>選擇目標團隊：</p>
+            <h3>{t('detail:copyTitle')}</h3>
+            <p>{t('detail:copyPickTeam')}</p>
             <select value={copyTeam} onChange={(e) => setCopyTeam(e.target.value)}>
-              {targetTeams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.displayName}
+              {targetTeams.map((tm) => (
+                <option key={tm.id} value={tm.id}>
+                  {tm.displayName}
                 </option>
               ))}
             </select>
             <div className="detail-dialog-actions">
               <button type="button" className="btn-secondary" onClick={() => setCopyTeam(null)}>
-                取消
+                {t('common:cancel')}
               </button>
               <button
                 type="button"
@@ -389,7 +389,7 @@ export function SkillDetailPage() {
                 disabled={busy}
                 onClick={() => doCopy(copyTeam)}
               >
-                複製
+                {t('detail:copyConfirm')}
               </button>
             </div>
           </div>
@@ -415,6 +415,7 @@ function ConfirmDialog({
   onConfirm: () => void
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="detail-dialog-backdrop" role="dialog" aria-modal="true">
       <div className="detail-dialog">
@@ -422,10 +423,10 @@ function ConfirmDialog({
         <p>{message}</p>
         <div className="detail-dialog-actions">
           <button type="button" className="btn-secondary" onClick={onCancel} disabled={busy}>
-            取消
+            {t('common:cancel')}
           </button>
           <button type="button" className="btn-primary" onClick={onConfirm} disabled={busy}>
-            {busy ? '處理中…' : confirmLabel}
+            {busy ? t('detail:processing') : confirmLabel}
           </button>
         </div>
       </div>

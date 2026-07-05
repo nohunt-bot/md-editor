@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { skillApi, tagApi } from '../api/api'
 import { Pagination } from '../components/common/Pagination'
+import { useTranslation } from 'react-i18next'
 import './OpenSpacePage.css'
 
 // Phase 3.1: open-space browse. Latest-published cards (backend sorts by
@@ -23,6 +24,7 @@ type OpenSkill = {
 }
 
 export function OpenSpacePage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
   const q = params.get('q') || undefined
@@ -87,20 +89,20 @@ export function OpenSpacePage() {
   return (
     <div className="page open-space">
       <div className="page-header">
-        <h1>開放空間</h1>
-        {q && <span className="open-space-q">搜尋：「{q}」</span>}
+        <h1>{t('open:title')}</h1>
+        {q && <span className="open-space-q">{t('open:searchLabel', { q })}</span>}
         <div className="open-sort">
           <button
             className={`tag-chip ${!sort ? 'active' : ''}`}
             onClick={() => selectSort(undefined)}
           >
-            最新
+            {t('open:sortLatest')}
           </button>
           <button
             className={`tag-chip ${sort === 'likes' ? 'active' : ''}`}
             onClick={() => selectSort('likes')}
           >
-            最熱
+            {t('open:sortHot')}
           </button>
         </div>
       </div>
@@ -111,7 +113,7 @@ export function OpenSpacePage() {
             className={`tag-chip ${!tag ? 'active' : ''}`}
             onClick={() => selectTag(undefined)}
           >
-            全部
+            {t('common:all')}
           </button>
           {tags.map((t) => (
             <button
@@ -126,10 +128,10 @@ export function OpenSpacePage() {
       )}
 
       {loading ? (
-        <div className="empty-state">載入中…</div>
+        <div className="empty-state">{t('common:loading')}</div>
       ) : skills.length === 0 ? (
         <div className="empty-state">
-          <p>{filtering ? '沒有符合的 skill，試試放寬篩選' : '還沒有團隊發布 skill'}</p>
+          <p>{filtering ? t('open:emptyNoMatch') : t('open:emptyNone')}</p>
         </div>
       ) : (
         <div className="open-grid">
@@ -158,7 +160,7 @@ export function OpenSpacePage() {
               <div className="open-card-meta">
                 <span className="open-card-team">{skill.teamDisplayName || skill.teamId}</span>
                 <span className="open-card-stats">
-                  ♥ {skill.likeCount ?? 0} · 引用 {skill.copyCount ?? 0}
+                  ♥ {skill.likeCount ?? 0} · {t('open:cite', { count: skill.copyCount ?? 0 })}
                   {skill.publishedAt &&
                     ` · ${new Date(skill.publishedAt).toLocaleDateString()}`}
                 </span>
