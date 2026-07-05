@@ -20,6 +20,9 @@ public record SkillResponse(
     List<ResolvedPrerequisite> prerequisites,
     Integer currentVersion,
     Integer publishedVersion, // Phase B (v2): version frozen at last publish; null = never published
+    Integer likeCount,        // Phase C (v2)
+    Integer copyCount,        // Phase C (v2): citations via copy-to-team
+    Boolean likedByMe,        // Phase C (v2): only set on detail reads; null in lists
     String authorId,
     String lastEditorId,
     Instant createdAt,

@@ -60,6 +60,11 @@ public class Skill {
     private Integer publishedVersion;
     private PublishedSnapshot publishedSnapshot;
 
+    // Phase C (v2): denormalized counters — likes (skill_likes is the source
+    // of truth) and copies (number of copy-to-team descendants).
+    private Integer likeCount;
+    private Integer copyCount;
+
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -123,6 +128,12 @@ public class Skill {
 
     public Integer getPublishedVersion() { return publishedVersion; }
     public void setPublishedVersion(Integer publishedVersion) { this.publishedVersion = publishedVersion; }
+
+    public Integer getLikeCount() { return likeCount; }
+    public void setLikeCount(Integer likeCount) { this.likeCount = likeCount; }
+
+    public Integer getCopyCount() { return copyCount; }
+    public void setCopyCount(Integer copyCount) { this.copyCount = copyCount; }
 
     public PublishedSnapshot getPublishedSnapshot() { return publishedSnapshot; }
     public void setPublishedSnapshot(PublishedSnapshot publishedSnapshot) { this.publishedSnapshot = publishedSnapshot; }

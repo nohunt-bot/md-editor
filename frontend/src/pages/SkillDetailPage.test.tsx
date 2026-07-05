@@ -14,6 +14,7 @@ vi.mock('../app/useIdentity', () => ({
 
 const getMock = vi.fn()
 const getVersionsMock = vi.fn(() => Promise.resolve({ data: [] }))
+const likeMock = vi.fn()
 
 vi.mock('../api/api', async () => {
   const actual = await vi.importActual<typeof import('../api/api')>('../api/api')
@@ -23,6 +24,7 @@ vi.mock('../api/api', async () => {
       ...actual.skillApi,
       get: (id: string) => getMock(id),
       getVersions: () => getVersionsMock(),
+      like: (id: string) => likeMock(id),
     },
   }
 })
@@ -130,6 +132,22 @@ describe('SkillDetailPage actions (§2.3)', () => {
     renderAt('s2')
     expect(await screen.findByText('（發布版）')).toBeInTheDocument()
     expect(screen.queryByText('重新發布')).not.toBeInTheDocument()
+  })
+
+  it('toggles the like button via the API (Phase C)', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: { ...openPublishedSkill, likeCount: 2, likedByMe: false },
+    })
+    likeMock.mockResolvedValue({ data: { likeCount: 3, likedByMe: true } })
+    renderAt('s2')
+    const btn = await screen.findByRole('button', { name: /♡ 2/ })
+    const { fireEvent } = await import('@testing-library/react')
+    fireEvent.click(btn)
+    expect(await screen.findByRole('button', { name: /♥ 3/ })).toBeInTheDocument()
+    expect(likeMock).toHaveBeenCalledWith('s2')
   })
 
   it('renders the 找不到或無權限 state on 404', async () => {

@@ -22,6 +22,8 @@ public record OpenSkillResponse(
     String sourceSkillId,
     List<String> tags,
     Integer currentVersion,
+    Integer likeCount,  // Phase C (v2)
+    Integer copyCount,  // Phase C (v2)
     String authorId,
     String lastEditorId,
     Instant createdAt,

@@ -18,6 +18,8 @@ type OpenSkill = {
   teamDisplayName?: string
   publishedAt?: string
   tags?: string[]
+  likeCount?: number // Phase C (v2)
+  copyCount?: number // Phase C (v2)
 }
 
 export function OpenSpacePage() {
@@ -25,6 +27,7 @@ export function OpenSpacePage() {
   const navigate = useNavigate()
   const q = params.get('q') || undefined
   const tag = params.get('tag') || undefined
+  const sort = params.get('sort') === 'likes' ? 'likes' : undefined // Phase C
 
   const [skills, setSkills] = useState<OpenSkill[]>([])
   const [tags, setTags] = useState<string[]>([])
@@ -35,7 +38,7 @@ export function OpenSpacePage() {
 
   useEffect(() => {
     setPage(0)
-  }, [q, tag])
+  }, [q, tag, sort])
 
   useEffect(() => {
     tagApi
@@ -48,7 +51,7 @@ export function OpenSpacePage() {
     let cancelled = false
     setLoading(true)
     skillApi
-      .listOpen({ q, tag, page })
+      .listOpen({ q, tag, sort, page })
       .then((res) => {
         if (cancelled) return
         setSkills(res.data.content || [])
@@ -63,7 +66,14 @@ export function OpenSpacePage() {
     return () => {
       cancelled = true
     }
-  }, [q, tag, page])
+  }, [q, tag, sort, page])
+
+  function selectSort(next?: 'likes') {
+    const p = new URLSearchParams(params)
+    if (!next) p.delete('sort')
+    else p.set('sort', next)
+    setParams(p, { replace: true })
+  }
 
   function selectTag(next?: string) {
     const p = new URLSearchParams(params)
@@ -79,6 +89,20 @@ export function OpenSpacePage() {
       <div className="page-header">
         <h1>開放空間</h1>
         {q && <span className="open-space-q">搜尋：「{q}」</span>}
+        <div className="open-sort">
+          <button
+            className={`tag-chip ${!sort ? 'active' : ''}`}
+            onClick={() => selectSort(undefined)}
+          >
+            最新
+          </button>
+          <button
+            className={`tag-chip ${sort === 'likes' ? 'active' : ''}`}
+            onClick={() => selectSort('likes')}
+          >
+            最熱
+          </button>
+        </div>
       </div>
 
       {tags.length > 0 && (
@@ -133,11 +157,11 @@ export function OpenSpacePage() {
               )}
               <div className="open-card-meta">
                 <span className="open-card-team">{skill.teamDisplayName || skill.teamId}</span>
-                {skill.publishedAt && (
-                  <span className="open-card-date">
-                    {new Date(skill.publishedAt).toLocaleDateString()}
-                  </span>
-                )}
+                <span className="open-card-stats">
+                  ♥ {skill.likeCount ?? 0} · 引用 {skill.copyCount ?? 0}
+                  {skill.publishedAt &&
+                    ` · ${new Date(skill.publishedAt).toLocaleDateString()}`}
+                </span>
               </div>
             </article>
           ))}

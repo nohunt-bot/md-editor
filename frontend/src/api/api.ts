@@ -94,8 +94,15 @@ export const skillApi = {
   list: (teamId: string, page = 0, size = 20) =>
     api.get('/api/skills', { params: { teamId, page, size } }),
 
-  listOpen: (params: { tag?: string; q?: string; page?: number; size?: number } = {}) =>
+  listOpen: (params: { tag?: string; q?: string; sort?: string; page?: number; size?: number } = {}) =>
     api.get('/api/skills', { params: { view: 'open', ...params } }),
+
+  // Phase C (v2): like / unlike (idempotent) — returns { likeCount, likedByMe }.
+  like: (id: string) =>
+    api.put(`/api/skills/${id}/like`),
+
+  unlike: (id: string) =>
+    api.delete(`/api/skills/${id}/like`),
 
   get: (id: string) =>
     api.get(`/api/skills/${id}`),

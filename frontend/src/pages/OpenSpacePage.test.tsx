@@ -74,6 +74,16 @@ describe('OpenSpacePage (§3.1)', () => {
     )
   })
 
+  it('passes sort=likes when the 最熱 chip is clicked (Phase C)', async () => {
+    listOpenMock.mockResolvedValue({ data: { content: [publishedSkill] } })
+    renderAt()
+    const hot = await screen.findByRole('button', { name: '最熱' })
+    fireEvent.click(hot)
+    await waitFor(() =>
+      expect(listOpenMock).toHaveBeenCalledWith(expect.objectContaining({ sort: 'likes' })),
+    )
+  })
+
   it('passes the selected tag to listOpen when a chip is clicked', async () => {
     listOpenMock.mockResolvedValue({ data: { content: [publishedSkill] } })
     renderAt()

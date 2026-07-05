@@ -46,13 +46,16 @@ class SkillServiceTest {
     @Mock
     private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
+    @Mock
+    private SkillLikeRepository skillLikeRepository;
+
     private SkillService skillService;
 
     @BeforeEach
     void setUp() {
         CurrentUserProvider adminProvider = () -> new CurrentUser("admin", "Admin", Map.of(), true);
         AuthorizationService authorizationService = new AuthorizationService(adminProvider);
-        skillService = new SkillService(skillRepository, referenceResolver, authorizationService, teamService, mongoTemplate);
+        skillService = new SkillService(skillRepository, referenceResolver, authorizationService, teamService, mongoTemplate, skillLikeRepository);
     }
 
     @Test
@@ -200,7 +203,7 @@ class SkillServiceTest {
     private SkillService serviceForUser(CurrentUser user) {
         CurrentUserProvider provider = () -> user;
         return new SkillService(skillRepository, referenceResolver, new AuthorizationService(provider),
-            teamService, mongoTemplate);
+            teamService, mongoTemplate, skillLikeRepository);
     }
 
     private Skill teamSkill(String id, String teamId) {
@@ -272,6 +275,53 @@ class SkillServiceTest {
         SkillResponse live = asMember.getSkill("skill-1").orElseThrow();
         assertEquals("# edited after publish", live.content());
         assertEquals(4, live.currentVersion());
+    }
+
+    @Test
+    @DisplayName("Like is idempotent and refreshes the denormalized count (Phase C v2)")
+    void like_idempotent() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(skillLikeRepository.findBySkillIdAndUserId("skill-1", "carol"))
+            .thenReturn(Optional.empty())                       // first like: not yet present
+            .thenReturn(Optional.of(new SkillLike("skill-1", "carol"))); // second: present
+        when(skillLikeRepository.countBySkillId("skill-1")).thenReturn(1L);
+
+        SkillService asCarol = serviceForUser(
+            new CurrentUser("carol", "Carol", Map.of("team-b", Role.EDITOR), false));
+
+        SkillService.LikeStatus first = asCarol.like("skill-1");
+        SkillService.LikeStatus second = asCarol.like("skill-1");
+
+        assertEquals(1L, first.likeCount());
+        assertTrue(first.likedByMe());
+        assertEquals(1L, second.likeCount()); // no double count
+        verify(skillLikeRepository, times(1)).save(any(SkillLike.class));
+        assertEquals(1, skill.getLikeCount());
+    }
+
+    @Test
+    @DisplayName("Unlike removes the like and refreshes the count (Phase C v2)")
+    void unlike_decrements() {
+        Skill skill = teamSkill("skill-1", "team-a");
+        skill.setScope("open");
+        skill.setStatus("published");
+        skill.setLikeCount(1);
+        when(skillRepository.findById("skill-1")).thenReturn(Optional.of(skill));
+        when(skillRepository.save(any(Skill.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(skillLikeRepository.countBySkillId("skill-1")).thenReturn(0L);
+
+        SkillService asCarol = serviceForUser(
+            new CurrentUser("carol", "Carol", Map.of("team-b", Role.EDITOR), false));
+        SkillService.LikeStatus status = asCarol.unlike("skill-1");
+
+        verify(skillLikeRepository).deleteBySkillIdAndUserId("skill-1", "carol");
+        assertEquals(0L, status.likeCount());
+        assertFalse(status.likedByMe());
+        assertEquals(0, skill.getLikeCount());
     }
 
     @Test

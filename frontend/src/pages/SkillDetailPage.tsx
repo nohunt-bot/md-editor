@@ -22,6 +22,9 @@ type Skill = {
   status: string
   currentVersion?: number
   publishedVersion?: number // Phase B (v2): version frozen at last publish
+  likeCount?: number // Phase C (v2)
+  copyCount?: number // Phase C (v2)
+  likedByMe?: boolean // Phase C (v2)
   lastEditorId?: string
   updatedAt?: string
   tags?: string[]
@@ -68,6 +71,9 @@ export function SkillDetailPage() {
   const [busy, setBusy] = useState(false)
   const [copyTeam, setCopyTeam] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  // Phase C (v2): like state, seeded from the detail response.
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
 
   useEffect(() => {
     if (!id) return
@@ -77,7 +83,10 @@ export function SkillDetailPage() {
     skillApi
       .get(id)
       .then((res) => {
-        if (!cancelled) setSkill(res.data)
+        if (cancelled) return
+        setSkill(res.data)
+        setLiked(Boolean(res.data.likedByMe))
+        setLikeCount(res.data.likeCount ?? 0)
       })
       .catch(() => {
         if (!cancelled) setNotFound(true)
@@ -137,6 +146,17 @@ export function SkillDetailPage() {
       setActionError('下架失敗：' + (e.response?.data?.message || e.message))
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function toggleLike() {
+    if (!id) return
+    try {
+      const res = liked ? await skillApi.unlike(id) : await skillApi.like(id)
+      setLiked(res.data.likedByMe)
+      setLikeCount(res.data.likeCount)
+    } catch (e: any) {
+      setActionError('操作失敗：' + (e.response?.data?.message || e.message))
     }
   }
 
@@ -233,6 +253,17 @@ export function SkillDetailPage() {
               </>
             )}
           </dl>
+          <div className="like-row">
+            <button
+              type="button"
+              className={`like-btn ${liked ? 'liked' : ''}`}
+              aria-pressed={liked}
+              onClick={toggleLike}
+            >
+              {liked ? '♥' : '♡'} {likeCount}
+            </button>
+            <span className="copy-cite">引用 {skill.copyCount ?? 0} 次</span>
+          </div>
         </section>
 
         {(editable || canCopy) && (

@@ -31,3 +31,19 @@ db_.skills
 print('v2-freeze migration: backfilled ' + backfilled + ' published skill(s).');
 print('published without snapshot remaining: ' +
   db_.skills.countDocuments({ status: 'published', publishedSnapshot: { $exists: false } }));
+
+// Phase C — counters backfill (idempotent): copyCount from sourceSkillId
+// aggregation; likeCount from skill_likes (0 for rows without likes).
+const copyCounts = {};
+db_.skills.find({ sourceSkillId: { $ne: null } }, { sourceSkillId: 1 }).forEach((s) => {
+  copyCounts[s.sourceSkillId] = (copyCounts[s.sourceSkillId] || 0) + 1;
+});
+let counterUpdates = 0;
+db_.skills.find({}, { _id: 1 }).forEach((s) => {
+  const idStr = s._id.toString();
+  const copies = copyCounts[idStr] || 0;
+  const likes = db_.skill_likes ? db_.skill_likes.countDocuments({ skillId: idStr }) : 0;
+  db_.skills.updateOne({ _id: s._id }, { $set: { copyCount: copies, likeCount: likes } });
+  counterUpdates += 1;
+});
+print('v2-counters migration: refreshed counters on ' + counterUpdates + ' skill(s).');

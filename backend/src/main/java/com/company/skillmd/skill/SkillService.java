@@ -29,15 +29,17 @@ public class SkillService {
     private final AuthorizationService authorizationService;
     private final TeamService teamService;
     private final MongoTemplate mongoTemplate;
+    private final SkillLikeRepository skillLikeRepository;
 
     public SkillService(SkillRepository skillRepository, ReferenceResolver referenceResolver,
                          AuthorizationService authorizationService, TeamService teamService,
-                         MongoTemplate mongoTemplate) {
+                         MongoTemplate mongoTemplate, SkillLikeRepository skillLikeRepository) {
         this.skillRepository = skillRepository;
         this.referenceResolver = referenceResolver;
         this.authorizationService = authorizationService;
         this.teamService = teamService;
         this.mongoTemplate = mongoTemplate;
+        this.skillLikeRepository = skillLikeRepository;
     }
 
     public SkillResponse createSkill(CreateSkillRequest request, String userId) {
@@ -104,8 +106,50 @@ public class SkillService {
                 // everyone else reads the frozen publish snapshot.
                 var user = authorizationService.currentUser();
                 boolean memberView = user.isAdmin() || user.isMemberOf(skill.getTeamId());
-                return memberView ? toResponse(skill) : toFrozenResponse(skill);
+                // Phase C (v2): detail carries the viewer's like state.
+                Boolean likedByMe = skillLikeRepository
+                    .findBySkillIdAndUserId(id, user.getUserId()).isPresent();
+                return memberView ? toResponse(skill, likedByMe) : toFrozenResponse(skill, likedByMe);
             });
+    }
+
+    /**
+     * Phase C (v2): like / unlike. Any caller who can SEE the skill may like
+     * it. Idempotent — the unique (skillId, userId) index backs it, and the
+     * denormalized counter is recomputed from the source of truth.
+     */
+    public LikeStatus like(String id) {
+        Skill skill = requireVisible(id);
+        String userId = authorizationService.currentUser().getUserId();
+        if (skillLikeRepository.findBySkillIdAndUserId(id, userId).isEmpty()) {
+            skillLikeRepository.save(new SkillLike(id, userId));
+        }
+        return refreshLikeCount(skill, true);
+    }
+
+    public LikeStatus unlike(String id) {
+        Skill skill = requireVisible(id);
+        String userId = authorizationService.currentUser().getUserId();
+        skillLikeRepository.deleteBySkillIdAndUserId(id, userId);
+        return refreshLikeCount(skill, false);
+    }
+
+    public record LikeStatus(long likeCount, boolean likedByMe) {}
+
+    private Skill requireVisible(String id) {
+        Skill skill = skillRepository.findById(id)
+            .filter(s -> s.getDeletedAt() == null)
+            .orElseThrow(() -> new ResourceNotFoundException("Skill not found: " + id));
+        boolean openAndPublished = "open".equals(skill.getScope()) && "published".equals(skill.getStatus());
+        authorizationService.requireResourceReadable(skill.getTeamId(), openAndPublished);
+        return skill;
+    }
+
+    private LikeStatus refreshLikeCount(Skill skill, boolean likedByMe) {
+        long count = skillLikeRepository.countBySkillId(skill.getId());
+        skill.setLikeCount((int) count);
+        skillRepository.save(skill);
+        return new LikeStatus(count, likedByMe);
     }
 
     public Page<SkillResponse> listSkills(String teamId, Pageable pageable) {
@@ -122,6 +166,10 @@ public class SkillService {
      * owning team's displayName, batch-resolved to avoid N+1.
      */
     public Page<OpenSkillResponse> listOpenSkills(String tag, String q, Pageable pageable) {
+        return listOpenSkills(tag, q, null, pageable);
+    }
+
+    public Page<OpenSkillResponse> listOpenSkills(String tag, String q, String sort, Pageable pageable) {
         Criteria criteria = Criteria.where("scope").is("open")
             .and("status").is("published")
             .and("deletedAt").isNull();
@@ -133,7 +181,12 @@ public class SkillService {
         if (q != null && !q.isBlank()) {
             query.addCriteria(TextCriteria.forDefaultLanguage().matching(q));
         }
-        query.with(Sort.by(Sort.Direction.DESC, "publishedAt"));
+        // Phase C (v2): 最新 (default) or 最熱 (likes, ties broken by recency).
+        if ("likes".equals(sort)) {
+            query.with(Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("publishedAt")));
+        } else {
+            query.with(Sort.by(Sort.Direction.DESC, "publishedAt"));
+        }
 
         long total = mongoTemplate.count(Query.of(query).limit(0).skip(0), Skill.class);
         query.with(pageable);
@@ -217,6 +270,9 @@ public class SkillService {
         copy.setStatus("draft");
         copy.setPublishedAt(null);
         copy.setSourceSkillId(source.getId());
+        // Phase C (v2): the source gains a citation.
+        source.setCopyCount((source.getCopyCount() == null ? 0 : source.getCopyCount()) + 1);
+        skillRepository.save(source);
         copy.setFolderId(null);
         copy.setTags(source.getTags() != null ? List.copyOf(source.getTags()) : List.of());
         copy.setCurrentVersion(1);
@@ -258,6 +314,8 @@ public class SkillService {
             skill.getSourceSkillId(),
             snap != null ? snap.getTags() : skill.getTags(),
             snap != null ? snap.getVersion() : skill.getCurrentVersion(),
+            skill.getLikeCount(),
+            skill.getCopyCount(),
             skill.getAuthorId(),
             skill.getLastEditorId(),
             skill.getCreatedAt(),
@@ -266,6 +324,10 @@ public class SkillService {
     }
 
     private SkillResponse toResponse(Skill skill) {
+        return toResponse(skill, null);
+    }
+
+    private SkillResponse toResponse(Skill skill, Boolean likedByMe) {
         return new SkillResponse(
             skill.getId(),
             skill.getName(),
@@ -283,6 +345,9 @@ public class SkillService {
             List.of(), // TODO: resolve prerequisites
             skill.getCurrentVersion(),
             skill.getPublishedVersion(),
+            skill.getLikeCount(),
+            skill.getCopyCount(),
+            likedByMe,
             skill.getAuthorId(),
             skill.getLastEditorId(),
             skill.getCreatedAt(),
@@ -295,10 +360,10 @@ public class SkillService {
      * fields come from the publish-time snapshot, never the live draft.
      * Falls back to live fields for pre-migration rows without a snapshot.
      */
-    private SkillResponse toFrozenResponse(Skill skill) {
+    private SkillResponse toFrozenResponse(Skill skill, Boolean likedByMe) {
         Skill.PublishedSnapshot snap = skill.getPublishedSnapshot();
         if (snap == null) {
-            return toResponse(skill);
+            return toResponse(skill, likedByMe);
         }
         return new SkillResponse(
             skill.getId(),
@@ -317,6 +382,9 @@ public class SkillService {
             List.of(),
             snap.getVersion(), // the frozen version is the visible version
             skill.getPublishedVersion(),
+            skill.getLikeCount(),
+            skill.getCopyCount(),
+            likedByMe,
             skill.getAuthorId(),
             skill.getLastEditorId(),
             skill.getCreatedAt(),

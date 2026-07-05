@@ -115,6 +115,44 @@
   text-align: center;
 }
 
+/* Phase C (v2): like toggle + citation count */
+.like-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  border-top: 1px solid var(--border);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.like-btn:hover {
+  background: var(--bg-hover);
+}
+
+.like-btn.liked {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.copy-cite {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
 /* Phase B (v2): frozen-view note + unpublished-changes hint */
 .frozen-note {
   font-size: var(--fs-xs);

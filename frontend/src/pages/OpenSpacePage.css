@@ -7,6 +7,17 @@
   margin-left: var(--sp-3);
 }
 
+.open-sort {
+  display: flex;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+
+.open-card-stats {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
 .open-space-tags {
   display: flex;
   flex-wrap: wrap;

@@ -40,8 +40,20 @@ public class SkillController {
     public ResponseEntity<Page<OpenSkillResponse>> listOpenSkills(
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String sort,
             Pageable pageable) {
-        return ResponseEntity.ok(skillService.listOpenSkills(tag, q, pageable));
+        return ResponseEntity.ok(skillService.listOpenSkills(tag, q, sort, pageable));
+    }
+
+    // Phase C (v2): like / unlike (idempotent; any viewer who can see it).
+    @PutMapping("/{id}/like")
+    public ResponseEntity<SkillService.LikeStatus> like(@PathVariable String id) {
+        return ResponseEntity.ok(skillService.like(id));
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<SkillService.LikeStatus> unlike(@PathVariable String id) {
+        return ResponseEntity.ok(skillService.unlike(id));
     }
 
     @GetMapping("/{id}")

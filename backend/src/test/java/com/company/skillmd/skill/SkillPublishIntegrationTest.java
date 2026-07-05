@@ -270,4 +270,46 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
         assertTrue(carolAfter.getBody().contains("secret rewrite"),
             "after re-publish carol sees the refreshed content");
     }
+
+    // --- Phase C (v2): likes + citation counts ---
+
+    @Test
+    @DisplayName("Like/unlike round-trip updates the count; copy increments copyCount")
+    void likesAndCopyCount() {
+        Skill skill = persistSkill("like-target", "team-a", "open", "published");
+        String id = skill.getId();
+
+        // carol likes it (idempotent double-call)
+        ResponseEntity<String> like1 = restTemplate.exchange(
+            baseUrl + "/" + id + "/like", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, like1.getStatusCode());
+        ResponseEntity<String> like2 = restTemplate.exchange(
+            baseUrl + "/" + id + "/like", HttpMethod.PUT,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertTrue(like2.getBody().contains("\"likeCount\":1"), "double like must not double count");
+
+        // detail carries likedByMe for carol
+        ResponseEntity<String> detail = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertTrue(detail.getBody().contains("\"likedByMe\":true"));
+        assertTrue(detail.getBody().contains("\"likeCount\":1"));
+
+        // unlike drops it back
+        ResponseEntity<String> unliked = restTemplate.exchange(
+            baseUrl + "/" + id + "/like", HttpMethod.DELETE,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertTrue(unliked.getBody().contains("\"likeCount\":0"));
+
+        // copy-to-team bumps the source's copyCount
+        restTemplate.exchange(
+            baseUrl + "/" + id + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        ResponseEntity<String> afterCopy = restTemplate.exchange(
+            baseUrl + "/" + id, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertTrue(afterCopy.getBody().contains("\"copyCount\":1"),
+            "copy-to-team should increment the source copyCount");
+    }
 }
