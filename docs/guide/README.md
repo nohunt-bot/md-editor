@@ -37,6 +37,7 @@
 | [`setup.md`](./setup.md) | 啟動服務的設定：prerequisites、本機啟動步驟（mongo → backend → frontend → seed）、docker-compose 方式與已知問題、環境變數、健康檢查、關閉服務 | 第一次把服務跑起來的人 |
 | [`login.md`](./login.md) | 身分模型：dev-stub 是什麼、`X-Dev-User` 怎麼運作、有哪些 dev users、怎麼切換身分（UI + curl）、admin 能做什麼、Keycloak 現況 | 要用不同身分測試功能的人 |
 | [`user-flows.md`](./user-flows.md) | 逐步操作手順：瀏覽、建立/發布/下架、複製到團隊、版本歷史還原、讚/引用、資料夾、設定、在線提示等所有功能 | 要實際操作 UI 的人 |
+| [`lifecycle.md`](./lifecycle.md) | 文件（skill）完整生命週期：每個狀態、每個轉換的欄位變化、可見性規則，對照 `SkillService.java` 逐行核實 | 要理解資料模型/狀態機、或要改後端邏輯的人 |
 
 ## 其他參考文檔（非本目錄，規劃與決策向）
 
