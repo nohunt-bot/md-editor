@@ -38,6 +38,7 @@
 | [`login.md`](./login.md) | 身分模型：dev-stub 是什麼、`X-Dev-User` 怎麼運作、有哪些 dev users、怎麼切換身分（UI + curl）、admin 能做什麼、Keycloak 現況 | 要用不同身分測試功能的人 |
 | [`user-flows.md`](./user-flows.md) | 逐步操作手順：瀏覽、建立/發布/下架、複製到團隊、版本歷史還原、讚/引用、資料夾、設定、在線提示等所有功能 | 要實際操作 UI 的人 |
 | [`lifecycle.md`](./lifecycle.md) | 文件（skill）完整生命週期：每個狀態、每個轉換的欄位變化、可見性規則，對照 `SkillService.java` 逐行核實 | 要理解資料模型/狀態機、或要改後端邏輯的人 |
+| [`authorization.md`](./authorization.md) | 權限（授權）設計：身分解析（dev-stub）、團隊角色 EDITOR/VIEWER 與全域 admin、四個授權檢查、403 vs 404 原則、操作×權限總表、複製到團隊的雙重授權，對照 `AuthorizationService`/`SkillService`/`FolderService` 核實 | 要理解授權規則、或要改權限邏輯的人 |
 
 ## 其他參考文檔（非本目錄，規劃與決策向）
 
