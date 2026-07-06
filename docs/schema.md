@@ -9,6 +9,9 @@
 | `folders` | 巢狀資料夾，parent-child 關聯，以團隊為根 |
 | `skill_versions` | skill 每個版本的快照 |
 | `tags` | 全域 tag 定義 |
+| `skill_likes` | 一使用者對一 skill 一個讚；skills.likeCount 為其去正規化計數（Phase C） |
+| `skill_presence` | 軟在線提示——誰正在編輯某 skill，編輯器約每 5s 心跳一次（Phase E） |
+| `user_preferences` | 跟隨帳號跨裝置的使用者偏好（主題、語言） |
 
 ---
 
@@ -50,6 +53,8 @@
     "version": "number"
   },
   "sourceSkillId": "string",         // null；複製來源 skills._id
+  "likeCount": "number",             // 去正規化：skill_likes 的計數（可為 null，首次 like 才有值）
+  "copyCount": "number",             // 去正規化：以此為 sourceSkillId 的複製次數（可為 null）
   "folderId": "string",
   "tags": ["string"],
   "references": [
@@ -152,6 +157,73 @@ tags 維持**全域**（跨團隊共用同一 tag 語彙，開放空間篩選才
 
 ---
 
+## `skill_likes`
+
+```json
+{
+  "_id": "ObjectId",
+  "skillId": "string",        // ref: skills._id
+  "userId": "string",
+  "createdAt": "ISODate"      // @CreatedDate
+}
+```
+
+**Indexes**
+- `(skillId, userId)`: unique（名 `skillId_userId_unique`）——讓 like 在資料層冪等
+  （宣告；目前未由 migration 建立，見文末說明）
+
+**規則**
+- Phase C（v2）：一使用者對一 skill 一個讚。
+- `skills.likeCount` 是此 collection 的去正規化計數，供清單顯示／排序用；此
+  collection 才是讚的真實來源（source of truth）。
+
+---
+
+## `skill_presence`
+
+```json
+{
+  "_id": "ObjectId",
+  "skillId": "string",        // ref: skills._id
+  "userId": "string",
+  "lastSeen": "ISODate"       // TTL：放棄的心跳 60 秒後自動清除
+}
+```
+
+**Indexes**
+- `(skillId, userId)`: unique（名 `skillId_userId_unique`）
+  （宣告；目前未由 migration 建立，見文末說明）
+- `lastSeen`：TTL index `@Indexed(expireAfterSeconds = 60)`——放棄的心跳 60 秒
+  後自動清除（宣告；目前未由 migration 建立，見文末說明）
+
+**規則**
+- Phase E（v2）：軟在線提示——誰正在編輯某 skill。編輯器約每 5s 心跳一次。
+- 冪等實際上是靠 app 層的 atomic upsert（`MongoTemplate.upsert`）保證，而非
+  靠上面宣告的 unique index（見文末說明）。
+- 參見 ADR `docs/decisions/20260705-presence-db-poll-over-websocket.md`。
+
+---
+
+## `user_preferences`
+
+```json
+{
+  "_id": "string",            // = userId（@Id，自然鍵）；dev-stub id，未來為 Keycloak subject
+  "theme": "string",          // "light" | "dark" | "system"
+  "language": "string"        // "zh-TW" | "en"
+}
+```
+
+**Indexes**
+- 無額外 index（以 `userId` 為 `_id`）
+
+**規則**
+- 跟隨帳號跨裝置的偏好（主題、語言）。
+- 裝置／工作階段區域性偏好（view mode、active team、dev 身分）留在
+  localStorage，**不**存這裡。
+
+---
+
 ## 關聯圖
 
 ```
@@ -165,6 +237,8 @@ folders
 
 skills
   _id ←── skill_versions.skillId
+  _id ←── skill_likes.skillId
+  _id ←── skill_presence.skillId
   _id ←── skills.references[].skillId
   _id ←── skills.prerequisites[].skillId
   _id ←── skills.sourceSkillId（複製來源；可懸空）
@@ -172,6 +246,9 @@ skills
 
 tags
   name ←── skills.tags[]
+
+user_preferences
+  _id = userId   (獨立，不 FK 到其他 collection；對應身分主體)
 ```
 
 ---
@@ -183,3 +260,31 @@ tags
   `sourceSkillId=null`；既有 folders 補上 `teamId="team-a"`；seed `team-a`／
   `team-b` 至 `teams`；移除舊的 `name` 全域 unique index，建立本文件所列新
   indexes。此腳本為 idempotent（可重複執行）。
+- `scripts/migrate-20260705-v2-freeze.js`：v2 回填。Phase B 為已發布但缺
+  `publishedSnapshot` 者以當下內容凍結快照；Phase C 回填去正規化計數
+  （`copyCount` 由 `sourceSkillId` 聚合、`likeCount` 由 `skill_likes` 計數）。
+  **此腳本只回填資料，不建立任何 index**（含 skill_likes / skill_presence 的
+  unique 與 TTL index）。此腳本為 idempotent（可重複執行）。
+
+---
+
+## Index 宣告 vs 實際建立（已知缺口）
+
+Spring Boot **預設關閉 auto-index-creation**（`SkillService.java:178` 附近註解
+證實）。因此本文件各 collection 標示的 `@CompoundIndex` / `@Indexed`（含 TTL）／
+text index **只是程式碼中的註解宣告，不會自動在 DB 建立**。而 v2 migration
+（`scripts/migrate-20260705-v2-freeze.js`）**只回填資料**，**沒有建立**
+skill_likes / skill_presence 的 unique 與 TTL index。
+
+**影響**：
+
+- `skill_presence` 的冪等實際上是靠 app 層的 **atomic upsert**
+  （`MongoTemplate.upsert`，見 `SkillService.java:177-187`）保證的，**不是**靠宣告
+  的 unique index。
+- `skill_likes` 的 unique index 同樣未在 DB 建立；一使用者對一 skill 的唯一性目前
+  也不由 DB 端保證。
+- `skill_presence` 的 60 秒 TTL 目前**不會**在 DB 端自動清除過期心跳（TTL index
+  未建立）；實務上是靠讀取時以 `PRESENCE_WINDOW_SECONDS` 時間窗過濾。
+
+未來若要改由 DB 端保證唯一性／TTL，需在 migration 補建這些 index。在此之前，請把
+上述 index 一律視為「**宣告；目前未由 migration 建立**」。
