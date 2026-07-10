@@ -7,6 +7,7 @@ import { Markdown } from '../components/common/Markdown'
 import { useTranslation } from 'react-i18next'
 import { useIdentity, type Identity } from '../app/useIdentity'
 import { useCopyToTeam } from '../app/useCopyToTeam'
+import { VersionDiffDialog } from '../components/version/VersionDiffDialog'
 import './SkillDetailPage.css'
 
 // §6.4 detail: two columns. Left = rendered markdown; right = metadata + a
@@ -73,6 +74,7 @@ export function SkillDetailPage() {
   const [notFound, setNotFound] = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [confirm, setConfirm] = useState<Confirm>(null)
+  const [diffVersion, setDiffVersion] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [copyTeam, setCopyTeam] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -377,14 +379,25 @@ export function SkillDetailPage() {
                   <span className="version-num">v{v.version}</span>
                   <span className="version-editor">{v.editorId}</span>
                   <span className="version-time">{fmtTime(v.createdAt)}</span>
-                  {editable && v.version !== skill.currentVersion && (
-                    <button
-                      type="button"
-                      className="version-restore"
-                      onClick={() => setConfirm({ action: 'restore', version: v.version })}
-                    >
-                      {t('detail:restore')}
-                    </button>
+                  {v.version !== skill.currentVersion && (
+                    <div className="version-actions">
+                      <button
+                        type="button"
+                        className="version-diff-btn"
+                        onClick={() => setDiffVersion(v.version)}
+                      >
+                        {t('detail:viewDiff')}
+                      </button>
+                      {editable && (
+                        <button
+                          type="button"
+                          className="version-restore"
+                          onClick={() => setConfirm({ action: 'restore', version: v.version })}
+                        >
+                          {t('detail:restore')}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </li>
               ))}
@@ -421,6 +434,20 @@ export function SkillDetailPage() {
           busy={busy}
           onConfirm={() => doRestore(confirm.version)}
           onCancel={() => setConfirm(null)}
+        />
+      )}
+      {diffVersion !== null && (
+        <VersionDiffDialog
+          skillId={id!}
+          version={diffVersion}
+          currentVersion={skill.currentVersion ?? 1}
+          currentContent={skill.content}
+          canRestore={editable}
+          onClose={() => setDiffVersion(null)}
+          onRestore={(version) => {
+            setDiffVersion(null)
+            setConfirm({ action: 'restore', version })
+          }}
         />
       )}
       {copyTeam !== null && (

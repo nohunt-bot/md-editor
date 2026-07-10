@@ -1,0 +1,80 @@
+/* Imitates ConflictDialog.css: same overlay/panel/actions structure, token
+   colors so it stays readable across the light/dark theme flip. */
+.version-diff-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.version-diff-dialog {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 1200px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.version-diff-header h2 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text);
+}
+
+.version-diff-loading {
+  color: var(--text-secondary);
+  margin: 1rem 0;
+}
+
+.version-diff-error {
+  color: var(--danger);
+  margin: 1rem 0;
+}
+
+.version-diff-body {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.version-diff-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.version-diff-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.version-diff-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-restore-version {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: white !important;
+}
+
+.btn-restore-version:hover {
+  opacity: 0.9;
+}
