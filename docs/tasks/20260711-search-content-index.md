@@ -1,6 +1,6 @@
 # Task: 全文搜尋納入 content ＋ 實體化宣告 index（T1-1）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 重跑測試+對照實碼驗收通過、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/search-content
 > （branch wt/search-content）。commander 對照實碼驗收，過關 merge。
@@ -35,3 +35,10 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | 抽實碼事實（text index 建立點、測試自建 index、
   migration 慣例）；建 worktree；派 sonnet
+- 2026-07-11 | done | sonnet commit b177e4c。驗收：commander 重跑 ./mvnw test
+  exit 0、annotation 權重與 migration 逐項一致、新測試驗「內文命中＋metadata-only
+  不外洩」、schema.md 缺口段保留未跑腳本環境警語、node --check 過、main tree
+  乾淨。merge 後 commander 補修 docs/guide/README.md 過時的「已知缺口」措辭
+  （agent 依規不做 spec 外修改，正確留給 commander）。
+  ⚠ 部署備忘：正式/開發 DB 要跑一次 scripts/migrate-20260711-search-content-indexes.js
+  才會生效（drop+重建 text index、補建 likes/presence index）。
