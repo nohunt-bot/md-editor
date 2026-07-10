@@ -39,14 +39,13 @@
 | [`user-flows.md`](./user-flows.md) | 逐步操作手順：瀏覽、建立/發布/下架、複製到團隊、版本歷史還原、讚/引用、資料夾、設定、在線提示等所有功能 | 要實際操作 UI 的人 |
 | [`lifecycle.md`](./lifecycle.md) | 文件（skill）完整生命週期：每個狀態、每個轉換的欄位變化、可見性規則，對照 `SkillService.java` 逐行核實 | 要理解資料模型/狀態機、或要改後端邏輯的人 |
 | [`authorization.md`](./authorization.md) | 權限（授權）設計：身分解析（dev-stub）、團隊角色 EDITOR/VIEWER 與全域 admin、四個授權檢查、403 vs 404 原則、操作×權限總表、複製到團隊的雙重授權，對照 `AuthorizationService`/`SkillService`/`FolderService` 核實 | 要理解授權規則、或要改權限邏輯的人 |
-| [`../schema.md`](../schema.md) | MongoDB 資料模型（v2）：八個 collection（teams/skills/folders/skill_versions/tags/skill_likes/skill_presence/user_preferences）的欄位、index、規則、關聯圖與 migration 記錄，含「index 宣告 vs 實際建立」的已知缺口說明 | 要理解資料模型、或要改 schema/migration 的人 |
+| [`schema.md`](./schema.md) | MongoDB 資料模型（v2）：八個 collection（teams/skills/folders/skill_versions/tags/skill_likes/skill_presence/user_preferences）的欄位、index、規則、關聯圖與 migration 記錄，含「index 宣告 vs 實際建立」的已知缺口說明 | 要理解資料模型、或要改 schema/migration 的人 |
 
 ## 其他參考文檔（非本目錄，規劃與決策向）
 
 - 專案總覽：[`../../README.md`](../../README.md)
 - 實作進度：[`../../IMPLEMENTATION_STATUS.md`](../../IMPLEMENTATION_STATUS.md)
 - 規格書：[`../design/PRD.md`](../design/PRD.md)
-- 資料模型：[`../schema.md`](../schema.md)
 - 決策記錄（ADR）：[`../decisions/`](../decisions/)
   - 身分為何是 dev-stub、Keycloak 為何 deferred：
     `20260703-defer-keycloak-stub-identity.md`

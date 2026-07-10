@@ -6,7 +6,7 @@
   - 任務主檔 `docs/tasks/20260703-skill-marketplace.md`（執行計畫與驗證方式）
   - 決策記錄 `docs/decisions/20260703-*.md`（scope、Keycloak 延後、編輯器收斂）
   - 原始設計摘要 `docs/design/original-plan-summary.md`
-  - 現行 schema `docs/schema.md`（本文件 §4 為其擴充版，實作時以本文件為準並回寫）
+  - 現行 schema `docs/guide/schema.md`（本文件 §4 為其擴充版，實作時以本文件為準並回寫）
 
 ---
 
@@ -106,7 +106,7 @@ draft ────────────────────────�
 ## 4. MongoDB Schema
 
 新增 `teams`；`skills`、`folders` 擴充；`skill_versions`、`tags` 沿用。
-粗體 = 相對 `docs/schema.md` 的新欄位。
+粗體 = 相對 `docs/guide/schema.md` 的新欄位。
 
 ### 4.1 `teams`（新）
 
@@ -176,7 +176,7 @@ draft ────────────────────────�
 
 ### 4.4 `skill_versions`、`tags`
 
-沿用 `docs/schema.md` 現行定義。tags 維持**全域**（跨團隊共用同一 tag 語彙，
+沿用 `docs/guide/schema.md` 現行定義。tags 維持**全域**（跨團隊共用同一 tag 語彙，
 開放空間篩選才有一致性）。複製 skill 時 versions 不複製（新件從 v1 開始）。
 
 ---
