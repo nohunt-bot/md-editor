@@ -1,6 +1,6 @@
 # Task: 版本歷史 diff 檢視（T1-2）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 重跑測試+對照實碼驗收通過、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/version-diff
 > （branch wt/version-diff）。commander 對照實碼驗收，過關 merge。
@@ -30,3 +30,9 @@ components/version/ 目錄存在但是空的。
 ## Progress log
 - 2026-07-11 | planning | 抽實碼事實（diff lib、API 掛點、空 version 目錄）；
   建 worktree；派 sonnet
+- 2026-07-11 | done | sonnet commit b3db771。驗收：commander 重跑 npm test（67/67）
+  ＋ tsc --noEmit exit 0、getVersion 回應形狀對照後端 VersionDetailResponse
+  （snapshot.content）無誤、還原接既有 ConfirmDialog 非第二條路徑、檢視差異
+  不受編輯權限限制（唯讀）而還原鈕維持 editable 閘控、深色主題與 ConflictDialog
+  同法（useDarkTheme 硬編 true——淺色模式下 diff 面板仍深色為既有模式，非本次
+  引入）、main tree 乾淨。merge。
