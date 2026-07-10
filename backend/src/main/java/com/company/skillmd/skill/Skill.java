@@ -17,15 +17,16 @@ public class Skill {
     @Id
     private String id;
 
-    @TextIndexed
+    @TextIndexed(weight = 10)
     private String name;
 
-    @TextIndexed
+    @TextIndexed(weight = 10)
     private String displayName;
 
-    @TextIndexed
+    @TextIndexed(weight = 5)
     private String description;
 
+    @TextIndexed(weight = 1)
     private String content;
     private String teamId;
     private String scope;
@@ -34,7 +35,7 @@ public class Skill {
     private String sourceSkillId;
     private String folderId;
 
-    @TextIndexed
+    @TextIndexed(weight = 8)
     private List<String> tags;
     private List<SkillReference> references;
     private List<SkillPrerequisite> prerequisites;
