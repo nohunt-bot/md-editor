@@ -126,8 +126,36 @@ public class SkillService {
                 // Phase C (v2): detail carries the viewer's like state.
                 Boolean likedByMe = skillLikeRepository
                     .findBySkillIdAndUserId(id, user.getUserId()).isPresent();
-                return memberView ? toResponse(skill, likedByMe) : toFrozenResponse(skill, likedByMe);
+                // Detail-only (PRD §8): resolve provenance here so lists never
+                // pay for the extra lookup.
+                SkillResponse.SourceInfo source = resolveSource(skill);
+                return memberView ? toResponse(skill, likedByMe, source) : toFrozenResponse(skill, likedByMe, source);
             });
+    }
+
+    /**
+     * Resolve a copy's source-update hint (PRD §8). Only called from
+     * {@link #getSkill(String)} — every other SkillResponse producer leaves
+     * {@code source} null. Visible only if the source still exists, isn't
+     * soft-deleted, and is currently open+published; otherwise {@code
+     * available=false} with no other field populated (must not leak the name
+     * or team of a source the caller can no longer see).
+     */
+    private SkillResponse.SourceInfo resolveSource(Skill skill) {
+        if (skill.getSourceSkillId() == null) return null;
+        return skillRepository.findById(skill.getSourceSkillId())
+            .filter(s -> s.getDeletedAt() == null)
+            .filter(s -> "open".equals(s.getScope()) && "published".equals(s.getStatus()))
+            .map(s -> {
+                String teamDisplayName = teamService.resolveDisplayNames(Set.of(s.getTeamId())).get(s.getTeamId());
+                // Every publish refreshes publishedAt, so publishedAt > the
+                // copy's own createdAt means "source published again since
+                // this copy was made".
+                boolean updatedSinceCopy = s.getPublishedAt() != null && skill.getCreatedAt() != null
+                    && s.getPublishedAt().isAfter(skill.getCreatedAt());
+                return new SkillResponse.SourceInfo(true, s.getId(), s.getDisplayName(), teamDisplayName, updatedSinceCopy);
+            })
+            .orElseGet(() -> new SkillResponse.SourceInfo(false, null, null, null, null));
     }
 
     /**
@@ -444,7 +472,7 @@ public class SkillService {
     }
 
     private SkillResponse toResponse(Skill skill) {
-        return toResponse(skill, null);
+        return toResponse(skill, null, null);
     }
 
     /**
@@ -484,7 +512,7 @@ public class SkillService {
             .toList();
     }
 
-    private SkillResponse toResponse(Skill skill, Boolean likedByMe) {
+    private SkillResponse toResponse(Skill skill, Boolean likedByMe, SkillResponse.SourceInfo source) {
         return new SkillResponse(
             skill.getId(),
             skill.getName(),
@@ -496,6 +524,7 @@ public class SkillService {
             skill.getStatus(),
             skill.getPublishedAt(),
             skill.getSourceSkillId(),
+            source,
             skill.getFolderId(),
             skill.getTags(),
             resolveReferences(skill),
@@ -517,10 +546,10 @@ public class SkillService {
      * fields come from the publish-time snapshot, never the live draft.
      * Falls back to live fields for pre-migration rows without a snapshot.
      */
-    private SkillResponse toFrozenResponse(Skill skill, Boolean likedByMe) {
+    private SkillResponse toFrozenResponse(Skill skill, Boolean likedByMe, SkillResponse.SourceInfo source) {
         Skill.PublishedSnapshot snap = skill.getPublishedSnapshot();
         if (snap == null) {
-            return toResponse(skill, likedByMe);
+            return toResponse(skill, likedByMe, source);
         }
         return new SkillResponse(
             skill.getId(),
@@ -533,6 +562,7 @@ public class SkillService {
             skill.getStatus(),
             skill.getPublishedAt(),
             skill.getSourceSkillId(),
+            source,
             skill.getFolderId(),
             snap.getTags(),
             List.of(),

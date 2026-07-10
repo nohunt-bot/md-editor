@@ -166,6 +166,37 @@
   margin: 0;
 }
 
+/* T1-3: source-update hint (PRD §8) */
+.detail-source {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+}
+
+.detail-source-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.detail-source-link:hover {
+  text-decoration: underline;
+}
+
+.detail-source-team {
+  color: var(--text-muted);
+}
+
+.detail-source-unavailable {
+  color: var(--text-muted);
+}
+
+.source-updated-badge {
+  background: var(--bg-hover);
+  color: var(--warn);
+}
+
 .unpublished-hint {
   border-top: 1px solid var(--border);
   padding-top: var(--sp-3);

@@ -31,6 +31,14 @@ type Skill = {
   lastEditorId?: string
   updatedAt?: string
   tags?: string[]
+  // T1-3: source-update hint (PRD §8), populated only by the detail endpoint.
+  source?: {
+    available: boolean
+    skillId?: string | null
+    displayName?: string | null
+    teamDisplayName?: string | null
+    updatedSinceCopy?: boolean | null
+  } | null
 }
 
 type Version = {
@@ -278,6 +286,30 @@ export function SkillDetailPage() {
             <dd>{skill.lastEditorId ?? '—'}</dd>
             <dt>{t('detail:updatedAt')}</dt>
             <dd>{fmtTime(skill.updatedAt)}</dd>
+            {skill.source && (
+              <>
+                <dt>{t('detail:sourceLabel')}</dt>
+                <dd>
+                  {skill.source.available ? (
+                    <span className="detail-source">
+                      <Link to={`/skills/${skill.source.skillId}`} className="detail-source-link">
+                        {skill.source.displayName}
+                      </Link>
+                      {skill.source.teamDisplayName && (
+                        <span className="detail-source-team"> · {skill.source.teamDisplayName}</span>
+                      )}
+                      {skill.source.updatedSinceCopy && (
+                        <span className="badge source-updated-badge">
+                          {t('detail:sourceUpdatedBadge')}
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="detail-source-unavailable">{t('detail:sourceUnavailable')}</span>
+                  )}
+                </dd>
+              </>
+            )}
             {skill.tags && skill.tags.length > 0 && (
               <>
                 <dt>{t('common:tags')}</dt>
