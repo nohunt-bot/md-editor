@@ -1,6 +1,6 @@
 # Task: 複製件的來源更新提示（T1-3）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 重跑測試+審碼驗收通過、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/source-hint
 > （branch wt/source-hint）。commander 對照實碼驗收，過關 merge。
@@ -35,3 +35,8 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | 抽實碼事實（copyToTeam 欄位、publishedAt 語意、
   詳情側欄結構、resolveDisplayNames）；建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 6261b1b。驗收：commander 重跑 mvnw test exit 0、
+  vitest 71/71、tsc OK；resolveSource 僅 getSkill 呼叫（清單無 N+1，有測試
+  防洩漏 assert）、不可見來源不洩名稱/團隊、null-safe 時間比較、frozen view
+  也正確帶 source。偏差：agent 依 implementer 內建規則未 commit（留給
+  orchestrator），commander 驗收後代為 commit——後續派工單要預期此行為。
