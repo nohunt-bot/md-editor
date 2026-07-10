@@ -225,9 +225,17 @@
   font-size: var(--fs-xs);
 }
 
-.version-restore {
+.version-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
   flex: 0 0 auto;
   margin-left: auto;
+}
+
+.version-diff-btn,
+.version-restore {
+  flex: 0 0 auto;
   padding: 2px var(--sp-2);
   font-size: var(--fs-xs);
   color: var(--accent);
@@ -237,6 +245,7 @@
   cursor: pointer;
 }
 
+.version-diff-btn:hover,
 .version-restore:hover {
   background: var(--bg-hover);
 }
