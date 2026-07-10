@@ -50,7 +50,8 @@ class SearchVisibilityIntegrationTest extends AbstractIntegrationTest {
         // $text queries need the text index; auto index creation is off by default.
         mongoTemplate.indexOps(Skill.class).ensureIndex(
             new TextIndexDefinition.TextIndexDefinitionBuilder()
-                .onField("name").onField("displayName").onField("description").onField("tags")
+                .onField("name", 10F).onField("displayName", 10F).onField("tags", 8F)
+                .onField("description", 5F).onField("content", 1F)
                 .build());
     }
 
@@ -77,6 +78,42 @@ class SearchVisibilityIntegrationTest extends AbstractIntegrationTest {
             skill.setPublishedAt(Instant.now());
         }
         skillRepository.save(skill);
+    }
+
+    private void persistWithContent(String name, String teamId, String scope, String status, String content) {
+        Skill skill = new Skill();
+        skill.setName(name);
+        skill.setDisplayName(name);
+        skill.setDescription("searchable description");
+        skill.setContent(content);
+        skill.setTeamId(teamId);
+        skill.setScope(scope);
+        skill.setStatus(status);
+        skill.setTags(List.of("tag1"));
+        skill.setCurrentVersion(1);
+        skill.setAuthorId("alice");
+        skill.setLastEditorId("alice");
+        if ("published".equals(status)) {
+            skill.setPublishedAt(Instant.now());
+        }
+        skillRepository.save(skill);
+    }
+
+    @Test
+    @DisplayName("search matches a keyword that appears only in content, not in name/displayName/description/tags")
+    void search_matchesKeywordOnlyInContent() {
+        persistWithContent("plain-skill", "team-a", "team", "draft",
+            "This paragraph mentions xylophone somewhere in the markdown body.");
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            searchUrl + "?q=xylophone", HttpMethod.GET,
+            new HttpEntity<>(headersFor("alice")), String.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String body = response.getBody();
+        assertTrue(body.contains("plain-skill"));
+        // Metadata-only: the matched keyword itself must not leak into the response.
+        assertFalse(body.contains("xylophone"));
     }
 
     @Test

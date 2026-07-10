@@ -81,7 +81,8 @@
 **Indexes**
 - `(teamId, name)`: unique — name 唯一性由全域改為**團隊內唯一**
   （複製到多團隊必然重名；migration 時移除舊的全域 `name` unique index）
-- text index：`name, displayName, description, tags`
+- text index：`name(10), displayName(10), tags(8), description(5), content(1)`
+  （weights；`content` 使已發布/草稿內文的關鍵字可被搜到，非僅 metadata 欄位）
 - `(scope, status, publishedAt desc)` — 開放空間瀏覽（最新發布）
 - `(teamId, folderId)` — 團隊清單
 
@@ -265,26 +266,33 @@ user_preferences
   （`copyCount` 由 `sourceSkillId` 聚合、`likeCount` 由 `skill_likes` 計數）。
   **此腳本只回填資料，不建立任何 index**（含 skill_likes / skill_presence 的
   unique 與 TTL index）。此腳本為 idempotent（可重複執行）。
+- `scripts/migrate-20260711-search-content-indexes.js`：重建 skills text
+  index 納入 `content`（weights 見上）；為 skill_likes / skill_presence 去重
+  （保留每組 `(skillId, userId)` 最早一筆）後建立 unique compound index；為
+  skill_presence 建立 `lastSeen` TTL index（60 秒）。此腳本為 idempotent（可
+  重複執行）——收掉下方「已知缺口」一節所述的宣告與實際建立落差。
 
 ---
 
-## Index 宣告 vs 實際建立（已知缺口）
+## Index 宣告 vs 實際建立
 
 Spring Boot **預設關閉 auto-index-creation**（`SkillService.java:178` 附近註解
 證實）。因此本文件各 collection 標示的 `@CompoundIndex` / `@Indexed`（含 TTL）／
-text index **只是程式碼中的註解宣告，不會自動在 DB 建立**。而 v2 migration
-（`scripts/migrate-20260705-v2-freeze.js`）**只回填資料**，**沒有建立**
-skill_likes / skill_presence 的 unique 與 TTL index。
+text index，過去只是程式碼中的註解宣告，不會自動在 DB 建立；`skill_likes` /
+`skill_presence` 的 unique 與 TTL index、以及 skills text index 納入 `content`，
+現在由 `scripts/migrate-20260711-search-content-indexes.js` 建立，缺口已收掉。
 
-**影響**：
+**歷史脈絡（曾經的落差，現況見上）**：
 
-- `skill_presence` 的冪等實際上是靠 app 層的 **atomic upsert**
-  （`MongoTemplate.upsert`，見 `SkillService.java:177-187`）保證的，**不是**靠宣告
-  的 unique index。
-- `skill_likes` 的 unique index 同樣未在 DB 建立；一使用者對一 skill 的唯一性目前
-  也不由 DB 端保證。
-- `skill_presence` 的 60 秒 TTL 目前**不會**在 DB 端自動清除過期心跳（TTL index
-  未建立）；實務上是靠讀取時以 `PRESENCE_WINDOW_SECONDS` 時間窗過濾。
+- `skill_presence` 的冪等在 index 補建前，是靠 app 層的 **atomic upsert**
+  （`MongoTemplate.upsert`，見 `SkillService.java:177-187`）保證的，並非靠宣告
+  的 unique index；補建 index 後兩者一致，upsert 邏輯不變。
+- `skill_likes` 的 unique index 在補建前未於 DB 建立；一使用者對一 skill 的唯一性
+  當時不由 DB 端保證。
+- `skill_presence` 的 60 秒 TTL 在補建前不會於 DB 端自動清除過期心跳；讀取路徑
+  以 `PRESENCE_WINDOW_SECONDS` 時間窗過濾的行為不變（TTL 只是額外的 DB 端清理，
+  對讀取結果無影響，故啟用 TTL 是行為安全的）。
 
-未來若要改由 DB 端保證唯一性／TTL，需在 migration 補建這些 index。在此之前，請把
-上述 index 一律視為「**宣告；目前未由 migration 建立**」。
+**現況**：執行過 `scripts/migrate-20260711-search-content-indexes.js` 之後，
+上述 index 已實際建立在 DB，不再只是註解宣告。若未執行過此腳本的環境，仍處於
+「宣告；未由 migration 建立」的狀態，需先跑一次此腳本。
