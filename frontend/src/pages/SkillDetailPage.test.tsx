@@ -198,3 +198,77 @@ describe('SkillDetailPage actions (§2.3)', () => {
     expect(await screen.findByText('找不到或無權限')).toBeInTheDocument()
   })
 })
+
+describe('SkillDetailPage source-update hint (T1-3)', () => {
+  it('shows a source link + team name and a 來源已更新 badge when the source was updated since copy', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: {
+        ...draftTeamSkill,
+        teamId: 'team-b',
+        source: {
+          available: true,
+          skillId: 'src-1',
+          displayName: 'Original Deploy',
+          teamDisplayName: '平台團隊',
+          updatedSinceCopy: true,
+        },
+      },
+    })
+    renderAt('s1')
+    const link = await screen.findByRole('link', { name: 'Original Deploy' })
+    expect(link).toHaveAttribute('href', '/skills/src-1')
+    expect(screen.getByText('平台團隊', { exact: false })).toBeInTheDocument()
+    expect(screen.getByText('來源已更新')).toBeInTheDocument()
+  })
+
+  it('shows the source link without a badge when it was not updated since copy', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: {
+        ...draftTeamSkill,
+        teamId: 'team-b',
+        source: {
+          available: true,
+          skillId: 'src-1',
+          displayName: 'Original Deploy',
+          teamDisplayName: '平台團隊',
+          updatedSinceCopy: false,
+        },
+      },
+    })
+    renderAt('s1')
+    expect(await screen.findByRole('link', { name: 'Original Deploy' })).toBeInTheDocument()
+    expect(screen.queryByText('來源已更新')).not.toBeInTheDocument()
+  })
+
+  it('shows 來源已不存在或不可見 when the source is unavailable', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-b', displayName: '資料團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({
+      data: {
+        ...draftTeamSkill,
+        teamId: 'team-b',
+        source: { available: false },
+      },
+    })
+    renderAt('s1')
+    expect(await screen.findByText('來源已不存在或不可見')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Original Deploy/ })).not.toBeInTheDocument()
+  })
+
+  it('renders no 複製自 row when the skill has no source', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    renderAt('s1')
+    await screen.findByText('資訊')
+    expect(screen.queryByText('複製自')).not.toBeInTheDocument()
+  })
+})

@@ -14,6 +14,7 @@ public record SkillResponse(
     String status,
     Instant publishedAt,
     String sourceSkillId,
+    SourceInfo source,
     String folderId,
     List<String> tags,
     List<ResolvedReference> references,
@@ -30,4 +31,19 @@ public record SkillResponse(
 ) {
     public record ResolvedReference(String skillId, String relation, String name, String displayName) {}
     public record ResolvedPrerequisite(String skillId, String note, String name, String displayName) {}
+
+    /**
+     * Provenance of a copied skill (PRD §8), resolved ONLY on the detail
+     * endpoint (GET /api/skills/{id}) — never on lists/create/update/publish
+     * to avoid N+1 lookups. When {@code available} is false, no other field
+     * is populated (a deleted/unpublished/private source must not leak its
+     * name or team).
+     */
+    public record SourceInfo(
+        boolean available,
+        String skillId,
+        String displayName,
+        String teamDisplayName,
+        Boolean updatedSinceCopy
+    ) {}
 }

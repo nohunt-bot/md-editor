@@ -3,6 +3,8 @@ package com.company.skillmd.skill;
 import com.company.skillmd.AbstractIntegrationTest;
 import com.company.skillmd.skill.dto.CopyToTeamRequest;
 import com.company.skillmd.skill.dto.UpdateSkillRequest;
+import com.company.skillmd.team.Team;
+import com.company.skillmd.team.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,9 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private SkillRepository skillRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     private String baseUrl;
 
@@ -65,6 +70,18 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
             skill.setPublishedAt(Instant.now());
         }
         return skillRepository.save(skill);
+    }
+
+    private void seedTeam(String id, String displayName) {
+        Team team = new Team();
+        team.setId(id);
+        team.setName(id);
+        team.setDisplayName(displayName);
+        teamRepository.save(team);
+    }
+
+    private String extractId(String body) {
+        return body.split("\"id\":\"")[1].split("\"")[0];
     }
 
     @Test
@@ -369,5 +386,135 @@ class SkillPublishIntegrationTest extends AbstractIntegrationTest {
             baseUrl + "/" + id + "/presence", HttpMethod.PUT,
             new HttpEntity<>(headersFor("alice")), String.class);
         assertTrue(a4.getBody().contains("\"editors\":[]"), "admin left: " + a4.getBody());
+    }
+
+    // --- Source-update hint for copied skills (T1-3, PRD §8) ---
+    // Detail-only: GET /{id} resolves the copy's `source` block; every other
+    // producer (including list) must leave it null (no N+1 lookups).
+
+    @Test
+    @DisplayName("Detail: copy shows source available, not updated since copy")
+    void sourceHint_visibleNotUpdated() {
+        seedTeam("team-a", "Platform Team");
+        Skill source = persistSkill("hint-src-1", "team-a", "open", "published");
+
+        ResponseEntity<String> copyResp = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        assertEquals(HttpStatus.CREATED, copyResp.getStatusCode());
+        String copyId = extractId(copyResp.getBody());
+
+        ResponseEntity<String> detail = restTemplate.exchange(
+            baseUrl + "/" + copyId, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, detail.getStatusCode());
+        String body = detail.getBody();
+        assertTrue(body.contains("\"available\":true"), body);
+        assertTrue(body.contains("\"skillId\":\"" + source.getId() + "\""), body);
+        assertTrue(body.contains("\"teamDisplayName\":\"Platform Team\""), body);
+        assertTrue(body.contains("\"updatedSinceCopy\":false"), body);
+    }
+
+    @Test
+    @DisplayName("Detail: copy shows source available and updated since copy (re-published after copy)")
+    void sourceHint_visibleUpdatedSinceCopy() {
+        seedTeam("team-a", "Platform Team");
+        Skill source = persistSkill("hint-src-2", "team-a", "open", "published");
+
+        ResponseEntity<String> copyResp = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        assertEquals(HttpStatus.CREATED, copyResp.getStatusCode());
+        String copyId = extractId(copyResp.getBody());
+
+        // Source is re-published after the copy was made — publishedAt moves
+        // past the copy's createdAt.
+        ResponseEntity<String> republish = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/publish", HttpMethod.POST,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertEquals(HttpStatus.OK, republish.getStatusCode());
+
+        ResponseEntity<String> detail = restTemplate.exchange(
+            baseUrl + "/" + copyId, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, detail.getStatusCode());
+        String body = detail.getBody();
+        assertTrue(body.contains("\"available\":true"), body);
+        assertTrue(body.contains("\"updatedSinceCopy\":true"), body);
+    }
+
+    @Test
+    @DisplayName("Detail: copy shows source unavailable when the source was soft-deleted")
+    void sourceHint_sourceDeleted() {
+        seedTeam("team-a", "Platform Team");
+        Skill source = persistSkill("hint-src-3", "team-a", "open", "published");
+
+        ResponseEntity<String> copyResp = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        assertEquals(HttpStatus.CREATED, copyResp.getStatusCode());
+        String copyId = extractId(copyResp.getBody());
+
+        source.setDeletedAt(Instant.now());
+        skillRepository.save(source);
+
+        ResponseEntity<String> detail = restTemplate.exchange(
+            baseUrl + "/" + copyId, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, detail.getStatusCode());
+        String body = detail.getBody();
+        assertTrue(
+            body.contains("\"source\":{\"available\":false,\"skillId\":null,\"displayName\":null,"
+                + "\"teamDisplayName\":null,\"updatedSinceCopy\":null}"),
+            "deleted source must not leak name/team: " + body);
+    }
+
+    @Test
+    @DisplayName("Detail: copy shows source unavailable when the source was unpublished")
+    void sourceHint_sourceUnpublished() {
+        seedTeam("team-a", "Platform Team");
+        Skill source = persistSkill("hint-src-4", "team-a", "open", "published");
+
+        ResponseEntity<String> copyResp = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        assertEquals(HttpStatus.CREATED, copyResp.getStatusCode());
+        String copyId = extractId(copyResp.getBody());
+
+        ResponseEntity<String> unpublish = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/publish", HttpMethod.DELETE,
+            new HttpEntity<>(headersFor("alice")), String.class);
+        assertEquals(HttpStatus.OK, unpublish.getStatusCode());
+
+        ResponseEntity<String> detail = restTemplate.exchange(
+            baseUrl + "/" + copyId, HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, detail.getStatusCode());
+        String body = detail.getBody();
+        assertTrue(
+            body.contains("\"source\":{\"available\":false,\"skillId\":null,\"displayName\":null,"
+                + "\"teamDisplayName\":null,\"updatedSinceCopy\":null}"),
+            "unpublished source must not leak name/team: " + body);
+    }
+
+    @Test
+    @DisplayName("List endpoint never resolves source info (detail-only, no N+1)")
+    void sourceHint_listDoesNotResolveSource() {
+        seedTeam("team-a", "Platform Team");
+        Skill source = persistSkill("hint-src-5", "team-a", "open", "published");
+
+        ResponseEntity<String> copyResp = restTemplate.exchange(
+            baseUrl + "/" + source.getId() + "/copy-to-team", HttpMethod.POST,
+            new HttpEntity<>(new CopyToTeamRequest("team-b"), headersFor("carol")), String.class);
+        assertEquals(HttpStatus.CREATED, copyResp.getStatusCode());
+
+        ResponseEntity<String> list = restTemplate.exchange(
+            baseUrl + "?teamId=team-b", HttpMethod.GET,
+            new HttpEntity<>(headersFor("carol")), String.class);
+        assertEquals(HttpStatus.OK, list.getStatusCode());
+        String body = list.getBody();
+        assertTrue(body.contains("\"source\":null"), "list rows should carry a null source: " + body);
+        assertFalse(body.contains("\"updatedSinceCopy\""),
+            "list must never resolve nested source fields: " + body);
     }
 }
