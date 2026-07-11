@@ -1,6 +1,6 @@
 # Task: GUI 改版 3/3 — 搜尋門戶首頁（版型 D）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋真 stack 走查驗收、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/gui-portal
 > （branch wt/gui-portal）。commander 驗收（測試重跑＋走查），過關 merge。
@@ -36,3 +36,8 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | 抽掛點（/open?q= 動線、favoritesApi、空間色 token）；
   建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 bcebfeb。驗收：vitest 106/106＋tsc 重跑 exit 0；
+  真 stack 走查：/ 門戶（品牌+hero 搜尋+雙門卡+收藏 chip）、置中經 computed
+  layout 確認（截圖縮放曾誤判偏左）、分頁無 active、深色主題可讀；
+  GlobalSearch 零 diff（wrapper CSS 放大）。main tree 乾淨；commander 代提。
+  GUI 三步（tabs/cardprefs/portal）全部收官。
