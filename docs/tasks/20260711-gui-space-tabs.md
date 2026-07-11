@@ -1,6 +1,6 @@
 # Task: GUI 改版 1/3 — 頂部空間分頁＋空間識別色（版型 B）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋真 stack 瀏覽器走查驗收、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/gui-tabs
 > （branch wt/gui-tabs）。commander 驗收（測試重跑＋審碼＋截圖走查），過關 merge。
@@ -39,3 +39,8 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | 使用者拍板 B+D；抽 shell/Sidebar/UserMenu 事實；
   建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 b7c4d36。驗收：vitest 83/83＋tsc 重跑 exit 0；
+  真 stack 走查（mongo+worktree 前後端+seed）：/team 分頁+側欄+藍條、
+  /open 全寬+綠、/favorites 琥珀+空狀態、詳情 open+published 綠條、
+  深色主題（data-theme=dark）識別色亮階可讀。UserMenu topbar 下拉改朝下
+  （agent 合理決定）。main tree 乾淨；agent 未 commit（慣例），commander 代提。
