@@ -29,6 +29,7 @@ export default {
     searchViewAll: 'View all results in Open Space →',
     noTeams: '(no teams yet)',
     favorites: 'Favorites',
+    spaceTabsLabel: 'Space switcher',
   },
   folders: {
     none: 'No folders',

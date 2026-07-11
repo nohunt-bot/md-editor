@@ -29,6 +29,7 @@ export default {
     searchViewAll: '在開放空間查看全部結果 →',
     noTeams: '（尚無團隊）',
     favorites: '我的收藏',
+    spaceTabsLabel: '空間切換',
   },
   folders: {
     none: '尚無資料夾',

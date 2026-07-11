@@ -117,7 +117,10 @@ export function FavoritesPage() {
   return (
     <div className="page favorites-page">
       <div className="page-header">
-        <h1>{t('favorites:title')}</h1>
+        <h1>
+          <span className="page-space-stripe page-space-stripe-fav" aria-hidden="true" />
+          {t('favorites:title')}
+        </h1>
       </div>
       <Section
         title={t('favorites:myFavorites')}

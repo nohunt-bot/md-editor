@@ -4,7 +4,6 @@ import { folderApi, tagApi } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
 import { NewFolderModal } from './NewFolderModal'
 import { useTeamFilter } from './TeamFilterContext'
-import { UserMenu } from './UserMenu'
 import { useTranslation } from 'react-i18next'
 import type { Identity } from './useIdentity'
 
@@ -119,37 +118,7 @@ export function Sidebar({ identity }: { identity: Identity }) {
             </div>
           </div>
         </section>
-
-        <div className="zone-divider" />
-
-        {/* Zone 2: 開放空間 */}
-        <section className="zone">
-          <div className="zone-header">
-            <span className="zone-bar" />
-            <NavLink to="/open" className="zone-title-link">
-              {t('shell:openSpace')}
-            </NavLink>
-          </div>
-          <NavLink to="/open" className="zone-entry">
-            {t('shell:browseAll')}
-          </NavLink>
-        </section>
-
-        <div className="zone-divider" />
-
-        {/* Zone 3: 我的收藏 (T1-4) */}
-        <section className="zone">
-          <div className="zone-header">
-            <span className="zone-bar" />
-            <NavLink to="/favorites" className="zone-title-link">
-              {t('shell:favorites')}
-            </NavLink>
-          </div>
-        </section>
       </div>
-
-      {/* Bottom: user menu (identity, quick prefs, settings, logout) */}
-      <UserMenu identity={identity} />
 
       {showNewFolder && teamId && (
         <NewFolderModal

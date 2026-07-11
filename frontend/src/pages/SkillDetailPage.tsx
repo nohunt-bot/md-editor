@@ -290,7 +290,13 @@ export function SkillDetailPage() {
       <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />
       <div className="skill-detail">
       <article className="detail-reading">
-        <h1 className="detail-title">{skill.displayName || skill.name}</h1>
+        <h1 className="detail-title">
+          <span
+            className={`page-space-stripe ${isOpenPublished ? 'page-space-stripe-open' : 'page-space-stripe-team'}`}
+            aria-hidden="true"
+          />
+          {skill.displayName || skill.name}
+        </h1>
         {skill.description && <p className="detail-desc">{skill.description}</p>}
         <Markdown content={skill.content} />
       </article>
