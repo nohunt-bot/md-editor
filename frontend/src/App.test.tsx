@@ -94,6 +94,24 @@ describe('AppShell — create-entry gating (VIEWER vs EDITOR)', () => {
   })
 })
 
+describe('AppShell — 新增 Skill button scoped to the team space', () => {
+  it.each(['/open', '/favorites', '/', '/settings', '/skills/abc'])(
+    'does not render the 新增 Skill button on %s',
+    async (path) => {
+      mockIdentity = identity({
+        activeTeamId: 'team-1',
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
+      })
+      renderAt(path)
+
+      await waitFor(() => {
+        expect(screen.queryByText('＋ 新增 Skill')).toBeNull()
+      })
+    }
+  )
+})
+
 describe('AppShell — single search box on the portal', () => {
   it('does not render the topbar GlobalSearch on /', async () => {
     mockIdentity = identity({})

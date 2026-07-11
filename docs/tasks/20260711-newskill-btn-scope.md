@@ -1,6 +1,6 @@
 # Task: 「新增 Skill」按鈕收斂到團隊空間
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋純前端實走驗收、merge 1e293c6)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/newskill-btn
 > （branch wt/newskill-btn）。agent 不 commit，commander 驗收後代提，
@@ -27,3 +27,7 @@ Topbar「＋新增 Skill」（App.tsx:78-96 三分支）在所有路由顯示：
 
 ## Progress log
 - 2026-07-11 | planning | 盤點入口（topbar 全路由＋空狀態）；建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 1e293c6。驗收：vitest 122/122＋tsc 重跑 exit 0；
+  純前端實走 /team 有（英文 locale 曾一度誤判為缺）、/open 與 / 無
+  （topbar 僅 UserMenu）；/favorites /settings /skills/:id 由 it.each 測試
+  覆蓋。commander 代提，結案併入 merge commit（amend）。

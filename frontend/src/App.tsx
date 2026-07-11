@@ -70,30 +70,31 @@ function AppShell({
       <div className="app-body">
         <header className="app-topbar">
           {showTopbarSearch && <GlobalSearch />}
-          {!identity.activeTeamId ? (
-            // Phase 5.1 no-team guard: creating needs an owning team.
-            <button
-              className="btn-primary"
-              disabled
-              title={t('common:selectTeamFirst')}
-            >
-              {t('common:newSkill')}
-            </button>
-          ) : canEditActiveTeam(identity) ? (
-            <Link to="/skills/new" className="btn-primary">
-              {t('common:newSkill')}
-            </Link>
-          ) : (
-            // VIEWER (non-admin) on the active team: server would 403 on
-            // create, so don't render a live entry point.
-            <button
-              className="btn-primary"
-              disabled
-              title={t('detail:copyNeedsEditor')}
-            >
-              {t('common:newSkill')}
-            </button>
-          )}
+          {showSidebar &&
+            (!identity.activeTeamId ? (
+              // Phase 5.1 no-team guard: creating needs an owning team.
+              <button
+                className="btn-primary"
+                disabled
+                title={t('common:selectTeamFirst')}
+              >
+                {t('common:newSkill')}
+              </button>
+            ) : canEditActiveTeam(identity) ? (
+              <Link to="/skills/new" className="btn-primary">
+                {t('common:newSkill')}
+              </Link>
+            ) : (
+              // VIEWER (non-admin) on the active team: server would 403 on
+              // create, so don't render a live entry point.
+              <button
+                className="btn-primary"
+                disabled
+                title={t('detail:copyNeedsEditor')}
+              >
+                {t('common:newSkill')}
+              </button>
+            ))}
           <UserMenu identity={identity} />
         </header>
         <SpaceTabs />
