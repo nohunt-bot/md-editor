@@ -134,6 +134,18 @@ export function Sidebar({ identity }: { identity: Identity }) {
             {t('shell:browseAll')}
           </NavLink>
         </section>
+
+        <div className="zone-divider" />
+
+        {/* Zone 3: 我的收藏 (T1-4) */}
+        <section className="zone">
+          <div className="zone-header">
+            <span className="zone-bar" />
+            <NavLink to="/favorites" className="zone-title-link">
+              {t('shell:favorites')}
+            </NavLink>
+          </div>
+        </section>
       </div>
 
       {/* Bottom: user menu (identity, quick prefs, settings, logout) */}

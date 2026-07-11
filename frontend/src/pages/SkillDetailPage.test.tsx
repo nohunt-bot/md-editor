@@ -15,6 +15,10 @@ vi.mock('../app/useIdentity', () => ({
 const getMock = vi.fn()
 const getVersionsMock = vi.fn(() => Promise.resolve({ data: [] }))
 const likeMock = vi.fn()
+const favoritesListMock = vi.fn(() => Promise.resolve({ data: [] as any[] }))
+const favoritesAddMock = vi.fn((_id: string) => Promise.resolve({ data: {} }))
+const favoritesRemoveMock = vi.fn((_id: string) => Promise.resolve({ data: {} }))
+const recordRecentMock = vi.fn((_id: string) => Promise.resolve({ data: {} }))
 
 vi.mock('../api/api', async () => {
   const actual = await vi.importActual<typeof import('../api/api')>('../api/api')
@@ -25,6 +29,13 @@ vi.mock('../api/api', async () => {
       get: (id: string) => getMock(id),
       getVersions: () => getVersionsMock(),
       like: (id: string) => likeMock(id),
+    },
+    favoritesApi: {
+      ...actual.favoritesApi,
+      list: () => favoritesListMock(),
+      add: (id: string) => favoritesAddMock(id),
+      remove: (id: string) => favoritesRemoveMock(id),
+      recordRecent: (id: string) => recordRecentMock(id),
     },
   }
 })
@@ -74,6 +85,10 @@ const openPublishedSkill = {
 beforeEach(() => {
   getMock.mockReset()
   getVersionsMock.mockClear()
+  favoritesListMock.mockReset().mockResolvedValue({ data: [] })
+  favoritesAddMock.mockReset().mockResolvedValue({ data: {} })
+  favoritesRemoveMock.mockReset().mockResolvedValue({ data: {} })
+  recordRecentMock.mockReset().mockResolvedValue({ data: {} })
 })
 
 describe('SkillDetailPage actions (§2.3)', () => {
@@ -270,5 +285,67 @@ describe('SkillDetailPage source-update hint (T1-3)', () => {
     renderAt('s1')
     await screen.findByText('資訊')
     expect(screen.queryByText('複製自')).not.toBeInTheDocument()
+  })
+})
+
+describe('SkillDetailPage favorites + recent (T1-4)', () => {
+  it('records a recent view after a successful detail load', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    renderAt('s1')
+    await screen.findByText('資訊')
+    expect(recordRecentMock).toHaveBeenCalledWith('s1')
+  })
+
+  it('seeds the favorite star as unset when the skill is not in GET /api/me/favorites', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    favoritesListMock.mockResolvedValue({ data: [{ id: 'other-skill' }] })
+    renderAt('s1')
+    const btn = await screen.findByRole('button', { name: /☆/ })
+    expect(btn).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('seeds the favorite star as set when the skill is already in GET /api/me/favorites', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    favoritesListMock.mockResolvedValue({ data: [{ id: 's1' }] })
+    renderAt('s1')
+    const btn = await screen.findByRole('button', { name: /★/ })
+    expect(btn).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('adds a favorite via PUT when toggled on', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    favoritesListMock.mockResolvedValue({ data: [] })
+    renderAt('s1')
+    const btn = await screen.findByRole('button', { name: /☆/ })
+    const { fireEvent } = await import('@testing-library/react')
+    fireEvent.click(btn)
+    expect(favoritesAddMock).toHaveBeenCalledWith('s1')
+    expect(await screen.findByRole('button', { name: /★/ })).toBeInTheDocument()
+  })
+
+  it('removes a favorite via DELETE when toggled off', async () => {
+    mockIdentity = identity({
+      teams: [{ id: 'team-a', displayName: '平台團隊', role: 'EDITOR' }],
+    })
+    getMock.mockResolvedValue({ data: draftTeamSkill })
+    favoritesListMock.mockResolvedValue({ data: [{ id: 's1' }] })
+    renderAt('s1')
+    const btn = await screen.findByRole('button', { name: /★/ })
+    const { fireEvent } = await import('@testing-library/react')
+    fireEvent.click(btn)
+    expect(favoritesRemoveMock).toHaveBeenCalledWith('s1')
+    expect(await screen.findByRole('button', { name: /☆/ })).toBeInTheDocument()
   })
 })

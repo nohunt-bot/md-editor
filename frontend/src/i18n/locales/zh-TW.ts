@@ -28,6 +28,7 @@ export default {
     searchEmpty: '找不到符合的 skill',
     searchViewAll: '在開放空間查看全部結果 →',
     noTeams: '（尚無團隊）',
+    favorites: '我的收藏',
   },
   folders: {
     none: '尚無資料夾',
@@ -117,6 +118,8 @@ export default {
     unpublishFailed: '下架失敗：',
     copyFailed: '複製失敗：',
     likeFailed: '操作失敗：',
+    favorite: '收藏',
+    favoriteFailed: '操作失敗：',
   },
   editor: {
     editTitle: '編輯 Skill',
@@ -183,5 +186,12 @@ export default {
     next: '下一頁 →',
     status: '第 {{page}} / {{total}} 頁',
     label: '分頁',
+  },
+  favorites: {
+    title: '收藏',
+    myFavorites: '我的收藏',
+    recentlyViewed: '最近瀏覽',
+    emptyFavorites: '尚無收藏，瀏覽 skill 時點擊 ☆ 即可收藏。',
+    emptyRecent: '尚無瀏覽紀錄。',
   },
 }

@@ -1,5 +1,6 @@
 package com.company.skillmd.auth;
 
+import com.company.skillmd.search.SearchResultResponse;
 import com.company.skillmd.team.TeamService;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -17,13 +18,16 @@ public class MeController {
     private final TeamService teamService;
     private final UserPreferencesRepository preferencesRepository;
     private final MongoTemplate mongoTemplate;
+    private final FavoritesService favoritesService;
 
     public MeController(AuthorizationService authorizationService, TeamService teamService,
-                        UserPreferencesRepository preferencesRepository, MongoTemplate mongoTemplate) {
+                        UserPreferencesRepository preferencesRepository, MongoTemplate mongoTemplate,
+                        FavoritesService favoritesService) {
         this.authorizationService = authorizationService;
         this.teamService = teamService;
         this.preferencesRepository = preferencesRepository;
         this.mongoTemplate = mongoTemplate;
+        this.favoritesService = favoritesService;
     }
 
     @GetMapping("/api/me")
@@ -62,6 +66,41 @@ public class MeController {
         mongoTemplate.upsert(Query.query(Criteria.where("_id").is(userId)),
             update, UserPreferences.class);
         return getPreferences();
+    }
+
+    // --- T1-4: favorites + recently viewed --------------------------------
+
+    /** Add to favorites. 404 if the skill doesn't exist, is deleted, or isn't visible to the caller. Idempotent. */
+    @PutMapping("/api/me/favorites/{skillId}")
+    public ResponseEntity<Void> addFavorite(@PathVariable String skillId) {
+        favoritesService.addFavorite(skillId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Remove from favorites. Idempotent — 200 even if absent. */
+    @DeleteMapping("/api/me/favorites/{skillId}")
+    public ResponseEntity<Void> removeFavorite(@PathVariable String skillId) {
+        favoritesService.removeFavorite(skillId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Metadata-only, stored order, filtered to what's currently visible to the caller. */
+    @GetMapping("/api/me/favorites")
+    public ResponseEntity<List<SearchResultResponse>> listFavorites() {
+        return ResponseEntity.ok(favoritesService.listFavorites());
+    }
+
+    /** Best-effort: record a detail view. No visibility validation (the caller just loaded it). */
+    @PostMapping("/api/me/recent/{skillId}")
+    public ResponseEntity<Void> recordRecent(@PathVariable String skillId) {
+        favoritesService.recordRecent(skillId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Same resolution/filtering as favorites, most-recent-first, capped at 10. */
+    @GetMapping("/api/me/recent")
+    public ResponseEntity<List<SearchResultResponse>> listRecent() {
+        return ResponseEntity.ok(favoritesService.listRecent());
     }
 
     public record MeResponse(String userId, String displayName, List<TeamMembership> teams, boolean admin) {}

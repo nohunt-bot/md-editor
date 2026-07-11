@@ -1,0 +1,13 @@
+/* T1-4: favorites + recently viewed — two stacked sections reusing the
+   open-space card grid (OpenSpacePage.css: .open-grid/.open-card/...). */
+
+.favorites-section {
+  margin-top: var(--sp-6);
+}
+
+.favorites-section h2 {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 var(--sp-3);
+}

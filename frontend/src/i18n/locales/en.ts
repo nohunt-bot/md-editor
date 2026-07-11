@@ -28,6 +28,7 @@ export default {
     searchEmpty: 'No matching skills',
     searchViewAll: 'View all results in Open Space →',
     noTeams: '(no teams yet)',
+    favorites: 'Favorites',
   },
   folders: {
     none: 'No folders',
@@ -117,6 +118,8 @@ export default {
     unpublishFailed: 'Unpublish failed: ',
     copyFailed: 'Copy failed: ',
     likeFailed: 'Action failed: ',
+    favorite: 'Favorite',
+    favoriteFailed: 'Action failed: ',
   },
   editor: {
     editTitle: 'Edit Skill',
@@ -183,5 +186,12 @@ export default {
     next: 'Next →',
     status: 'Page {{page}} / {{total}}',
     label: 'Pagination',
+  },
+  favorites: {
+    title: 'Favorites',
+    myFavorites: 'My Favorites',
+    recentlyViewed: 'Recently Viewed',
+    emptyFavorites: 'No favorites yet — click ☆ on a skill to save it here.',
+    emptyRecent: 'No view history yet.',
   },
 }
