@@ -40,6 +40,7 @@ vi.mock('../api/api', async () => {
 
 vi.mock('../app/useIdentity', () => ({
   useIdentity: () => baseIdentity(),
+  canEditActiveTeam: () => false,
 }))
 
 function baseIdentity(): Identity {
