@@ -198,4 +198,12 @@ export default {
     emptyFavorites: 'No favorites yet — click ☆ on a skill to save it here.',
     emptyRecent: 'No view history yet.',
   },
+  home: {
+    tagline: 'The company-wide skill knowledge base',
+    myTeamDoor: 'My Team',
+    openSpaceDoor: 'Open Space',
+    myTeamDoorHint: "Browse and manage your team's skills",
+    openSpaceDoorHint: 'Browse skills published company-wide',
+    noTeamGuidance: 'Select a team on the left first',
+  },
 }

@@ -198,4 +198,12 @@ export default {
     emptyFavorites: '尚無收藏，瀏覽 skill 時點擊 ☆ 即可收藏。',
     emptyRecent: '尚無瀏覽紀錄。',
   },
+  home: {
+    tagline: '全公司的 skill 知識庫',
+    myTeamDoor: '我的團隊',
+    openSpaceDoor: '開放空間',
+    myTeamDoorHint: '瀏覽並管理團隊的 skill',
+    openSpaceDoorHint: '瀏覽全公司已發布的 skill',
+    noTeamGuidance: '請先在左側選擇團隊',
+  },
 }

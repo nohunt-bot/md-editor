@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
+import { HomePage } from './pages/HomePage'
 import { SkillsPage } from './pages/SkillsPage'
 import { OpenSpacePage } from './pages/OpenSpacePage'
 import { SkillEditor } from './components/editor/SkillEditor'
@@ -85,7 +86,7 @@ function AppShell({
         <SpaceTabs />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<Navigate to="/team" replace />} />
+            <Route path="/" element={<HomePage identity={identity} />} />
             <Route path="/team" element={<SkillsPage identity={identity} />} />
             <Route path="/open" element={<OpenSpacePage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
