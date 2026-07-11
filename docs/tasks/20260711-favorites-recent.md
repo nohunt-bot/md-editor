@@ -1,6 +1,7 @@
 # Task: 收藏＋最近瀏覽（T1-4）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作（中途遇月上限中斷、SendMessage 續作）、
+commander 重跑測試+審碼驗收通過、merge)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/favorites
 > （branch wt/favorites）。commander 對照實碼驗收，過關 merge。
@@ -30,3 +31,10 @@ user_preferences collection 已存在（userId/theme/language），加欄位即�
 ## Progress log
 - 2026-07-11 | planning | 抽實碼事實（MeController/UserPreferences、共用
   Sidebar、like pattern、visibility 規則）；建 worktree；派 sonnet
+- 2026-07-11 | interrupted | agent 被月花費上限打斷（讀檔階段、無半成品）；
+  使用者明令 commander 不得代做實作（只規劃/驗收，已入永久記憶）；
+  SendMessage 讓原 agent 續作
+- 2026-07-11 | done | 實作 2f1df72。驗收：commander 重跑 mvnw test（95）exit 0、
+  vitest 81/81、tsc OK；FavoritesService 全原子操作、可見性同 SearchService
+  規則、非成員讀凍結快照、讀取時過濾不改寫儲存清單、recent cap 10 去重上移
+  皆有測試；main tree 乾淨。agent 依例不 commit，commander 代提後 merge。
