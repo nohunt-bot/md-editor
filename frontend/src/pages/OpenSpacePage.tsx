@@ -114,7 +114,10 @@ export function OpenSpacePage() {
   return (
     <div className="page open-space">
       <div className="page-header">
-        <h1>{t('open:title')}</h1>
+        <h1>
+          <span className="page-space-stripe page-space-stripe-open" aria-hidden="true" />
+          {t('open:title')}
+        </h1>
         {q && <span className="open-space-q">{t('open:searchLabel', { q })}</span>}
         <div className="open-sort">
           <button

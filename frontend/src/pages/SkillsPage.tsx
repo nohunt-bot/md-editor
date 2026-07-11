@@ -129,6 +129,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
     <div className="skills-main">
       <div className="skills-header">
         <h1>
+          <span className="page-space-stripe page-space-stripe-team" aria-hidden="true" />
           {identity.activeTeam?.displayName
             ? t('skills:teamSkills', { team: identity.activeTeam.displayName })
             : t('skills:teamSkillsGeneric')}

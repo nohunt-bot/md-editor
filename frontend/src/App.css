@@ -158,6 +158,93 @@
   z-index: 20;
 }
 
+/* UserMenu moved here from the sidebar bottom (GUI redesign step 1/3) — the
+   sidebar is no longer on every route, so identity must live in the topbar.
+   Override the sidebar-bottom styling (border-top, full width, upward
+   dropdown) for this context. */
+.app-topbar .user-menu {
+  border-top: none;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.app-topbar .user-menu-trigger {
+  width: auto;
+}
+
+.app-topbar .user-menu-pop {
+  bottom: auto;
+  top: calc(100% + var(--sp-1));
+  left: auto;
+  right: 0;
+  width: 220px;
+}
+
+/* ---- Space tabs (GUI redesign step 1/3) ---- */
+.space-tabs {
+  display: flex;
+  gap: var(--sp-6);
+  padding: 0 var(--sp-6);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.space-tab {
+  display: inline-block;
+  padding: var(--sp-3) 0;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.space-tab:hover {
+  color: var(--text);
+}
+
+.space-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.space-tab-team.active {
+  color: var(--space-team);
+  border-bottom-color: var(--space-team);
+}
+
+.space-tab-open.active {
+  color: var(--space-open);
+  border-bottom-color: var(--space-open);
+}
+
+.space-tab-fav.active {
+  color: var(--space-fav);
+  border-bottom-color: var(--space-fav);
+}
+
+/* ---- Page-header space stripes (GUI redesign step 1/3) ---- */
+.page-space-stripe {
+  display: inline-block;
+  width: 4px;
+  height: 1.2em;
+  border-radius: 2px;
+  margin-right: var(--sp-2);
+  vertical-align: middle;
+}
+
+.page-space-stripe-team {
+  background: var(--space-team);
+}
+
+.page-space-stripe-open {
+  background: var(--space-open);
+}
+
+.page-space-stripe-fav {
+  background: var(--space-fav);
+}
+
 .app-main {
   flex: 1;
   padding: var(--sp-6);

@@ -30,6 +30,12 @@
   --warn: #d97706;
   --danger: #dc2626;
 
+  /* Space identity colours (GUI redesign step 1/3) — tabs + page-header
+     stripes ONLY use these tokens, never raw hex in components. */
+  --space-team: #2563eb;
+  --space-open: #16a34a;
+  --space-fav: #d97706;
+
   /* Fonts */
   --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -91,6 +97,10 @@
   --ok-soft: #14351f;
   --warn: #e8a13c;
   --danger: #ef5350;
+
+  --space-team: #6494f5;
+  --space-open: #34c065;
+  --space-fav: #f0a742;
 
   color-scheme: dark;
   color: var(--text);
