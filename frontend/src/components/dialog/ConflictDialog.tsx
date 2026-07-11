@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactDiffViewer from 'react-diff-viewer-continued'
+import { useResolvedTheme } from '../../app/useTheme'
 import './ConflictDialog.css'
 
 interface ConflictDialogProps {
@@ -26,6 +27,7 @@ export function ConflictDialog({
 }: ConflictDialogProps) {
   const [showDiff, setShowDiff] = useState(true)
   const { t } = useTranslation()
+  const resolvedTheme = useResolvedTheme()
 
   return (
     <div className="conflict-dialog-overlay">
@@ -56,7 +58,7 @@ export function ConflictDialog({
               splitView={true}
               leftTitle={t('conflict:serverTitle', { version: currentVersion })}
               rightTitle={t('conflict:yourChanges')}
-              useDarkTheme={true}
+              useDarkTheme={resolvedTheme === 'dark'}
             />
           </div>
         )}

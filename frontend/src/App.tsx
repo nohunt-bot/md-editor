@@ -12,7 +12,7 @@ import { UserMenu } from './app/UserMenu'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
 import { useEffect } from 'react'
-import { useIdentity } from './app/useIdentity'
+import { useIdentity, canEditActiveTeam } from './app/useIdentity'
 import { setThemeMode, type ThemeMode } from './app/useTheme'
 import { getPreferences } from './api/api'
 import { setLanguage, type LanguageCode } from './i18n'
@@ -60,23 +60,36 @@ function AppShell({
 }) {
   const location = useLocation()
   const showSidebar = location.pathname === '/team'
+  // The portal (/) already has the hero GlobalSearch as its search entry
+  // point; rendering the topbar one too gives ⌘K two competing listeners.
+  const showTopbarSearch = location.pathname !== '/'
 
   return (
     <div className="app-shell">
       {showSidebar && <Sidebar identity={identity} />}
       <div className="app-body">
         <header className="app-topbar">
-          <GlobalSearch />
-          {identity.activeTeamId ? (
-            <Link to="/skills/new" className="btn-primary">
-              {t('common:newSkill')}
-            </Link>
-          ) : (
+          {showTopbarSearch && <GlobalSearch />}
+          {!identity.activeTeamId ? (
             // Phase 5.1 no-team guard: creating needs an owning team.
             <button
               className="btn-primary"
               disabled
               title={t('common:selectTeamFirst')}
+            >
+              {t('common:newSkill')}
+            </button>
+          ) : canEditActiveTeam(identity) ? (
+            <Link to="/skills/new" className="btn-primary">
+              {t('common:newSkill')}
+            </Link>
+          ) : (
+            // VIEWER (non-admin) on the active team: server would 403 on
+            // create, so don't render a live entry point.
+            <button
+              className="btn-primary"
+              disabled
+              title={t('detail:copyNeedsEditor')}
             >
               {t('common:newSkill')}
             </button>

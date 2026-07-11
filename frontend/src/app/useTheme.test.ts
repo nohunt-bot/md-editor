@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useTheme, readThemeMode } from './useTheme'
+import { useTheme, readThemeMode, useResolvedTheme } from './useTheme'
 
 // Phase D (v2): mode persists to localStorage and resolves onto <html data-theme>.
 
@@ -24,5 +24,35 @@ describe('useTheme (Phase D v2)', () => {
     const { result } = renderHook(() => useTheme())
     act(() => result.current.setMode('light'))
     expect(document.documentElement.dataset.theme).toBe('light')
+  })
+})
+
+describe('useResolvedTheme', () => {
+  beforeEach(() => {
+    delete document.documentElement.dataset.theme
+  })
+
+  it('defaults to light when data-theme is unset', () => {
+    const { result } = renderHook(() => useResolvedTheme())
+    expect(result.current).toBe('light')
+  })
+
+  it('reflects the initial data-theme value', () => {
+    document.documentElement.dataset.theme = 'dark'
+    const { result } = renderHook(() => useResolvedTheme())
+    expect(result.current).toBe('dark')
+  })
+
+  it('updates live when data-theme mutates (MutationObserver)', async () => {
+    const { result } = renderHook(() => useResolvedTheme())
+    expect(result.current).toBe('light')
+
+    await act(async () => {
+      document.documentElement.dataset.theme = 'dark'
+      // Let the MutationObserver's microtask queue flush.
+      await Promise.resolve()
+    })
+
+    expect(result.current).toBe('dark')
   })
 })

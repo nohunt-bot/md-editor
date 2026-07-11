@@ -28,6 +28,31 @@ export function setThemeMode(mode: ThemeMode) {
   applyTheme(mode)
 }
 
+function readResolvedTheme(): 'light' | 'dark' {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+}
+
+/**
+ * The theme actually applied to <html data-theme>, kept live via a
+ * MutationObserver. Used by components (e.g. diff dialogs) that need to
+ * follow the resolved theme rather than the user's raw mode preference
+ * ('system' isn't 'light' or 'dark').
+ */
+export function useResolvedTheme(): 'light' | 'dark' {
+  const [resolved, setResolved] = useState<'light' | 'dark'>(readResolvedTheme)
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => setResolved(readResolvedTheme()))
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  return resolved
+}
+
 export function useTheme(): { mode: ThemeMode; setMode: (m: ThemeMode) => void } {
   const [mode, setModeState] = useState<ThemeMode>(readThemeMode)
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 import { skillApi } from '../../api/api'
+import { useResolvedTheme } from '../../app/useTheme'
 import './VersionDiffDialog.css'
 
 interface VersionDiffDialogProps {
@@ -29,6 +30,7 @@ export function VersionDiffDialog({
   onRestore,
 }: VersionDiffDialogProps) {
   const { t } = useTranslation()
+  const resolvedTheme = useResolvedTheme()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [versionContent, setVersionContent] = useState('')
@@ -73,7 +75,7 @@ export function VersionDiffDialog({
               splitView={true}
               leftTitle={t('detail:diffOldLabel', { version })}
               rightTitle={t('detail:diffCurrentLabel', { version: currentVersion })}
-              useDarkTheme={true}
+              useDarkTheme={resolvedTheme === 'dark'}
             />
           </div>
         )}

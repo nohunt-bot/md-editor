@@ -1,6 +1,6 @@
 # Task: Bug 掃蕩修復（GUI 改版後）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 修復、commander 測試重跑＋live 複驗四修、merge 87318c9)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/bugfix-sweep
 > （branch wt/bugfix-sweep）。commander 已完成真 stack 掃蕩並實證下列 4 項；
@@ -37,3 +37,8 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | commander 真 stack 掃蕩（console、viewer 視角、
   ⌘K、清單檢視、UserMenu）；4 實證 bug、4 嫌疑排除；建 worktree；派 sonnet
+- 2026-07-11 | done | 修復 87318c9。驗收：vitest 117/117＋tsc 重跑 exit 0；
+  live 複驗（worktree 前端＋main 後端）：bob 兩入口 disabled＋需要團隊編輯
+  權限、/ 單一搜尋框（hero）、淺色 diff 底白（rgb 255,255,255）且 viewer
+  dialog 無還原鈕、grep browseAll=0。commander 代提，任務檔結案併入
+  merge commit（依 2026-07-11 lesson amend）。
