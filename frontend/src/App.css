@@ -1,72 +1,74 @@
 /* ============================================================
-   App shell — two-zone layout (PRD §6.3). Consumes §6.2 tokens.
+   App shell — three-band layout (docs/tasks/20260711-sidebar-layout-fix.md).
+   Topbar and SpaceTabs are full-width bands; the sidebar lives only inside
+   the content row below them, scoped to /team. Consumes §6.2 tokens.
    ============================================================ */
 
 .app-shell {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
 }
 
-/* ---- Sidebar (260px fixed) ---- */
+/* ---- Content row: sidebar (on /team) + main ---- */
+.app-content-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* ---- Sidebar (260px fixed, height = content row, not the viewport) ---- */
 .app-sidebar {
   width: 260px;
   flex-shrink: 0;
   border-right: 1px solid var(--border);
+  border-top: 3px solid var(--space-team);
   background: var(--bg-subtle);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
 }
 
 .sidebar-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
 }
 
 .zone {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-}
-
-.zone-header {
-  display: flex;
-  align-items: center;
   gap: var(--sp-2);
 }
 
-.zone-bar {
-  width: 3px;
-  height: 14px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-
-.zone-title-link {
-  font-size: var(--fs-md);
+.sidebar-team-label {
+  font-size: var(--fs-sm);
   font-weight: 600;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.zone-title-link.active {
-  color: var(--accent);
+  color: var(--text-muted);
 }
 
 .zone-subtitle {
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: var(--sp-2);
 }
 
 .zone-block {
-  margin-top: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-1);
+}
+
+.sidebar-section-header .folder-new-btn {
+  margin-top: 0;
+  width: auto;
 }
 
 .zone-entry {
@@ -137,14 +139,7 @@
   margin-bottom: var(--sp-1);
 }
 
-/* ---- Body ---- */
-.app-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ---- Topbar (full width, top band) ---- */
 .app-topbar {
   display: flex;
   align-items: center;
@@ -156,6 +151,21 @@
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+/* Brand wordmark — also the only way back to the portal (/) once you've
+   left it (docs/tasks/20260711-sidebar-layout-fix.md). */
+.app-brand {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  flex: 0 0 auto;
+  margin-right: var(--sp-2);
+}
+
+.app-brand:hover {
+  color: var(--accent);
 }
 
 /* UserMenu moved here from the sidebar bottom (GUI redesign step 1/3) — the

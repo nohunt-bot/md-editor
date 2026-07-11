@@ -31,6 +31,7 @@ export default {
     spaceTabsLabel: '空間切換',
   },
   folders: {
+    section: '資料夾',
     none: '尚無資料夾',
     newFolder: '+ 新增資料夾',
     allSkills: '全部 skill',
