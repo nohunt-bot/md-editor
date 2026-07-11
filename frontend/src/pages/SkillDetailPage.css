@@ -148,6 +148,35 @@
   border-color: var(--danger);
 }
 
+/* T1-4: favorite toggle, grouped with the like button. */
+.like-row-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.favorite-btn:hover {
+  background: var(--bg-hover);
+}
+
+.favorite-btn.favorited {
+  color: var(--warning, #b58900);
+  border-color: var(--warning, #b58900);
+}
+
 .copy-cite {
   font-size: var(--fs-xs);
   color: var(--text-muted);

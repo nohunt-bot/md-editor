@@ -4,6 +4,7 @@ import { OpenSpacePage } from './pages/OpenSpacePage'
 import { SkillEditor } from './components/editor/SkillEditor'
 import { SkillDetailPage } from './pages/SkillDetailPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { FavoritesPage } from './pages/FavoritesPage'
 import { Sidebar } from './app/Sidebar'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/" element={<Navigate to="/team" replace />} />
                 <Route path="/team" element={<SkillsPage identity={identity} />} />
                 <Route path="/open" element={<OpenSpacePage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/skills/new" element={<SkillEditor />} />
                 <Route path="/skills/:id" element={<SkillDetailPage />} />

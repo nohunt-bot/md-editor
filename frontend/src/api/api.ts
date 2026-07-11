@@ -100,6 +100,23 @@ export function search(q: string, scope: string = 'all') {
   return api.get<SearchResponse>('/api/search', { params: { q, scope } })
 }
 
+// --- Favorites + recently viewed (T1-4) ---------------------------------
+// Metadata-only summaries (same shape as SearchResult — no content field).
+export type FavoriteItem = SearchResult
+
+export const favoritesApi = {
+  list: () => api.get<FavoriteItem[]>('/api/me/favorites'),
+
+  add: (skillId: string) => api.put(`/api/me/favorites/${skillId}`),
+
+  remove: (skillId: string) => api.delete(`/api/me/favorites/${skillId}`),
+
+  recent: () => api.get<FavoriteItem[]>('/api/me/recent'),
+
+  // Best-effort — callers should not block or surface errors from this.
+  recordRecent: (skillId: string) => api.post(`/api/me/recent/${skillId}`),
+}
+
 // Skill API
 export const skillApi = {
   list: (

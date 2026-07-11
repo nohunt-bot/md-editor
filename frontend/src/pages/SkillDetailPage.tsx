@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { skillApi } from '../api/api'
+import { skillApi, favoritesApi } from '../api/api'
 import { Badge } from '../components/common/Badge'
 import { ErrorBanner } from '../components/common/ErrorBanner'
 import { Markdown } from '../components/common/Markdown'
@@ -89,6 +89,8 @@ export function SkillDetailPage() {
   // Phase C (v2): like state, seeded from the detail response.
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
+  // T1-4: favorite state, seeded by checking membership in GET /api/me/favorites.
+  const [favorite, setFavorite] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -102,12 +104,31 @@ export function SkillDetailPage() {
         setSkill(res.data)
         setLiked(Boolean(res.data.likedByMe))
         setLikeCount(res.data.likeCount ?? 0)
+        // T1-4: fire-and-forget — best-effort, must not block or fail the page.
+        favoritesApi.recordRecent(id).catch(() => {})
       })
       .catch(() => {
         if (!cancelled) setNotFound(true)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    let cancelled = false
+    favoritesApi
+      .list()
+      .then((res) => {
+        if (cancelled) return
+        setFavorite((res.data || []).some((s) => s.id === id))
+      })
+      .catch(() => {
+        if (!cancelled) setFavorite(false)
       })
     return () => {
       cancelled = true
@@ -197,6 +218,21 @@ export function SkillDetailPage() {
       setLikeCount(res.data.likeCount)
     } catch (e: any) {
       setActionError(t('detail:likeFailed') + (e.response?.data?.message || e.message))
+    }
+  }
+
+  async function toggleFavorite() {
+    if (!id) return
+    try {
+      if (favorite) {
+        await favoritesApi.remove(id)
+        setFavorite(false)
+      } else {
+        await favoritesApi.add(id)
+        setFavorite(true)
+      }
+    } catch (e: any) {
+      setActionError(t('detail:favoriteFailed') + (e.response?.data?.message || e.message))
     }
   }
 
@@ -324,14 +360,24 @@ export function SkillDetailPage() {
             )}
           </dl>
           <div className="like-row">
-            <button
-              type="button"
-              className={`like-btn ${liked ? 'liked' : ''}`}
-              aria-pressed={liked}
-              onClick={toggleLike}
-            >
-              {liked ? '♥' : '♡'} {likeCount}
-            </button>
+            <div className="like-row-buttons">
+              <button
+                type="button"
+                className={`like-btn ${liked ? 'liked' : ''}`}
+                aria-pressed={liked}
+                onClick={toggleLike}
+              >
+                {liked ? '♥' : '♡'} {likeCount}
+              </button>
+              <button
+                type="button"
+                className={`favorite-btn ${favorite ? 'favorited' : ''}`}
+                aria-pressed={favorite}
+                onClick={toggleFavorite}
+              >
+                {favorite ? '★' : '☆'} {t('detail:favorite')}
+              </button>
+            </div>
             <span className="copy-cite">{t('detail:citeCount', { count: skill.copyCount ?? 0 })}</span>
           </div>
         </section>
