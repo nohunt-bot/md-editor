@@ -1,6 +1,6 @@
 # Task: 拔掉 topbar 新增 Skill，建立入口移入 /team 頁首
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋live 雙角色驗收、merge 0142d92)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/newskill-header
 > （branch wt/newskill-header）。agent 不 commit；commander 驗收後代提，
@@ -25,3 +25,8 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 
 ## Progress log
 - 2026-07-11 | planning | 拍板移入頁首而非純刪除（保建立動線）；建 worktree；派工
+- 2026-07-11 | done | 實作 0142d92。驗收：vitest 129/129＋tsc 重跑 exit 0；
+  live：Bob(VIEWER) 頁首鈕 disabled＋提示、Alice(EDITOR) 為可用連結、
+  全路由 topbar 無建立鈕（僅品牌+搜尋+UserMenu）。agent 順手補了
+  viewPrefs.crossPage.test.tsx 既有 mock 缺口（必要，否則套件紅）。
+  commander 代提，結案併入 merge commit（amend）。

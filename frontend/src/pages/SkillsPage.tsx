@@ -7,7 +7,7 @@ import { Badge } from '../components/common/Badge'
 import { Pagination } from '../components/common/Pagination'
 import { ViewToggle } from '../components/common/ViewToggle'
 import { useTranslation } from 'react-i18next'
-import type { Identity } from '../app/useIdentity'
+import { canEditActiveTeam, type Identity } from '../app/useIdentity'
 import './SkillsPage.css'
 
 // The team skill list (§6.4). Folder/tag filters live in the shell sidebar and
@@ -145,6 +145,30 @@ export function SkillsPage({ identity }: { identity: Identity }) {
             onViewChange={setView}
             onDensityChange={setDensity}
           />
+          {!teamId ? (
+            // Phase 5.1 no-team guard: creating needs an owning team.
+            <button
+              className="btn-primary"
+              disabled
+              title={t('common:selectTeamFirst')}
+            >
+              {t('common:newSkill')}
+            </button>
+          ) : canEditActiveTeam(identity) ? (
+            <Link to="/skills/new" className="btn-primary">
+              {t('common:newSkill')}
+            </Link>
+          ) : (
+            // VIEWER (non-admin) on the active team: server would 403 on
+            // create, so don't render a live entry point.
+            <button
+              className="btn-primary"
+              disabled
+              title={t('detail:copyNeedsEditor')}
+            >
+              {t('common:newSkill')}
+            </button>
+          )}
         </div>
       </div>
 

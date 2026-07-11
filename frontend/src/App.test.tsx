@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import App from './App'
 import type { Identity } from './app/useIdentity'
 
@@ -7,6 +7,11 @@ import type { Identity } from './app/useIdentity'
 //    新增 Skill entry point — EDITOR/admin do.
 // 3. The portal (/) must not render the topbar GlobalSearch (the hero owns
 //    search there); other routes (e.g. /team) keep it.
+//
+// Page-header relocation (docs/tasks/20260711-newskill-into-page-header.md):
+// the 新增 Skill create entry moved out of the topbar into the /team page
+// header (see SkillsPage.test.tsx for the role-branch gating assertions).
+// This file now only asserts the topbar itself never renders it.
 
 let mockIdentity: Identity
 
@@ -47,66 +52,22 @@ function renderAt(path: string) {
   return render(<App />)
 }
 
-describe('AppShell — create-entry gating (VIEWER vs EDITOR)', () => {
-  it('renders a disabled 新增 Skill button with an explanatory title for a VIEWER', async () => {
-    mockIdentity = identity({
-      activeTeamId: 'team-1',
-      activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
-      teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
-    })
-    renderAt('/team')
-
-    await waitFor(() => {
-      const btn = screen.getByText('＋ 新增 Skill').closest('button')
-      expect(btn).toBeDisabled()
-      expect(btn).toHaveAttribute('title', '需要團隊編輯權限')
-    })
-  })
-
-  it('renders an active 新增 Skill link for an EDITOR', async () => {
-    mockIdentity = identity({
-      activeTeamId: 'team-1',
-      activeTeam: { id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any,
-      teams: [{ id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any],
-    })
-    renderAt('/team')
-
-    await waitFor(() => {
-      const link = screen.getByText('＋ 新增 Skill').closest('a')
-      expect(link).not.toBeNull()
-      expect(link).toHaveAttribute('href', '/skills/new')
-    })
-  })
-
-  it('renders an active 新增 Skill link for an admin even without an EDITOR role', async () => {
-    mockIdentity = identity({
-      admin: true,
-      activeTeamId: 'team-1',
-      activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
-      teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
-    })
-    renderAt('/team')
-
-    await waitFor(() => {
-      const link = screen.getByText('＋ 新增 Skill').closest('a')
-      expect(link).not.toBeNull()
-    })
-  })
-})
-
-describe('AppShell — 新增 Skill button scoped to the team space', () => {
-  it.each(['/open', '/favorites', '/', '/settings', '/skills/abc'])(
-    'does not render the 新增 Skill button on %s',
+describe('AppShell — 新增 Skill button never renders in the topbar', () => {
+  it.each(['/open', '/favorites', '/', '/settings', '/skills/abc', '/team'])(
+    'does not render the 新增 Skill button in the topbar on %s',
     async (path) => {
       mockIdentity = identity({
         activeTeamId: 'team-1',
-        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
-        teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any],
       })
       renderAt(path)
 
       await waitFor(() => {
-        expect(screen.queryByText('＋ 新增 Skill')).toBeNull()
+        expect(document.querySelector('.app-topbar')).not.toBeNull()
+        expect(
+          document.querySelector('.app-topbar')?.textContent,
+        ).not.toContain('＋ 新增 Skill')
       })
     }
   )

@@ -123,6 +123,71 @@ describe('SkillsPage view/density prefs (GUI redesign step 2/3)', () => {
   })
 })
 
+// Moved from App.test.tsx (docs/tasks/20260711-newskill-into-page-header.md):
+// the 新增 Skill create entry now lives in the page header, not the topbar.
+describe('SkillsPage header — create-entry gating (VIEWER vs EDITOR)', () => {
+  it('renders a disabled 新增 Skill button with an explanatory title for a VIEWER', async () => {
+    listMock.mockResolvedValue({ data: { content: [] } })
+    renderPage(
+      baseIdentity({
+        activeTeamId: 'team-1',
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
+      }),
+    )
+
+    await waitFor(() => {
+      const btn = screen.getByText('＋ 新增 Skill').closest('button')
+      expect(btn).toBeDisabled()
+      expect(btn).toHaveAttribute('title', '需要團隊編輯權限')
+    })
+  })
+
+  it('renders an active 新增 Skill link for an EDITOR', async () => {
+    listMock.mockResolvedValue({ data: { content: [] } })
+    renderPage(
+      baseIdentity({
+        activeTeamId: 'team-1',
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any],
+      }),
+    )
+
+    await waitFor(() => {
+      const link = screen.getByText('＋ 新增 Skill').closest('a')
+      expect(link).not.toBeNull()
+      expect(link).toHaveAttribute('href', '/skills/new')
+    })
+  })
+
+  it('renders an active 新增 Skill link for an admin even without an EDITOR role', async () => {
+    listMock.mockResolvedValue({ data: { content: [] } })
+    renderPage(
+      baseIdentity({
+        admin: true,
+        activeTeamId: 'team-1',
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'VIEWER' } as any],
+      }),
+    )
+
+    await waitFor(() => {
+      const link = screen.getByText('＋ 新增 Skill').closest('a')
+      expect(link).not.toBeNull()
+    })
+  })
+
+  it('renders a disabled 新增 Skill button with a select-team title when no team is active', async () => {
+    renderPage(baseIdentity({ activeTeamId: null, activeTeam: null }))
+
+    await waitFor(() => {
+      const btn = screen.getByText('＋ 新增 Skill').closest('button')
+      expect(btn).toBeDisabled()
+      expect(btn).toHaveAttribute('title', '請先在左側選擇團隊')
+    })
+  })
+})
+
 describe('SkillsPage cards + badges', () => {
   it('renders published and draft badges for skills', async () => {
     listMock.mockResolvedValue({

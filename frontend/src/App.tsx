@@ -12,7 +12,7 @@ import { UserMenu } from './app/UserMenu'
 import { GlobalSearch } from './app/GlobalSearch'
 import { TeamFilterProvider } from './app/TeamFilterContext'
 import { useEffect } from 'react'
-import { useIdentity, canEditActiveTeam } from './app/useIdentity'
+import { useIdentity } from './app/useIdentity'
 import { setThemeMode, type ThemeMode } from './app/useTheme'
 import { getPreferences } from './api/api'
 import { setLanguage, type LanguageCode } from './i18n'
@@ -78,31 +78,6 @@ function AppShell({
           {t('common:appTitle')}
         </Link>
         {showTopbarSearch && <GlobalSearch />}
-        {showSidebar &&
-          (!identity.activeTeamId ? (
-            // Phase 5.1 no-team guard: creating needs an owning team.
-            <button
-              className="btn-primary"
-              disabled
-              title={t('common:selectTeamFirst')}
-            >
-              {t('common:newSkill')}
-            </button>
-          ) : canEditActiveTeam(identity) ? (
-            <Link to="/skills/new" className="btn-primary">
-              {t('common:newSkill')}
-            </Link>
-          ) : (
-            // VIEWER (non-admin) on the active team: server would 403 on
-            // create, so don't render a live entry point.
-            <button
-              className="btn-primary"
-              disabled
-              title={t('detail:copyNeedsEditor')}
-            >
-              {t('common:newSkill')}
-            </button>
-          ))}
         <UserMenu identity={identity} />
       </header>
       <SpaceTabs />
