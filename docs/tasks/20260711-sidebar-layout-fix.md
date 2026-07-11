@@ -1,6 +1,6 @@
 # Task: 側欄層級修正——移到分頁列之下（版型 B 補完）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋前後截圖走查驗收、merge b7cb0a1)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/sidebar-layout
 > （branch wt/sidebar-layout）。agent 不 commit；commander 驗收（測試＋
@@ -34,3 +34,7 @@ GUI-1 把側欄改成「只在 /team 顯示」但沒動它的版面位置：仍�
 ## Progress log
 - 2026-07-11 | planning | 截圖實證層級顛倒；拍板三層直排＋品牌字＋側欄內部
   整理；建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 b7cb0a1。驗收：vitest 127/127＋tsc 重跑 exit 0；
+  live 截圖對照：topbar/分頁全寬、側欄降到分頁下（藍頂緣）、資料夾標頭
+  內嵌新增鈕（viewer 閘控保持）、/open 全寬含品牌。commander 代提，
+  結案併入 merge commit（amend）。

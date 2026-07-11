@@ -42,6 +42,32 @@ function renderSidebar(id: Identity) {
   )
 }
 
+describe('Sidebar — layout fix (docs/tasks/20260711-sidebar-layout-fix.md)', () => {
+  it('has no duplicate 我的團隊 zone-title header (the active tab already says it)', () => {
+    renderSidebar(identity({}))
+    expect(screen.queryByText('我的團隊')).toBeNull()
+    expect(document.querySelector('.zone-title-link')).toBeNull()
+  })
+
+  it('puts the ＋新增資料夾 button inside the folders section header', async () => {
+    renderSidebar(
+      identity({
+        activeTeamId: 'team-1',
+        activeTeam: { id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any,
+        teams: [{ id: 'team-1', displayName: 'Team A', role: 'EDITOR' } as any],
+      }),
+    )
+
+    await waitFor(() => {
+      const header = document.querySelector('.sidebar-section-header') as HTMLElement
+      expect(header).toBeTruthy()
+      expect(header.textContent).toContain('資料夾')
+      const btn = screen.getByText('+ 新增資料夾')
+      expect(header.contains(btn)).toBe(true)
+    })
+  })
+})
+
 describe('Sidebar — ＋新增資料夾 gating (VIEWER vs EDITOR)', () => {
   it('renders a disabled button with an explanatory title for a VIEWER', async () => {
     renderSidebar(

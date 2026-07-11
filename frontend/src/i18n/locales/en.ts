@@ -31,6 +31,7 @@ export default {
     spaceTabsLabel: 'Space switcher',
   },
   folders: {
+    section: 'Folders',
     none: 'No folders',
     newFolder: '+ New Folder',
     allSkills: 'All skills',

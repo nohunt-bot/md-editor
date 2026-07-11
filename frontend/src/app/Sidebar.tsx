@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import { NavLink } from 'react-router-dom'
 import { folderApi, tagApi } from '../api/api'
 import { FolderTree } from '../components/tree/FolderTree'
 import { NewFolderModal } from './NewFolderModal'
@@ -54,15 +53,10 @@ export function Sidebar({ identity }: { identity: Identity }) {
   return (
     <aside className="app-sidebar">
       <div className="sidebar-scroll">
-        {/* Zone 1: 我的團隊 */}
+        {/* Team switcher — active tab (SpaceTabs) already says 我的團隊, so
+            no zone-title header here. */}
         <section className="zone">
-          <div className="zone-header">
-            <span className="zone-bar" />
-            <NavLink to="/team" className="zone-title-link">
-              {t('shell:myTeam')}
-            </NavLink>
-          </div>
-
+          <div className="sidebar-team-label">{t('detail:team')}</div>
           <select
             className="team-switcher"
             value={teamId ?? ''}
@@ -81,34 +75,36 @@ export function Sidebar({ identity }: { identity: Identity }) {
           </select>
 
           <div className="zone-block">
+            <div className="sidebar-section-header">
+              <span className="zone-subtitle">{t('folders:section')}</span>
+              {teamId &&
+                (canEditActiveTeam(identity) ? (
+                  <button
+                    type="button"
+                    className="btn-small folder-new-btn"
+                    onClick={() => setShowNewFolder(true)}
+                  >
+                    {t('folders:newFolder')}
+                  </button>
+                ) : (
+                  // VIEWER (non-admin): server would 403 on create, so don't
+                  // render a live entry point — same pattern as App.tsx's
+                  // topbar 新增 Skill button.
+                  <button
+                    type="button"
+                    className="btn-small folder-new-btn"
+                    disabled
+                    title={t('detail:copyNeedsEditor')}
+                  >
+                    {t('folders:newFolder')}
+                  </button>
+                ))}
+            </div>
             <FolderTree
               folders={folders}
               selectedFolder={selectedFolder}
               onSelectFolder={setSelectedFolder}
             />
-            {teamId && (
-              canEditActiveTeam(identity) ? (
-                <button
-                  type="button"
-                  className="btn-small folder-new-btn"
-                  onClick={() => setShowNewFolder(true)}
-                >
-                  {t('folders:newFolder')}
-                </button>
-              ) : (
-                // VIEWER (non-admin): server would 403 on create, so don't
-                // render a live entry point — same pattern as App.tsx's
-                // topbar 新增 Skill button.
-                <button
-                  type="button"
-                  className="btn-small folder-new-btn"
-                  disabled
-                  title={t('detail:copyNeedsEditor')}
-                >
-                  {t('folders:newFolder')}
-                </button>
-              )
-            )}
           </div>
 
           <div className="zone-block">

@@ -51,6 +51,13 @@ function App() {
 // GUI redesign step 1/3 (docs/tasks/20260711-gui-space-tabs.md): the sidebar
 // is now a contextual panel that only appears in the team space (/team).
 // Needs useLocation, so it must render inside <BrowserRouter>.
+//
+// Layout fix (docs/tasks/20260711-sidebar-layout-fix.md): the shell is a
+// three-band column — topbar (full width) → SpaceTabs (full width) →
+// content row (sidebar + main on /team, main-only elsewhere). The sidebar
+// used to be a full-height leftmost flex child that pushed the topbar and
+// tabs to the right; it now lives inside the content row, scoped to that
+// row's height, not the viewport's.
 function AppShell({
   identity,
   t,
@@ -66,38 +73,41 @@ function AppShell({
 
   return (
     <div className="app-shell">
-      {showSidebar && <Sidebar identity={identity} />}
-      <div className="app-body">
-        <header className="app-topbar">
-          {showTopbarSearch && <GlobalSearch />}
-          {showSidebar &&
-            (!identity.activeTeamId ? (
-              // Phase 5.1 no-team guard: creating needs an owning team.
-              <button
-                className="btn-primary"
-                disabled
-                title={t('common:selectTeamFirst')}
-              >
-                {t('common:newSkill')}
-              </button>
-            ) : canEditActiveTeam(identity) ? (
-              <Link to="/skills/new" className="btn-primary">
-                {t('common:newSkill')}
-              </Link>
-            ) : (
-              // VIEWER (non-admin) on the active team: server would 403 on
-              // create, so don't render a live entry point.
-              <button
-                className="btn-primary"
-                disabled
-                title={t('detail:copyNeedsEditor')}
-              >
-                {t('common:newSkill')}
-              </button>
-            ))}
-          <UserMenu identity={identity} />
-        </header>
-        <SpaceTabs />
+      <header className="app-topbar">
+        <Link to="/" className="app-brand">
+          {t('common:appTitle')}
+        </Link>
+        {showTopbarSearch && <GlobalSearch />}
+        {showSidebar &&
+          (!identity.activeTeamId ? (
+            // Phase 5.1 no-team guard: creating needs an owning team.
+            <button
+              className="btn-primary"
+              disabled
+              title={t('common:selectTeamFirst')}
+            >
+              {t('common:newSkill')}
+            </button>
+          ) : canEditActiveTeam(identity) ? (
+            <Link to="/skills/new" className="btn-primary">
+              {t('common:newSkill')}
+            </Link>
+          ) : (
+            // VIEWER (non-admin) on the active team: server would 403 on
+            // create, so don't render a live entry point.
+            <button
+              className="btn-primary"
+              disabled
+              title={t('detail:copyNeedsEditor')}
+            >
+              {t('common:newSkill')}
+            </button>
+          ))}
+        <UserMenu identity={identity} />
+      </header>
+      <SpaceTabs />
+      <div className="app-content-row">
+        {showSidebar && <Sidebar identity={identity} />}
         <main className="app-main">
           <Routes>
             <Route path="/" element={<HomePage identity={identity} />} />
