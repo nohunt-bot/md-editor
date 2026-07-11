@@ -1,6 +1,15 @@
 /* T1-4: favorites + recently viewed — two stacked sections reusing the
    open-space card grid (OpenSpacePage.css: .open-grid/.open-card/...). */
 
+/* GUI redesign step 2/3: page-header becomes a flex row so the ViewToggle
+   can sit on the right. */
+.favorites-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
 .favorites-section {
   margin-top: var(--sp-6);
 }

@@ -49,6 +49,7 @@ beforeEach(() => {
   favoritesListMock.mockReset()
   recentMock.mockReset()
   navigateMock.mockClear()
+  localStorage.clear()
 })
 
 function renderPage() {
@@ -96,6 +97,25 @@ describe('FavoritesPage (T1-4)', () => {
       expect(screen.getByText('尚無收藏，瀏覽 skill 時點擊 ☆ 即可收藏。')).toBeInTheDocument()
       expect(screen.getByText('尚無瀏覽紀錄。')).toBeInTheDocument()
     })
+  })
+
+  it('defaults to grid view with no stored preference (matches today)', async () => {
+    favoritesListMock.mockResolvedValue({ data: [favoriteSkill] })
+    recentMock.mockResolvedValue({ data: [] })
+    const { container } = renderPage()
+    await screen.findByText('Deploy Guide')
+    expect(container.querySelector('.open-grid')).toHaveClass('grid')
+    expect(container.querySelector('.open-grid')).not.toHaveClass('list')
+  })
+
+  it('switches to a single-column list when the list toggle is clicked', async () => {
+    favoritesListMock.mockResolvedValue({ data: [favoriteSkill] })
+    recentMock.mockResolvedValue({ data: [] })
+    const { container } = renderPage()
+    await screen.findByText('Deploy Guide')
+    const { fireEvent } = await import('@testing-library/react')
+    fireEvent.click(screen.getByLabelText('清單檢視'))
+    expect(container.querySelector('.open-grid')).toHaveClass('list')
   })
 
   it('navigates to the skill detail page when a card is clicked', async () => {

@@ -70,6 +70,31 @@ class PreferencesIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("cardView/cardDensity round-trip and default to null when nothing saved")
+    void cardViewAndDensityRoundTrip() {
+        // Default: nulls
+        ResponseEntity<String> def = restTemplate.exchange(
+            url, HttpMethod.GET, new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(def.getBody().contains("\"cardView\":null"));
+        assertTrue(def.getBody().contains("\"cardDensity\":null"));
+
+        // Save alice's card prefs
+        ResponseEntity<String> saved = restTemplate.exchange(
+            url, HttpMethod.PUT,
+            new HttpEntity<>("{\"cardView\":\"grid\",\"cardDensity\":\"compact\"}", headersFor("alice")),
+            String.class);
+        assertEquals(HttpStatus.OK, saved.getStatusCode());
+        assertTrue(saved.getBody().contains("\"cardView\":\"grid\""));
+        assertTrue(saved.getBody().contains("\"cardDensity\":\"compact\""));
+
+        // Re-fetch to confirm persistence
+        ResponseEntity<String> after = restTemplate.exchange(
+            url, HttpMethod.GET, new HttpEntity<>(headersFor("alice")), String.class);
+        assertTrue(after.getBody().contains("\"cardView\":\"grid\""));
+        assertTrue(after.getBody().contains("\"cardDensity\":\"compact\""));
+    }
+
+    @Test
     @DisplayName("Preferences are isolated per user")
     void perUserIsolation() {
         restTemplate.exchange(url, HttpMethod.PUT,

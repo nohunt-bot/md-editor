@@ -61,8 +61,14 @@ export function getMe() {
   return api.get<MeResponse>('/api/me')
 }
 
-// User preferences (theme + language) that follow the account across devices.
-export type PreferencesPayload = { theme?: string | null; language?: string | null }
+// User preferences (theme + language + card view/density) that follow the
+// account across devices.
+export type PreferencesPayload = {
+  theme?: string | null
+  language?: string | null
+  cardView?: string | null
+  cardDensity?: string | null
+}
 
 export function getPreferences() {
   return api.get<PreferencesPayload>('/api/me/preferences')

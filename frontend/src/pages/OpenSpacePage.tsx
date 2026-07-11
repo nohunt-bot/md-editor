@@ -3,9 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { skillApi, tagApi } from '../api/api'
 import { Pagination } from '../components/common/Pagination'
 import { Modal } from '../components/common/Modal'
+import { ViewToggle } from '../components/common/ViewToggle'
 import { useTranslation } from 'react-i18next'
 import { useIdentity } from '../app/useIdentity'
 import { useCopyToTeam } from '../app/useCopyToTeam'
+import { useViewPrefs } from '../app/useViewPrefs'
 import './OpenSpacePage.css'
 
 // Phase 3.1: open-space browse. Latest-published cards (backend sorts by
@@ -32,6 +34,11 @@ export function OpenSpacePage() {
   const navigate = useNavigate()
   const identity = useIdentity()
   const { copy, targetTeams, canCopyTeam } = useCopyToTeam(identity)
+  // GUI redesign step 2/3: shared view/density prefs. Default here (when
+  // unset) stays "grid" — today's behavior.
+  const { view: prefView, density: prefDensity, setView, setDensity } = useViewPrefs()
+  const view = prefView ?? 'grid'
+  const density = prefDensity ?? 'comfortable'
   const q = params.get('q') || undefined
   const tag = params.get('tag') || undefined
   const sort = params.get('sort') === 'likes' ? 'likes' : undefined // Phase C
@@ -133,6 +140,12 @@ export function OpenSpacePage() {
             {t('open:sortHot')}
           </button>
         </div>
+        <ViewToggle
+          view={view}
+          density={density}
+          onViewChange={setView}
+          onDensityChange={setDensity}
+        />
       </div>
 
       {tags.length > 0 && (
@@ -162,7 +175,7 @@ export function OpenSpacePage() {
           <p>{filtering ? t('open:emptyNoMatch') : t('open:emptyNone')}</p>
         </div>
       ) : (
-        <div className="open-grid">
+        <div className={`open-grid ${view}${density === 'compact' ? ' density-compact' : ''}`}>
           {skills.map((skill) => (
             <article
               key={skill.id}
