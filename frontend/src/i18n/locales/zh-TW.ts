@@ -23,7 +23,6 @@ export default {
   shell: {
     myTeam: '我的團隊',
     openSpace: '開放空間',
-    browseAll: '瀏覽全部',
     searchPlaceholder: '搜尋 skill…（⌘K）',
     searchEmpty: '找不到符合的 skill',
     searchViewAll: '在開放空間查看全部結果 →',

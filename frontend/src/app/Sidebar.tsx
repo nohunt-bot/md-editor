@@ -5,7 +5,7 @@ import { FolderTree } from '../components/tree/FolderTree'
 import { NewFolderModal } from './NewFolderModal'
 import { useTeamFilter } from './TeamFilterContext'
 import { useTranslation } from 'react-i18next'
-import type { Identity } from './useIdentity'
+import { canEditActiveTeam, type Identity } from './useIdentity'
 
 export function Sidebar({ identity }: { identity: Identity }) {
   const { selectedFolder, setSelectedFolder, selectedTag, setSelectedTag } = useTeamFilter()
@@ -87,13 +87,27 @@ export function Sidebar({ identity }: { identity: Identity }) {
               onSelectFolder={setSelectedFolder}
             />
             {teamId && (
-              <button
-                type="button"
-                className="btn-small folder-new-btn"
-                onClick={() => setShowNewFolder(true)}
-              >
-                {t('folders:newFolder')}
-              </button>
+              canEditActiveTeam(identity) ? (
+                <button
+                  type="button"
+                  className="btn-small folder-new-btn"
+                  onClick={() => setShowNewFolder(true)}
+                >
+                  {t('folders:newFolder')}
+                </button>
+              ) : (
+                // VIEWER (non-admin): server would 403 on create, so don't
+                // render a live entry point — same pattern as App.tsx's
+                // topbar 新增 Skill button.
+                <button
+                  type="button"
+                  className="btn-small folder-new-btn"
+                  disabled
+                  title={t('detail:copyNeedsEditor')}
+                >
+                  {t('folders:newFolder')}
+                </button>
+              )
             )}
           </div>
 

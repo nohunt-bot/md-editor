@@ -23,7 +23,6 @@ export default {
   shell: {
     myTeam: 'My Team',
     openSpace: 'Open Space',
-    browseAll: 'Browse all',
     searchPlaceholder: 'Search skills… (⌘K)',
     searchEmpty: 'No matching skills',
     searchViewAll: 'View all results in Open Space →',
