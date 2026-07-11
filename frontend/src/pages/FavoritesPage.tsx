@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { favoritesApi, type FavoriteItem } from '../api/api'
 import { Badge } from '../components/common/Badge'
+import { ViewToggle } from '../components/common/ViewToggle'
 import { useTranslation } from 'react-i18next'
+import { useViewPrefs } from '../app/useViewPrefs'
 import './FavoritesPage.css'
 
 // T1-4: 我的收藏 + 最近瀏覽. Two independent sections, each metadata-only
@@ -36,12 +38,16 @@ function Section({
   loading,
   emptyMessage,
   onOpen,
+  view,
+  density,
 }: {
   title: string
   items: FavoriteItem[]
   loading: boolean
   emptyMessage: string
   onOpen: (id: string) => void
+  view: 'list' | 'grid'
+  density: 'comfortable' | 'compact'
 }) {
   return (
     <section className="favorites-section">
@@ -53,7 +59,7 @@ function Section({
           <p>{emptyMessage}</p>
         </div>
       ) : (
-        <div className="open-grid">
+        <div className={`open-grid ${view}${density === 'compact' ? ' density-compact' : ''}`}>
           {items.map((skill) => (
             <Card key={skill.id} skill={skill} onClick={() => onOpen(skill.id)} />
           ))}
@@ -71,6 +77,11 @@ export function FavoritesPage() {
   const [recent, setRecent] = useState<FavoriteItem[]>([])
   const [loadingFavorites, setLoadingFavorites] = useState(true)
   const [loadingRecent, setLoadingRecent] = useState(true)
+  // GUI redesign step 2/3: shared view/density prefs. Default here (when
+  // unset) stays "grid" — today's behavior.
+  const { view: prefView, density: prefDensity, setView, setDensity } = useViewPrefs()
+  const view = prefView ?? 'grid'
+  const density = prefDensity ?? 'comfortable'
 
   useEffect(() => {
     let cancelled = false
@@ -121,6 +132,12 @@ export function FavoritesPage() {
           <span className="page-space-stripe page-space-stripe-fav" aria-hidden="true" />
           {t('favorites:title')}
         </h1>
+        <ViewToggle
+          view={view}
+          density={density}
+          onViewChange={setView}
+          onDensityChange={setDensity}
+        />
       </div>
       <Section
         title={t('favorites:myFavorites')}
@@ -128,6 +145,8 @@ export function FavoritesPage() {
         loading={loadingFavorites}
         emptyMessage={t('favorites:emptyFavorites')}
         onOpen={open}
+        view={view}
+        density={density}
       />
       <Section
         title={t('favorites:recentlyViewed')}
@@ -135,6 +154,8 @@ export function FavoritesPage() {
         loading={loadingRecent}
         emptyMessage={t('favorites:emptyRecent')}
         onOpen={open}
+        view={view}
+        density={density}
       />
     </div>
   )

@@ -90,6 +90,39 @@ describe('SkillsPage empty states (§6.4)', () => {
   })
 })
 
+describe('SkillsPage view/density prefs (GUI redesign step 2/3)', () => {
+  it('defaults to list view with no stored preference (matches today)', async () => {
+    listMock.mockResolvedValue({
+      data: { content: [{ id: 's1', name: 'a', displayName: 'A', tags: [] }] },
+    })
+    const { container } = renderPage(baseIdentity())
+    await screen.findByText('A')
+    expect(container.querySelector('.skills-list')).toHaveClass('list')
+    expect(container.querySelector('.skills-list')).not.toHaveClass('density-compact')
+  })
+
+  it('migrates the legacy teamSkillsView=grid key into grid view', async () => {
+    localStorage.setItem('teamSkillsView', 'grid')
+    listMock.mockResolvedValue({
+      data: { content: [{ id: 's1', name: 'a', displayName: 'A', tags: [] }] },
+    })
+    const { container } = renderPage(baseIdentity())
+    await screen.findByText('A')
+    expect(container.querySelector('.skills-list')).toHaveClass('grid')
+  })
+
+  it('switching to compact density adds density-compact to the list container', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    listMock.mockResolvedValue({
+      data: { content: [{ id: 's1', name: 'a', displayName: 'A', tags: [] }] },
+    })
+    const { container } = renderPage(baseIdentity())
+    await screen.findByText('A')
+    fireEvent.click(screen.getByLabelText('緊湊'))
+    expect(container.querySelector('.skills-list')).toHaveClass('density-compact')
+  })
+})
+
 describe('SkillsPage cards + badges', () => {
   it('renders published and draft badges for skills', async () => {
     listMock.mockResolvedValue({

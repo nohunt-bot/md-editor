@@ -2,20 +2,19 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { skillApi } from '../api/api'
 import { useTeamFilter } from '../app/TeamFilterContext'
+import { useViewPrefs } from '../app/useViewPrefs'
 import { Badge } from '../components/common/Badge'
 import { Pagination } from '../components/common/Pagination'
+import { ViewToggle } from '../components/common/ViewToggle'
 import { useTranslation } from 'react-i18next'
 import type { Identity } from '../app/useIdentity'
 import './SkillsPage.css'
 
 // The team skill list (§6.4). Folder/tag filters live in the shell sidebar and
 // are shared via TeamFilterContext. Light-minimal card restyle is Phase 2.3.
-const VIEW_KEY = 'teamSkillsView'
-type View = 'list' | 'grid'
-
-function readView(): View {
-  return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list'
-}
+// GUI redesign step 2/3: view/density are now shared prefs (useViewPrefs)
+// that follow the user across /team, /open, /favorites. Default here (when
+// unset) stays "list" — today's behavior.
 
 export function SkillsPage({ identity }: { identity: Identity }) {
   const { t } = useTranslation()
@@ -23,7 +22,9 @@ export function SkillsPage({ identity }: { identity: Identity }) {
   const [skills, setSkills] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [view, setView] = useState<View>(readView)
+  const { view: prefView, density: prefDensity, setView, setDensity } = useViewPrefs()
+  const view = prefView ?? 'list'
+  const density = prefDensity ?? 'comfortable'
   // Phase A (v2): server-side pagination. Known limit: the sidebar/search
   // filters below are client-side and apply to the CURRENT page only —
   // server-side team-list filtering is backlog.
@@ -31,10 +32,6 @@ export function SkillsPage({ identity }: { identity: Identity }) {
   const [totalPages, setTotalPages] = useState(1)
 
   const teamId = identity.activeTeamId
-
-  useEffect(() => {
-    localStorage.setItem(VIEW_KEY, view)
-  }, [view])
 
   // New team → back to the first page.
   // Debounce the search box so we don't hit the API on every keystroke.
@@ -117,7 +114,7 @@ export function SkillsPage({ identity }: { identity: Identity }) {
       )
     }
     return (
-      <div className={`skills-list ${view}`}>
+      <div className={`skills-list ${view}${density === 'compact' ? ' density-compact' : ''}`}>
         {filteredSkills.map((skill) => (
           <SkillCard key={skill.id} skill={skill} />
         ))}
@@ -142,26 +139,12 @@ export function SkillsPage({ identity }: { identity: Identity }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <div className="view-toggle" role="group" aria-label={t('skills:viewMode')}>
-            <button
-              type="button"
-              className={view === 'list' ? 'active' : ''}
-              aria-label={t('skills:viewList')}
-              aria-pressed={view === 'list'}
-              onClick={() => setView('list')}
-            >
-              ☰
-            </button>
-            <button
-              type="button"
-              className={view === 'grid' ? 'active' : ''}
-              aria-label={t('skills:viewGrid')}
-              aria-pressed={view === 'grid'}
-              onClick={() => setView('grid')}
-            >
-              ▦
-            </button>
-          </div>
+          <ViewToggle
+            view={view}
+            density={density}
+            onViewChange={setView}
+            onDensityChange={setDensity}
+          />
         </div>
       </div>
 

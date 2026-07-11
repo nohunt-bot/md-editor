@@ -1,6 +1,15 @@
 /* Phase 3.1 open-space browse — light-minimal cards (PRD §6.1/§6.4).
    Consumes 2.1 tokens; separation via 1px border + whitespace. */
 
+/* GUI redesign step 2/3: page-header becomes a flex row so the ViewToggle
+   can sit on the right, alongside the existing sort chips. */
+.open-space .page-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
 .open-space-q {
   font-size: var(--fs-sm);
   color: var(--text-muted);
@@ -29,6 +38,25 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--sp-4);
+}
+
+/* GUI redesign step 2/3: "list" is a single-column stack of the same card
+   markup (CSS only, no DOM change). "density-compact" tightens padding and
+   clamps the description to one line. */
+.open-grid.list {
+  grid-template-columns: 1fr;
+}
+
+.open-grid.density-compact {
+  gap: var(--sp-2);
+}
+
+.open-grid.density-compact .open-card {
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.open-grid.density-compact .open-card-desc {
+  -webkit-line-clamp: 1;
 }
 
 .open-card {

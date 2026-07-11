@@ -18,6 +18,8 @@ public class UserPreferences {
     private String userId;
     private String theme;    // "light" | "dark" | "system"
     private String language; // "zh-TW" | "en"
+    private String cardView;    // "list" | "grid"
+    private String cardDensity; // "comfortable" | "compact"
 
     // T1-4: favorites + recently viewed. Both nullable (no migration needed —
     // new fields on an existing collection). recentSkillIds is most-recent-
@@ -36,6 +38,12 @@ public class UserPreferences {
 
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
+
+    public String getCardView() { return cardView; }
+    public void setCardView(String cardView) { this.cardView = cardView; }
+
+    public String getCardDensity() { return cardDensity; }
+    public void setCardDensity(String cardDensity) { this.cardDensity = cardDensity; }
 
     public List<String> getFavoriteSkillIds() { return favoriteSkillIds; }
     public void setFavoriteSkillIds(List<String> favoriteSkillIds) { this.favoriteSkillIds = favoriteSkillIds; }

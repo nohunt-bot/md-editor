@@ -67,6 +67,7 @@ beforeEach(() => {
   copyToTeamMock.mockReset()
   navigateMock.mockClear()
   mockIdentity = identity({ userId: 'alice', teams: [] })
+  localStorage.clear()
 })
 
 function renderAt(path = '/open') {
@@ -149,6 +150,22 @@ describe('OpenSpacePage (§3.1)', () => {
     renderAt()
     await screen.findByText('Deploy Guide')
     expect(screen.queryByText('複製到我的團隊')).not.toBeInTheDocument()
+  })
+
+  it('defaults to grid view with no stored preference (matches today)', async () => {
+    listOpenMock.mockResolvedValue({ data: { content: [publishedSkill] } })
+    const { container } = renderAt()
+    await screen.findByText('Deploy Guide')
+    expect(container.querySelector('.open-grid')).toHaveClass('grid')
+    expect(container.querySelector('.open-grid')).not.toHaveClass('list')
+  })
+
+  it('switches to a single-column list when the list toggle is clicked', async () => {
+    listOpenMock.mockResolvedValue({ data: { content: [publishedSkill] } })
+    const { container } = renderAt()
+    await screen.findByText('Deploy Guide')
+    fireEvent.click(screen.getByLabelText('清單檢視'))
+    expect(container.querySelector('.open-grid')).toHaveClass('list')
   })
 
   it('copies directly (single editable team) without navigating to the card detail first', async () => {

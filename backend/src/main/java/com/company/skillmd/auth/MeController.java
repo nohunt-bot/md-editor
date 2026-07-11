@@ -47,13 +47,13 @@ public class MeController {
         return ResponseEntity.ok(new MeResponse(user.getUserId(), user.getDisplayName(), teams, user.isAdmin()));
     }
 
-    /** Preferences that follow the user across devices (theme + language). */
+    /** Preferences that follow the user across devices (theme + language + card view/density). */
     @GetMapping("/api/me/preferences")
     public ResponseEntity<PreferencesResponse> getPreferences() {
         String userId = authorizationService.currentUser().getUserId();
         return ResponseEntity.ok(preferencesRepository.findById(userId)
-            .map(p -> new PreferencesResponse(p.getTheme(), p.getLanguage()))
-            .orElse(new PreferencesResponse(null, null))); // null = client uses its default
+            .map(p -> new PreferencesResponse(p.getTheme(), p.getLanguage(), p.getCardView(), p.getCardDensity()))
+            .orElse(new PreferencesResponse(null, null, null, null))); // null = client uses its default
     }
 
     @PutMapping("/api/me/preferences")
@@ -63,6 +63,8 @@ public class MeController {
         Update update = new Update();
         if (req.theme() != null) update.set("theme", req.theme());
         if (req.language() != null) update.set("language", req.language());
+        if (req.cardView() != null) update.set("cardView", req.cardView());
+        if (req.cardDensity() != null) update.set("cardDensity", req.cardDensity());
         mongoTemplate.upsert(Query.query(Criteria.where("_id").is(userId)),
             update, UserPreferences.class);
         return getPreferences();
@@ -107,7 +109,7 @@ public class MeController {
 
     public record TeamMembership(String id, String displayName, Role role) {}
 
-    public record PreferencesResponse(String theme, String language) {}
+    public record PreferencesResponse(String theme, String language, String cardView, String cardDensity) {}
 
-    public record PreferencesRequest(String theme, String language) {}
+    public record PreferencesRequest(String theme, String language, String cardView, String cardDensity) {}
 }
