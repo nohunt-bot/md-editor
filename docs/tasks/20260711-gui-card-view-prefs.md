@@ -1,6 +1,6 @@
 # Task: GUI 改版 2/3 — 卡片檢視客製化（排列＋密度偏好）
 
-Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
+Status: done (2026-07-11 — sonnet 實作、commander 測試重跑＋真 stack 走查驗收、merge 067b72b)
 
 > 派 sonnet，硬隔離 worktree：/Users/ch/md-editor-wt/gui-cardprefs
 > （branch wt/gui-cardprefs）。commander 驗收（測試重跑＋走查），過關 merge。
@@ -33,3 +33,7 @@ Status: in_progress (2026-07-11 — 派 sonnet，硬隔離 worktree)
 ## Progress log
 - 2026-07-11 | planning | 抽實碼事實（VIEW_KEY localStorage、prefs 覆蓋模式）；
   建 worktree；派 sonnet
+- 2026-07-11 | done | 實作 067b72b。驗收：mvnw 96＋vitest 101＋tsc 重跑 exit 0；
+  走查：清 localStorage 後預設＝現狀、grid+compact 即時生效、/open 跟隨、
+  server 存 cardView/cardDensity（curl 確認）。main tree 乾淨；commander 代提。
+  （此結案行為 /retro 補記——merge 當下漏了結案，流程缺口已入 LESSONS。）
